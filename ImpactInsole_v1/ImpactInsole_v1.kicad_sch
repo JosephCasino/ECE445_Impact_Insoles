@@ -1,0 +1,198 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "a88aefd4-7db0-48b6-a5b9-71390eb91bb3")
+	(paper "A4")
+	(lib_symbols)
+	(sheet
+		(at 88.138 59.944)
+		(size 26.416 24.638)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "1fc332dc-ff72-424d-a066-114727b06a42")
+		(property "Sheetname" "Sensor"
+			(at 88.138 59.2324 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "sensor.kicad_sch"
+			(at 88.138 85.1666 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "IMU_Clk" input
+			(at 88.138 63.246 180)
+			(uuid "0aecba60-a609-451b-8639-abdd15c64d6f")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "ADC_SCLK" input
+			(at 114.554 62.992 0)
+			(uuid "9649a2e7-6a5b-48f3-aed5-851b1fe484b5")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "S0" input
+			(at 114.554 82.55 0)
+			(uuid "ab5c3097-80ca-4363-9529-d8d33cf384d0")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "IMU_INT" input
+			(at 88.138 67.056 180)
+			(uuid "3efc4a8a-ba15-4d2c-84a8-bb20dcb35d27")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "ADC_CS" input
+			(at 114.554 65.532 0)
+			(uuid "94efb717-a94b-4876-9a78-5f37d0083b02")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "S2" input
+			(at 114.554 77.724 0)
+			(uuid "c6bccdaf-b260-428a-b368-b6a9eb40017b")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "S1" input
+			(at 114.554 80.01 0)
+			(uuid "31e4fb70-2446-4432-bfa4-35ff05abf8e7")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "ADC_SDATA" input
+			(at 114.554 68.072 0)
+			(uuid "3667b00f-84a2-4344-b47e-9edc3bc81e52")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "S3" input
+			(at 114.554 75.184 0)
+			(uuid "ac5c35bd-0de2-4ac2-bfd1-819c1504f5b3")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "IMU_Data" bidirectional
+			(at 88.138 70.358 180)
+			(uuid "534129ff-7d03-4fba-9e6c-865c2c9a1058")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(instances
+			(project "ImpactInsole_v1"
+				(path "/a88aefd4-7db0-48b6-a5b9-71390eb91bb3"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 131.064 59.944)
+		(size 26.416 24.638)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "86a80e0e-6a7a-4740-96d2-51b0c03920c1")
+		(property "Sheetname" "MCU"
+			(at 131.064 59.2324 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "mcu.kicad_sch"
+			(at 131.064 85.1666 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "ImpactInsole_v1"
+				(path "/a88aefd4-7db0-48b6-a5b9-71390eb91bb3"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)
