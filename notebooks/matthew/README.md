@@ -17,7 +17,8 @@ After deliberating between LiPo cells and coin battery, we decided to go with Li
 In addition, I started on the schematic for the PCB. I started working on the sensors since we mainly have those figured out. We decided to go with an FPC cable connector since it is the smallest profile.
 
 Schematic as of now:
-<img width="1713" height="883" alt="image" src="https://github.com/user-attachments/assets/71af821e-4d5b-4b3b-a1fc-914d6a594c22" />
+
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/71af821e-4d5b-4b3b-a1fc-914d6a594c22" />
 
 
 ## 2/20/26
@@ -27,9 +28,13 @@ I finished up the rest of the schematic. The power circuit is still a bit iffy. 
 Overall, I tried to keep most of the parts as generic as possible to keep the price down by using free parts given to us. In addition, I tried to add testpoints and make the circuits as simple as possible to make it easier to debug. 
 
 High Lvl Schematic:
-<img width="947" height="481" alt="image" src="https://github.com/user-attachments/assets/0a7f7ab3-2991-4ed5-b923-a643c7a60b43" />
+
+<img height="683"  alt="image" src="https://github.com/user-attachments/assets/0a7f7ab3-2991-4ed5-b923-a643c7a60b43" />
+
 Rough Layout:
-<img width="646" height="635" alt="image" src="https://github.com/user-attachments/assets/d3574280-8ad7-409a-9aa4-d68bac940c4d" />
+
+<img height="683" alt="image" src="https://github.com/user-attachments/assets/d3574280-8ad7-409a-9aa4-d68bac940c4d" />
+
 
 
 
