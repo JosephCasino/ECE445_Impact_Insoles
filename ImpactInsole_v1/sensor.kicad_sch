@@ -4066,7 +4066,7 @@
 		(uuid "b011eaf0-12a7-480f-9816-75a2fe13d3de")
 	)
 	(hierarchical_label "ADC_SDATA"
-		(shape input)
+		(shape output)
 		(at 255.778 50.038 0)
 		(effects
 			(font
@@ -4214,7 +4214,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 121.666 61.722 90)
 			(effects
 				(font
@@ -4416,7 +4416,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder"
 			(at 119.3292 138.176 0)
 			(effects
 				(font
@@ -4486,7 +4486,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder"
 			(at 106.8832 48.006 0)
 			(effects
 				(font
@@ -4554,7 +4554,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 158.242 57.912 90)
 			(effects
 				(font
@@ -5167,7 +5167,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder"
 			(at 169.8752 69.342 0)
 			(effects
 				(font
@@ -5567,7 +5567,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder"
 			(at 271.4752 38.862 0)
 			(effects
 				(font
@@ -6079,7 +6079,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 56.896 136.398 90)
 			(effects
 				(font
@@ -6479,7 +6479,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder"
 			(at 133.5532 138.43 0)
 			(effects
 				(font
@@ -6747,7 +6747,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 48.006 136.398 90)
 			(effects
 				(font

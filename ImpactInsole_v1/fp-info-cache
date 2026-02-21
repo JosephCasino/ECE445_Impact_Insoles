@@ -1,4 +1,4 @@
-26646986943918007
+26654073208865390
 18_Pin_Connector
 MOLEX_503480-1800
 
@@ -41,6 +41,13 @@ audio belton reverb
 0
 7
 7
+BMS_Senior_Design
+SOT95P280X145-5N
+
+
+0
+5
+5
 Battery
 BatteryClip_Keystone_54_D16-19mm
 Battery clip for batteries with a diameter between 16-19 mm: https://www.keyelco.com/product.cfm/product_id/826
@@ -59940,6 +59947,13 @@ Diode SMPA (DO-221BC)
 0
 2
 2
+Diode_Senior_Design
+DIOM5225X250N
+
+
+0
+2
+2
 Diode_THT
 D_5KPW_P7.62mm_Vertical_AnodeUp
 Diode, 5KPW series, Axial, Vertical, pin pitch=7.62mm, length*diameter=9*8mm^2, http://www.diodes.com/_files/packages/8686949.gif
@@ -106301,3 +106315,17 @@ Varistor VF
 0
 2
 2
+conn_sen
+JST_S2B-PH-K-S_LF__SN_
+
+
+0
+2
+2
+pp_senior_design
+QFN50P300X300X100-17N
+
+
+0
+22
+22
