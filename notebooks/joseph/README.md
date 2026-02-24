@@ -27,7 +27,14 @@ Setup:
  - Installed "Expo Go" app
  - Created dummy code for a mock app design
  
+## 2/20/2026
 
+- Installed Arduino IDE
+- Installed ESP32 board packages
 
+## 2/23/2026
+
+- Checked Matthew's Schematic 
+- Worked on Design Document
 
 
