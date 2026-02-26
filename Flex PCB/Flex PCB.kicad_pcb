@@ -1468,6 +1468,19 @@
 		(layer "Edge.Cuts")
 		(uuid "fe7d94ae-927f-49c6-a02e-c51a6244a2fb")
 	)
+	(gr_text "ImpactInsoles\nFlex V1\nECE445 Spring 26\nGroup 68\n"
+		(at 153.543 81.026 90)
+		(layer "F.SilkS")
+		(uuid "494145d6-dbe2-45c3-95e0-1a8aea758ad9")
+		(effects
+			(font
+				(size 0.8984 0.8984)
+				(thickness 0.14986)
+				(bold yes)
+			)
+			(justify left bottom)
+		)
+	)
 	(gr_text "Stiffener TOP"
 		(at 187 97.5 0)
 		(layer "Cmts.User")
@@ -1506,7 +1519,7 @@
 			(extension_offset 0.5)
 			(keep_text_aligned yes)
 		)
-		(gr_text "3.5"
+		(gr_text "137.7953"
 			(at 191.5 94.35 0)
 			(layer "Cmts.User")
 			(uuid "0c823c97-02e7-40b7-bc09-1479be7b35e8")
