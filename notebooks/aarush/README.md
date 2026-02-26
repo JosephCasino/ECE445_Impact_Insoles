@@ -17,3 +17,19 @@ I took a look at how to implement the female end of the FPC connector on the fle
 [General flexible PCB design](https://www.youtube.com/watch?v=gIRUQSaB3e0)
 
 I will try to design a male 20-pin width FPC on the flex PCB at first based on these (and other) resources. If this doesn't work I'll just add a female connector to a tongue with all 17 traces and then use a male-to-male extension cable to couple the flex PCB to the hard PCB.
+
+# 2026-02-22 – Flex PCB Research Session
+Individual session to research flex PCB implementation. Read Interlink Electronics's [FSR Integration Guide](https://cdn.sparkfun.com/assets/e/3/b/3/8/force_sensing_resistor_guide.pdf), and found other resources for PCB design:
+
+[FSR 402 Short](https://buyinterlinkelectronics.com/products/fsr-x-402-short)
+[FPC End Generator](https://github.com/mikeWShef/Kicad_FPC_board_ends?tab=readme-ov-file)
+[Stackup Reference](https://community.element14.com/products/pcbprototyping/b/pcb-blogs/posts/creating-a-flexible-pcb)
+[PCBWay Spec](https://www.pcbway.com/pcb_prototype/Stack_up_for_FPC.html)
+
+The plan for now is to design a simple test board to see if a conductive epoxy method for electrical connection will work, as well as to test the FPC connector design. 
+
+# 2026-02-26 – Initial Flex PCB Design
+Marathon session to design test flex PCB for order. All aspects planned on the 22nd were implemented. The script-generated FPC connectors did not stand up to DRC (custom rules and edge clearance issues), so some manual placement and footprint editing was necessary.
+
+![[InitialFlexPCBLayout.png]]![[InitialFlexPCBSchematic.png]]
+
