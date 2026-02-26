@@ -37,5 +37,7 @@ Setup:
 - Checked Matthew's Schematic 
 - Worked on Design Document
 
+## 2/25/2025
 
+- Worked on Design Document
 
