@@ -1,0 +1,13 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Impact Insoles",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Impact Insoles",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "id": "ece445group68.impactinsoles",
+  "description": "Impact Insoles test app"
+}
