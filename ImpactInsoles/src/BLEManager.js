@@ -12,7 +12,7 @@ export const DEVICE_NAME         = 'ImpactInsoles';
 
 // ── MOCK MODE FLAG ───────────────────────────────────────────
 // Set to false when real hardware is connected
-export const MOCK_MODE = true;
+export const MOCK_MODE = false;
 
 // ── MOCK: Simulate scanning and finding a device ─────────────
 export function mockScan(onDeviceFound) {
@@ -94,38 +94,38 @@ export function mockStartDataStream(onDataReceived) {
 }
 
 // ── REAL BLE (uncomment when hardware arrives) ───────────────
-// import { BleManager } from 'react-native-ble-plx';
-// export const bleManager = new BleManager();
-//
-// export function startScan(onDeviceFound) {
-//   bleManager.startDeviceScan(
-//     [SERVICE_UUID],
-//     null,
-//     (error, device) => {
-//       if (error) { console.error(error); return; }
-//       if (device.name === DEVICE_NAME) {
-//         bleManager.stopDeviceScan();
-//         onDeviceFound(device);
-//       }
-//     }
-//   );
-// }
-//
-// export async function connectToDevice(device) {
-//   const connected = await device.connect();
-//   await connected.discoverAllServicesAndCharacteristics();
-//   return connected;
-// }
-//
-// export function startDataStream(device, onDataReceived) {
-//   device.monitorCharacteristicForService(
-//     SERVICE_UUID,
-//     CHARACTERISTIC_UUID,
-//     (error, characteristic) => {
-//       if (error) { console.error(error); return; }
-//       const bytes = Buffer.from(characteristic.value, 'base64');
-//       const sensors = Array.from(bytes.slice(0, 8));
-//       onDataReceived({ sensors, timestamp: Date.now() });
-//     }
-//   );
-// }
+import { BleManager } from 'react-native-ble-plx';
+export const bleManager = new BleManager();
+
+export function startScan(onDeviceFound) {
+  bleManager.startDeviceScan(
+    [SERVICE_UUID],
+    null,
+    (error, device) => {
+      if (error) { console.error(error); return; }
+      if (device.name === DEVICE_NAME) {
+        bleManager.stopDeviceScan();
+        onDeviceFound(device);
+      }
+    }
+  );
+}
+
+export async function connectToDevice(device) {
+  const connected = await device.connect();
+  await connected.discoverAllServicesAndCharacteristics();
+  return connected;
+}
+
+export function startDataStream(device, onDataReceived) {
+  device.monitorCharacteristicForService(
+    SERVICE_UUID,
+    CHARACTERISTIC_UUID,
+    (error, characteristic) => {
+      if (error) { console.error(error); return; }
+      const bytes = Buffer.from(characteristic.value, 'base64');
+      const sensors = Array.from(bytes.slice(0, 8));
+      onDataReceived({ sensors, timestamp: Date.now() });
+    }
+  );
+}
