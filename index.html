@@ -1,12 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="manifest.json" />
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ImpactInsoles • Live Data</title>
+  <title>ImpactInsoles • Sensor Monitor</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Outfit:wght@300;600;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Exo+2:wght@300;600;900&display=swap');
+
+    :root {
+      --orange: #FF6B35;
+      --orange-light: #FF8555;
+      --orange-dark: #E85A2A;
+      --blue: #0066CC;
+      --blue-light: #338FDB;
+      --blue-dark: #004C99;
+      --bg-dark: #0A0E1A;
+      --bg-card: #141824;
+      --text-white: #FFFFFF;
+      --text-gray: #8A8FA8;
+    }
 
     * {
       margin: 0;
@@ -16,34 +29,35 @@
     }
 
     body {
-      font-family: 'Outfit', -apple-system, sans-serif;
-      background: #0A0C14;
-      color: #FFFFFF;
+      font-family: 'Exo 2', -apple-system, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-white);
       min-height: 100vh;
       overflow-x: hidden;
-      position: relative;
     }
 
-    /* Ambient background gradient */
+    /* Animated background gradient */
     body::before {
       content: '';
       position: fixed;
-      top: -200px;
-      right: -150px;
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(255,107,53,0.15) 0%, transparent 70%);
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(255,107,53,0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(0,102,204,0.15) 0%, transparent 50%);
+      animation: rotate 30s linear infinite;
       pointer-events: none;
-      animation: float 20s ease-in-out infinite;
     }
 
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      50% { transform: translate(-30px, 30px) scale(1.1); }
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
     .container {
-      max-width: 480px;
+      max-width: 600px;
       margin: 0 auto;
       padding: 24px;
       position: relative;
@@ -54,93 +68,98 @@
     .header {
       text-align: center;
       margin-bottom: 32px;
-      animation: slideDown 0.6s ease-out;
+      animation: slideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-20px); }
+      from { opacity: 0; transform: translateY(-30px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     .brand {
-      font-size: 36px;
+      font-size: 42px;
       font-weight: 900;
-      letter-spacing: 4px;
-      line-height: 1.1;
+      letter-spacing: 6px;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--orange) 0%, var(--blue) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       margin-bottom: 8px;
-    }
-
-    .brand-accent {
-      color: #FF6B35;
     }
 
     .tagline {
       font-size: 11px;
-      color: #8A8FA8;
-      letter-spacing: 3px;
+      color: var(--text-gray);
+      letter-spacing: 4px;
       text-transform: uppercase;
       font-weight: 300;
     }
 
-    /* Status badge */
+    /* Status Badge */
     .status-badge {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      background: #151821;
-      border: 1px solid #1E2235;
-      border-radius: 20px;
-      padding: 8px 16px;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 2px solid transparent;
+      border-radius: 24px;
+      padding: 10px 20px;
       margin: 20px 0;
-      font-size: 12px;
-      font-weight: 600;
-      animation: fadeIn 0.6s ease-out 0.2s both;
+      transition: all 0.3s ease;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    .status-badge.connected {
+      border-color: var(--blue);
+      box-shadow: 0 0 20px rgba(0,102,204,0.3);
     }
 
     .status-dot {
-      width: 8px;
-      height: 8px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      background: #8A8FA8;
+      background: var(--text-gray);
+      transition: all 0.3s ease;
     }
 
     .status-dot.connected {
-      background: #00E5A0;
-      box-shadow: 0 0 12px rgba(0,229,160,0.6);
+      background: var(--blue);
+      box-shadow: 0 0 12px var(--blue);
       animation: pulse 2s ease-in-out infinite;
     }
 
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.7; transform: scale(1.15); }
+      50% { opacity: 0.6; transform: scale(1.2); }
     }
 
-    /* Connect button */
+    .status-text {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    /* Connect Button */
     .connect-btn {
       width: 100%;
-      padding: 18px;
-      background: linear-gradient(135deg, #FF6B35 0%, #FF8555 100%);
+      padding: 20px;
+      background: linear-gradient(135deg, var(--orange) 0%, var(--orange-dark) 100%);
       border: none;
       border-radius: 16px;
       color: white;
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 900;
-      letter-spacing: 2px;
+      letter-spacing: 3px;
       cursor: pointer;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 20px rgba(255,107,53,0.3);
-      animation: fadeIn 0.6s ease-out 0.3s both;
-      font-family: 'Outfit', sans-serif;
+      box-shadow: 0 6px 24px rgba(255,107,53,0.4);
+      font-family: 'Exo 2', sans-serif;
+      text-transform: uppercase;
     }
 
     .connect-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(255,107,53,0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(255,107,53,0.5);
     }
 
     .connect-btn:active {
@@ -148,174 +167,244 @@
     }
 
     .connect-btn:disabled {
-      background: #1E2235;
-      color: #8A8FA8;
+      background: var(--bg-card);
+      color: var(--text-gray);
       cursor: not-allowed;
       box-shadow: none;
     }
 
-    /* Data display */
-    .data-section {
-      margin-top: 32px;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.5s ease-out;
-    }
-
-    .data-section.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .section-title {
-      font-size: 11px;
-      font-weight: 900;
-      color: #FFFFFF;
-      letter-spacing: 3px;
-      margin-bottom: 16px;
-      text-transform: uppercase;
-    }
-
-    /* Primary sensor display */
-    .primary-sensor {
-      background: #151821;
-      border: 1px solid #1E2235;
-      border-radius: 20px;
-      padding: 32px;
+    /* Live Value Display */
+    .value-display {
+      background: var(--bg-card);
+      border: 2px solid var(--blue);
+      border-radius: 24px;
+      padding: 40px;
       text-align: center;
-      margin-bottom: 24px;
+      margin: 32px 0;
       position: relative;
       overflow: hidden;
+      opacity: 0;
+      transform: scale(0.9);
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .primary-sensor::before {
+    .value-display.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .value-display::before {
       content: '';
       position: absolute;
       top: -50%;
       left: -50%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(circle, rgba(255,107,53,0.08) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(0,102,204,0.1) 0%, transparent 70%);
       animation: rotate 20s linear infinite;
     }
 
-    @keyframes rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    .sensor-label {
-      font-size: 10px;
-      color: #8A8FA8;
-      letter-spacing: 2px;
-      margin-bottom: 12px;
+    .value-label {
+      font-size: 11px;
+      color: var(--text-gray);
+      letter-spacing: 3px;
+      margin-bottom: 16px;
       position: relative;
+      font-weight: 600;
     }
 
-    .sensor-value {
-      font-size: 72px;
+    .value-number {
+      font-size: 96px;
       font-weight: 900;
-      font-family: 'JetBrains Mono', monospace;
-      background: linear-gradient(135deg, #FF6B35 0%, #FFB020 100%);
+      font-family: 'Roboto Mono', monospace;
+      background: linear-gradient(135deg, var(--blue-light) 0%, var(--blue) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       line-height: 1;
-      margin-bottom: 8px;
       position: relative;
       transition: transform 0.2s ease;
     }
 
-    .sensor-value.updating {
+    .value-number.updating {
       transform: scale(1.05);
     }
 
-    .sensor-range {
-      font-size: 11px;
-      color: #8A8FA8;
-      font-family: 'JetBrains Mono', monospace;
+    .value-range {
+      font-size: 13px;
+      color: var(--text-gray);
+      font-family: 'Roboto Mono', monospace;
+      margin-top: 12px;
       position: relative;
     }
 
-    /* All sensors grid */
-    .sensors-grid {
+    /* Recording Controls */
+    .recording-controls {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 24px;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 24px 0;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.5s ease;
     }
 
-    .mini-sensor {
-      background: #151821;
-      border: 1px solid #1E2235;
-      border-radius: 12px;
-      padding: 14px 8px;
-      text-align: center;
-      transition: all 0.3s ease;
+    .recording-controls.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
 
-    .mini-sensor:active {
-      transform: scale(0.95);
-      background: #1A1D2A;
-    }
-
-    .mini-label {
-      font-size: 8px;
-      color: #8A8FA8;
-      letter-spacing: 1px;
-      margin-bottom: 6px;
-      font-weight: 600;
-    }
-
-    .mini-value {
-      font-size: 20px;
-      font-weight: 800;
-      font-family: 'JetBrains Mono', monospace;
-      color: #FFFFFF;
-      transition: color 0.2s ease;
-    }
-
-    /* Value color coding */
-    .value-low { color: #0066CC; }
-    .value-med { color: #00AA88; }
-    .value-high { color: #FFB020; }
-    .value-max { color: #FF3B30; }
-
-    /* Info card */
-    .info-card {
-      background: #151821;
-      border: 1px solid #FF6B3530;
+    .record-btn {
+      padding: 18px;
+      border: none;
       border-radius: 14px;
-      padding: 16px;
-      margin-top: 24px;
-    }
-
-    .info-title {
-      font-size: 11px;
-      font-weight: 900;
-      color: #FF6B35;
+      font-size: 14px;
+      font-weight: 800;
       letter-spacing: 2px;
-      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Exo 2', sans-serif;
+      text-transform: uppercase;
     }
 
-    .info-text {
+    .start-btn {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+      color: white;
+      box-shadow: 0 4px 16px rgba(0,102,204,0.3);
+    }
+
+    .start-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,102,204,0.4);
+    }
+
+    .start-btn.recording {
+      background: var(--bg-card);
+      color: var(--text-gray);
+      cursor: default;
+    }
+
+    .stop-btn {
+      background: var(--bg-card);
+      border: 2px solid var(--orange);
+      color: var(--orange);
+    }
+
+    .stop-btn:hover:not(:disabled) {
+      background: var(--orange);
+      color: white;
+    }
+
+    .stop-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* Recording Indicator */
+    .recording-indicator {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 20px;
+      background: rgba(255,107,53,0.15);
+      border: 2px solid var(--orange);
+      border-radius: 12px;
+      margin: 16px 0;
+    }
+
+    .recording-indicator.active {
+      display: flex;
+    }
+
+    .rec-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--orange);
+      animation: blink 1s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .rec-text {
       font-size: 12px;
-      color: #C0C4D6;
-      line-height: 1.6;
+      font-weight: 700;
+      color: var(--orange);
+      letter-spacing: 2px;
     }
 
-    /* Disclaimer */
-    .disclaimer {
+    .rec-time {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 14px;
+      color: var(--orange);
+      font-weight: 700;
+    }
+
+    /* Graph Container */
+    .graph-container {
+      background: var(--bg-card);
+      border: 2px solid var(--blue);
+      border-radius: 20px;
+      padding: 24px;
+      margin: 24px 0;
+      display: none;
+    }
+
+    .graph-container.visible {
+      display: block;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .graph-title {
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--text-white);
+      letter-spacing: 3px;
+      margin-bottom: 20px;
       text-align: center;
-      margin-top: 32px;
-      font-size: 10px;
-      color: #8A8FA8;
-      line-height: 1.6;
     }
 
-    .disclaimer a {
-      color: #FF6B35;
-      text-decoration: none;
+    canvas {
+      max-width: 100%;
+    }
+
+    /* Session Stats */
+    .session-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .stat-card {
+      background: rgba(0,102,204,0.1);
+      border: 1px solid var(--blue);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 9px;
+      color: var(--text-gray);
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--blue-light);
+      font-family: 'Roboto Mono', monospace;
     }
   </style>
 </head>
@@ -323,105 +412,95 @@
   <div class="container">
     <!-- Header -->
     <div class="header">
-      <div class="brand">
-        IMPACT<br>
-        <span class="brand-accent">INSOLES</span>
-      </div>
-      <div class="tagline">Live Sensor Dashboard</div>
+      <div class="brand">IMPACT INSOLES</div>
+      <div class="tagline">Sensor Monitor</div>
     </div>
 
     <!-- Status -->
     <center>
-      <div class="status-badge">
+      <div class="status-badge" id="statusBadge">
         <div class="status-dot" id="statusDot"></div>
-        <span id="statusText">Not Connected</span>
+        <span class="status-text" id="statusText">Not Connected</span>
       </div>
     </center>
 
     <!-- Connect Button -->
     <button class="connect-btn" id="connectBtn" onclick="toggleConnection()">
-      🔵 SCAN & CONNECT
+      🔵 Scan & Connect
     </button>
 
-    <!-- Data Section (hidden until connected) -->
-    <div class="data-section" id="dataSection">
-      
-      <!-- Primary Sensor -->
-      <div class="section-title">SENSOR 0 (POTENTIOMETER)</div>
-      <div class="primary-sensor">
-        <div class="sensor-label">CURRENT VALUE</div>
-        <div class="sensor-value" id="primaryValue">0</div>
-        <div class="sensor-range">0 – 255</div>
-      </div>
-
-      <!-- All Sensors Grid -->
-      <div class="section-title">ALL SENSORS</div>
-      <div class="sensors-grid">
-        <div class="mini-sensor">
-          <div class="mini-label">S0</div>
-          <div class="mini-value" id="s0">0</div>
-        </div>
-        <div class="mini-sensor">
-          <div class="mini-label">S1</div>
-          <div class="mini-value" id="s1">0</div>
-        </div>
-        <div class="mini-sensor">
-          <div class="mini-label">S2</div>
-          <div class="mini-value" id="s2">0</div>
-        </div>
-        <div class="mini-sensor">
-          <div class="mini-label">S3</div>
-          <div class="mini-value" id="s3">0</div>
-        </div>
-        <div class="mini-sensor">
-          <div class="mini-label">S4</div>
-          <div class="mini-value" id="s4">0</div>
-        </div>
-        <div class="mini-sensor">
-          <div class="mini-label">S5</div>
-          <div class="mini-value" id="s5">0</div>
-        </div>
-        <div class="mini-sensor">
-          <div class="mini-label">S6</div>
-          <div class="mini-value" id="s6">0</div>
-        </div>
-        <div class="mini-sensor">
-          <div class="mini-label">S7</div>
-          <div class="mini-value" id="s7">0</div>
-        </div>
-      </div>
-
-      <!-- Info Card -->
-      <div class="info-card">
-        <div class="info-title">💡 TIP</div>
-        <div class="info-text">
-          Turn your potentiometer to see the values change in real-time. 
-          Sensor 0 shows the real reading, sensors 1-7 are simulated variations.
-        </div>
-      </div>
+    <!-- Live Value Display -->
+    <div class="value-display" id="valueDisplay">
+      <div class="value-label">SENSOR VALUE</div>
+      <div class="value-number" id="valueNumber">0</div>
+      <div class="value-range">Range: 0 – 255</div>
     </div>
 
-    <!-- Disclaimer -->
-    <div class="disclaimer">
-      Web Bluetooth requires iOS 16+ and may not work on all devices.<br>
-      For best results, use Chrome on Android or the native iOS app.
+    <!-- Recording Controls -->
+    <div class="recording-controls" id="recordingControls">
+      <button class="record-btn start-btn" id="startBtn" onclick="startRecording()">
+        ▶ Start Session
+      </button>
+      <button class="record-btn stop-btn" id="stopBtn" onclick="stopRecording()" disabled>
+        ⏹ Stop Session
+      </button>
+    </div>
+
+    <!-- Recording Indicator -->
+    <div class="recording-indicator" id="recordingIndicator">
+      <div class="rec-dot"></div>
+      <span class="rec-text">RECORDING</span>
+      <span class="rec-time" id="recTime">00:00</span>
+    </div>
+
+    <!-- Graph -->
+    <div class="graph-container" id="graphContainer">
+      <div class="graph-title">SESSION GRAPH</div>
+      <canvas id="sessionChart"></canvas>
+      
+      <div class="session-stats">
+        <div class="stat-card">
+          <div class="stat-label">DURATION</div>
+          <div class="stat-value" id="statDuration">0s</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">AVG VALUE</div>
+          <div class="stat-value" id="statAvg">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">MAX VALUE</div>
+          <div class="stat-value" id="statMax">0</div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-    // BLE Configuration (must match ESP32)
+    // BLE Configuration
     const SERVICE_UUID = '12345678-1234-1234-1234-123456789abc';
     const CHARACTERISTIC_UUID = 'abcd1234-ab12-ab12-ab12-abcdef123456';
 
     let bluetoothDevice = null;
     let characteristic = null;
+    let isRecording = false;
+    let recordingData = [];
+    let recordingStartTime = null;
+    let timerInterval = null;
+    let chart = null;
 
     // UI Elements
     const connectBtn = document.getElementById('connectBtn');
+    const statusBadge = document.getElementById('statusBadge');
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
-    const dataSection = document.getElementById('dataSection');
-    const primaryValue = document.getElementById('primaryValue');
+    const valueDisplay = document.getElementById('valueDisplay');
+    const valueNumber = document.getElementById('valueNumber');
+    const recordingControls = document.getElementById('recordingControls');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const recordingIndicator = document.getElementById('recordingIndicator');
+    const recTime = document.getElementById('recTime');
+    const graphContainer = document.getElementById('graphContainer');
 
     async function toggleConnection() {
       if (bluetoothDevice && bluetoothDevice.gatt.connected) {
@@ -436,7 +515,6 @@
         connectBtn.disabled = true;
         connectBtn.textContent = '🔍 SCANNING...';
 
-        // Request Bluetooth device
         bluetoothDevice = await navigator.bluetooth.requestDevice({
           filters: [{ name: 'ImpactInsoles' }],
           optionalServices: [SERVICE_UUID]
@@ -444,24 +522,23 @@
 
         connectBtn.textContent = '🔗 CONNECTING...';
 
-        // Connect to GATT server
         const server = await bluetoothDevice.gatt.connect();
         const service = await server.getPrimaryService(SERVICE_UUID);
         characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
 
-        // Subscribe to notifications
         await characteristic.startNotifications();
         characteristic.addEventListener('characteristicvaluechanged', handleData);
 
-        // Update UI
+        statusBadge.classList.add('connected');
         statusDot.classList.add('connected');
         statusText.textContent = 'Connected';
         connectBtn.textContent = '🔴 DISCONNECT';
         connectBtn.disabled = false;
-        dataSection.classList.add('visible');
+        
+        valueDisplay.classList.add('visible');
+        recordingControls.classList.add('visible');
 
         console.log('✅ Connected to ImpactInsoles');
-
       } catch (error) {
         console.error('Connection failed:', error);
         alert('Connection failed: ' + error.message);
@@ -473,39 +550,161 @@
     function disconnect() {
       if (bluetoothDevice) {
         bluetoothDevice.gatt.disconnect();
+        statusBadge.classList.remove('connected');
         statusDot.classList.remove('connected');
         statusText.textContent = 'Disconnected';
         connectBtn.textContent = '🔵 SCAN & CONNECT';
-        dataSection.classList.remove('visible');
+        valueDisplay.classList.remove('visible');
+        recordingControls.classList.remove('visible');
+        
+        if (isRecording) stopRecording();
+        
         console.log('Disconnected');
       }
     }
 
     function handleData(event) {
       const data = new Uint8Array(event.target.value.buffer);
+      const value = data[0]; // First byte is potentiometer
       
-      // Update primary sensor with animation
-      primaryValue.classList.add('updating');
-      primaryValue.textContent = data[0];
-      setTimeout(() => primaryValue.classList.remove('updating'), 200);
+      // Update display with animation
+      valueNumber.classList.add('updating');
+      valueNumber.textContent = value;
+      setTimeout(() => valueNumber.classList.remove('updating'), 200);
 
-      // Update all sensors
-      for (let i = 0; i < 8; i++) {
-        const element = document.getElementById(`s${i}`);
-        element.textContent = data[i];
-        
-        // Color code based on value
-        element.className = 'mini-value';
-        if (data[i] < 64) element.classList.add('value-low');
-        else if (data[i] < 128) element.classList.add('value-med');
-        else if (data[i] < 192) element.classList.add('value-high');
-        else element.classList.add('value-max');
+      // Record data if session is active
+      if (isRecording) {
+        const timestamp = (Date.now() - recordingStartTime) / 1000; // seconds
+        recordingData.push({ time: timestamp, value: value });
       }
     }
 
-    // Check if Web Bluetooth is supported
+    function startRecording() {
+      isRecording = true;
+      recordingData = [];
+      recordingStartTime = Date.now();
+      
+      startBtn.classList.add('recording');
+      stopBtn.disabled = false;
+      recordingIndicator.classList.add('active');
+      graphContainer.classList.remove('visible');
+      
+      // Start timer
+      timerInterval = setInterval(updateTimer, 1000);
+      
+      console.log('🔴 Recording started');
+    }
+
+    function stopRecording() {
+      isRecording = false;
+      
+      startBtn.classList.remove('recording');
+      stopBtn.disabled = true;
+      recordingIndicator.classList.remove('active');
+      
+      clearInterval(timerInterval);
+      
+      // Generate graph
+      generateGraph();
+      
+      console.log('⏹ Recording stopped. Data points:', recordingData.length);
+    }
+
+    function updateTimer() {
+      const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+      recTime.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function generateGraph() {
+      if (recordingData.length === 0) {
+        alert('No data recorded!');
+        return;
+      }
+
+      graphContainer.classList.add('visible');
+
+      // Calculate stats
+      const duration = recordingData[recordingData.length - 1].time;
+      const values = recordingData.map(d => d.value);
+      const avgValue = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+      const maxValue = Math.max(...values);
+
+      document.getElementById('statDuration').textContent = `${Math.round(duration)}s`;
+      document.getElementById('statAvg').textContent = avgValue;
+      document.getElementById('statMax').textContent = maxValue;
+
+      // Destroy old chart if exists
+      if (chart) chart.destroy();
+
+      // Create chart
+      const ctx = document.getElementById('sessionChart').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: recordingData.map(d => d.time.toFixed(1)),
+          datasets: [{
+            label: 'Sensor Value',
+            data: recordingData.map(d => d.value),
+            borderColor: '#0066CC',
+            backgroundColor: 'rgba(0, 102, 204, 0.1)',
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointRadius: 0,
+            pointHoverRadius: 6,
+            pointHoverBackgroundColor: '#FF6B35',
+            pointHoverBorderColor: '#FFFFFF',
+            pointHoverBorderWidth: 2,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#141824',
+              titleColor: '#FFFFFF',
+              bodyColor: '#8A8FA8',
+              borderColor: '#0066CC',
+              borderWidth: 2,
+              padding: 12,
+              displayColors: false,
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Time (seconds)',
+                color: '#8A8FA8',
+                font: { size: 11, weight: 'bold' }
+              },
+              ticks: { color: '#8A8FA8', maxTicksLimit: 8 },
+              grid: { color: 'rgba(138, 143, 168, 0.1)' }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Sensor Value',
+                color: '#8A8FA8',
+                font: { size: 11, weight: 'bold' }
+              },
+              min: 0,
+              max: 255,
+              ticks: { color: '#8A8FA8' },
+              grid: { color: 'rgba(138, 143, 168, 0.1)' }
+            }
+          }
+        }
+      });
+    }
+
+    // Check browser support
     if (!navigator.bluetooth) {
-      alert('Web Bluetooth is not supported on this device/browser. Try Chrome on Android or use the native iOS app.');
+      alert('Web Bluetooth not supported. Use Chrome on Android.');
       connectBtn.disabled = true;
       connectBtn.textContent = 'NOT SUPPORTED';
     }
