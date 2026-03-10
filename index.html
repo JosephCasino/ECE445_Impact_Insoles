@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="manifest" href="manifest.json" />
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ImpactInsoles • Sensor Monitor</title>
+  <title>ImpactInsoles • 12-bit + Packet Test</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Exo+2:wght@300;600;900&display=swap');
 
     :root {
       --orange: #FF6B35;
-      --orange-light: #FF8555;
-      --orange-dark: #E85A2A;
       --blue: #0066CC;
       --blue-light: #338FDB;
-      --blue-dark: #004C99;
       --bg-dark: #0A0E1A;
       --bg-card: #141824;
       --text-white: #FFFFFF;
       --text-gray: #8A8FA8;
+      --green: #00E5A0;
+      --red: #FF3B30;
     }
 
     * {
@@ -36,7 +36,6 @@
       overflow-x: hidden;
     }
 
-    /* Animated background gradient */
     body::before {
       content: '';
       position: fixed;
@@ -57,14 +56,13 @@
     }
 
     .container {
-      max-width: 600px;
+      max-width: 700px;
       margin: 0 auto;
       padding: 24px;
       position: relative;
       z-index: 1;
     }
 
-    /* Header */
     .header {
       text-align: center;
       margin-bottom: 32px;
@@ -80,7 +78,6 @@
       font-size: 42px;
       font-weight: 900;
       letter-spacing: 6px;
-      line-height: 1;
       background: linear-gradient(135deg, var(--orange) 0%, var(--blue) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -96,7 +93,6 @@
       font-weight: 300;
     }
 
-    /* Status Badge */
     .status-badge {
       display: inline-flex;
       align-items: center;
@@ -139,11 +135,10 @@
       letter-spacing: 1px;
     }
 
-    /* Connect Button */
     .connect-btn {
       width: 100%;
       padding: 20px;
-      background: linear-gradient(135deg, var(--orange) 0%, var(--orange-dark) 100%);
+      background: linear-gradient(135deg, var(--orange) 0%, #E85A2A 100%);
       border: none;
       border-radius: 16px;
       color: white;
@@ -162,10 +157,6 @@
       box-shadow: 0 10px 30px rgba(255,107,53,0.5);
     }
 
-    .connect-btn:active {
-      transform: translateY(0);
-    }
-
     .connect-btn:disabled {
       background: var(--bg-card);
       color: var(--text-gray);
@@ -173,27 +164,33 @@
       box-shadow: none;
     }
 
-    /* Live Value Display */
-    .value-display {
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin: 32px 0;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.5s ease;
+    }
+
+    .stats-grid.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .stat-card {
       background: var(--bg-card);
       border: 2px solid var(--blue);
-      border-radius: 24px;
-      padding: 40px;
+      border-radius: 20px;
+      padding: 24px;
       text-align: center;
-      margin: 32px 0;
       position: relative;
       overflow: hidden;
-      opacity: 0;
-      transform: scale(0.9);
-      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .value-display.visible {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    .value-display::before {
+    .stat-card::before {
       content: '';
       position: absolute;
       top: -50%;
@@ -204,17 +201,17 @@
       animation: rotate 20s linear infinite;
     }
 
-    .value-label {
+    .stat-label {
       font-size: 11px;
       color: var(--text-gray);
       letter-spacing: 3px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       position: relative;
       font-weight: 600;
     }
 
-    .value-number {
-      font-size: 96px;
+    .stat-value {
+      font-size: 48px;
       font-weight: 900;
       font-family: 'Roboto Mono', monospace;
       background: linear-gradient(135deg, var(--blue-light) 0%, var(--blue) 100%);
@@ -226,17 +223,87 @@
       transition: transform 0.2s ease;
     }
 
-    .value-number.updating {
+    .stat-value.updating {
       transform: scale(1.05);
     }
 
-    .value-range {
-      font-size: 13px;
+    .stat-unit {
+      font-size: 12px;
       color: var(--text-gray);
       font-family: 'Roboto Mono', monospace;
-      margin-top: 12px;
+      margin-top: 8px;
       position: relative;
     }
+
+    /* Packet Loss Card */
+    .loss-card {
+      background: var(--bg-card);
+      border: 2px solid var(--green);
+      border-radius: 20px;
+      padding: 24px;
+      margin: 24px 0;
+      opacity: 0;
+      transform: scale(0.95);
+      transition: all 0.5s ease;
+    }
+
+    .loss-card.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .loss-card.warning {
+      border-color: var(--orange);
+    }
+
+    .loss-card.error {
+      border-color: var(--red);
+    }
+
+    .loss-title {
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--text-white);
+      letter-spacing: 3px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .loss-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .loss-stat {
+      text-align: center;
+    }
+
+    .loss-stat-label {
+      font-size: 10px;
+      color: var(--text-gray);
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .loss-stat-value {
+      font-size: 24px;
+      font-weight: 900;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .loss-percent {
+      font-size: 56px;
+      font-weight: 900;
+      text-align: center;
+      margin: 16px 0;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .loss-percent.good { color: var(--green); }
+    .loss-percent.warning { color: var(--orange); }
+    .loss-percent.bad { color: var(--red); }
 
     /* Recording Controls */
     .recording-controls {
@@ -268,7 +335,7 @@
     }
 
     .start-btn {
-      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+      background: linear-gradient(135deg, var(--blue) 0%, #004C99 100%);
       color: white;
       box-shadow: 0 4px 16px rgba(0,102,204,0.3);
     }
@@ -300,7 +367,6 @@
       cursor: not-allowed;
     }
 
-    /* Recording Indicator */
     .recording-indicator {
       display: none;
       align-items: center;
@@ -344,7 +410,6 @@
       font-weight: 700;
     }
 
-    /* Graph Container */
     .graph-container {
       background: var(--bg-card);
       border: 2px solid var(--blue);
@@ -377,7 +442,6 @@
       max-width: 100%;
     }
 
-    /* Session Stats */
     .session-stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -385,7 +449,7 @@
       margin-top: 16px;
     }
 
-    .stat-card {
+    .session-stat-card {
       background: rgba(0,102,204,0.1);
       border: 1px solid var(--blue);
       border-radius: 12px;
@@ -393,14 +457,14 @@
       text-align: center;
     }
 
-    .stat-label {
+    .session-stat-label {
       font-size: 9px;
       color: var(--text-gray);
       letter-spacing: 2px;
       margin-bottom: 6px;
     }
 
-    .stat-value {
+    .session-stat-value {
       font-size: 20px;
       font-weight: 900;
       color: var(--blue-light);
@@ -410,13 +474,11 @@
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
     <div class="header">
       <div class="brand">IMPACT INSOLES</div>
-      <div class="tagline">Sensor Monitor</div>
+      <div class="tagline">12-Bit Resolution • Packet Loss Testing</div>
     </div>
 
-    <!-- Status -->
     <center>
       <div class="status-badge" id="statusBadge">
         <div class="status-dot" id="statusDot"></div>
@@ -424,16 +486,43 @@
       </div>
     </center>
 
-    <!-- Connect Button -->
     <button class="connect-btn" id="connectBtn" onclick="toggleConnection()">
       🔵 Scan & Connect
     </button>
 
-    <!-- Live Value Display -->
-    <div class="value-display" id="valueDisplay">
-      <div class="value-label">SENSOR VALUE</div>
-      <div class="value-number" id="valueNumber">0</div>
-      <div class="value-range">Range: 0 – 255</div>
+    <!-- Live Stats -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-label">SENSOR VALUE</div>
+        <div class="stat-value" id="sensorValue">0</div>
+        <div class="stat-unit">0 – 4095 (12-bit)</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">PACKET COUNT</div>
+        <div class="stat-value" id="packetCount">0</div>
+        <div class="stat-unit">Total Received</div>
+      </div>
+    </div>
+
+    <!-- Packet Loss Stats -->
+    <div class="loss-card" id="lossCard">
+      <div class="loss-title">PACKET LOSS TEST</div>
+      <div class="loss-percent good" id="lossPercent">0.00%</div>
+      <div class="loss-stats">
+        <div class="loss-stat">
+          <div class="loss-stat-label">RECEIVED</div>
+          <div class="loss-stat-value" id="packetsReceived" style="color: var(--green)">0</div>
+        </div>
+        <div class="loss-stat">
+          <div class="loss-stat-label">LOST</div>
+          <div class="loss-stat-value" id="packetsLost" style="color: var(--red)">0</div>
+        </div>
+        <div class="loss-stat">
+          <div class="loss-stat-label">EXPECTED</div>
+          <div class="loss-stat-value" id="packetsExpected" style="color: var(--text-gray)">0</div>
+        </div>
+      </div>
     </div>
 
     <!-- Recording Controls -->
@@ -446,7 +535,6 @@
       </button>
     </div>
 
-    <!-- Recording Indicator -->
     <div class="recording-indicator" id="recordingIndicator">
       <div class="rec-dot"></div>
       <span class="rec-text">RECORDING</span>
@@ -455,28 +543,27 @@
 
     <!-- Graph -->
     <div class="graph-container" id="graphContainer">
-      <div class="graph-title">SESSION GRAPH</div>
+      <div class="graph-title">SESSION GRAPH (12-BIT)</div>
       <canvas id="sessionChart"></canvas>
       
       <div class="session-stats">
-        <div class="stat-card">
-          <div class="stat-label">DURATION</div>
-          <div class="stat-value" id="statDuration">0s</div>
+        <div class="session-stat-card">
+          <div class="session-stat-label">DURATION</div>
+          <div class="session-stat-value" id="statDuration">0s</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">AVG VALUE</div>
-          <div class="stat-value" id="statAvg">0</div>
+        <div class="session-stat-card">
+          <div class="session-stat-label">AVG VALUE</div>
+          <div class="session-stat-value" id="statAvg">0</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">MAX VALUE</div>
-          <div class="stat-value" id="statMax">0</div>
+        <div class="session-stat-card">
+          <div class="session-stat-label">MAX VALUE</div>
+          <div class="session-stat-value" id="statMax">0</div>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // BLE Configuration
     const SERVICE_UUID = '12345678-1234-1234-1234-123456789abc';
     const CHARACTERISTIC_UUID = 'abcd1234-ab12-ab12-ab12-abcdef123456';
 
@@ -488,13 +575,25 @@
     let timerInterval = null;
     let chart = null;
 
+    // Packet loss tracking
+    let lastPacketID = -1;
+    let totalPacketsReceived = 0;
+    let totalPacketsLost = 0;
+    let currentPacketID = 0;
+
     // UI Elements
     const connectBtn = document.getElementById('connectBtn');
     const statusBadge = document.getElementById('statusBadge');
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
-    const valueDisplay = document.getElementById('valueDisplay');
-    const valueNumber = document.getElementById('valueNumber');
+    const statsGrid = document.getElementById('statsGrid');
+    const sensorValue = document.getElementById('sensorValue');
+    const packetCount = document.getElementById('packetCount');
+    const lossCard = document.getElementById('lossCard');
+    const lossPercent = document.getElementById('lossPercent');
+    const packetsReceived = document.getElementById('packetsReceived');
+    const packetsLost = document.getElementById('packetsLost');
+    const packetsExpected = document.getElementById('packetsExpected');
     const recordingControls = document.getElementById('recordingControls');
     const startBtn = document.getElementById('startBtn');
     const stopBtn = document.getElementById('stopBtn');
@@ -535,10 +634,16 @@
         connectBtn.textContent = '🔴 DISCONNECT';
         connectBtn.disabled = false;
         
-        valueDisplay.classList.add('visible');
+        statsGrid.classList.add('visible');
+        lossCard.classList.add('visible');
         recordingControls.classList.add('visible');
 
-        console.log('✅ Connected to ImpactInsoles');
+        // Reset counters
+        lastPacketID = -1;
+        totalPacketsReceived = 0;
+        totalPacketsLost = 0;
+
+        console.log('✅ Connected to ImpactInsoles (12-bit mode)');
       } catch (error) {
         console.error('Connection failed:', error);
         alert('Connection failed: ' + error.message);
@@ -554,7 +659,9 @@
         statusDot.classList.remove('connected');
         statusText.textContent = 'Disconnected';
         connectBtn.textContent = '🔵 SCAN & CONNECT';
-        valueDisplay.classList.remove('visible');
+        
+        statsGrid.classList.remove('visible');
+        lossCard.classList.remove('visible');
         recordingControls.classList.remove('visible');
         
         if (isRecording) stopRecording();
@@ -565,17 +672,61 @@
 
     function handleData(event) {
       const data = new Uint8Array(event.target.value.buffer);
-      const value = data[0]; // First byte is potentiometer
       
-      // Update display with animation
-      valueNumber.classList.add('updating');
-      valueNumber.textContent = value;
-      setTimeout(() => valueNumber.classList.remove('updating'), 200);
-
+      // Decode 12-bit sensor value from bytes 0-1
+      const sensor0 = (data[0] << 8) | data[1];  // 0-4095
+      
+      // Decode packet ID from bytes 16-19
+      const packetID = (data[16] << 24) | (data[17] << 16) | (data[18] << 8) | data[19];
+      
+      // Update sensor display
+      sensorValue.classList.add('updating');
+      sensorValue.textContent = sensor0;
+      setTimeout(() => sensorValue.classList.remove('updating'), 200);
+      
+      // Packet loss calculation
+      totalPacketsReceived++;
+      
+      if (lastPacketID !== -1) {
+        const expectedID = lastPacketID + 1;
+        if (packetID !== expectedID) {
+          const lost = packetID - expectedID;
+          totalPacketsLost += lost;
+          console.warn(`⚠️ Packet loss detected! Expected ${expectedID}, got ${packetID}. Lost: ${lost}`);
+        }
+      }
+      
+      lastPacketID = packetID;
+      currentPacketID = packetID;
+      
+      // Update packet stats
+      const totalExpected = currentPacketID + 1;
+      const lossPercentage = (totalPacketsLost / totalExpected) * 100;
+      
+      packetCount.textContent = totalPacketsReceived;
+      packetsReceived.textContent = totalPacketsReceived;
+      packetsLost.textContent = totalPacketsLost;
+      packetsExpected.textContent = totalExpected;
+      lossPercent.textContent = lossPercentage.toFixed(2) + '%';
+      
+      // Color code based on loss percentage
+      lossCard.classList.remove('warning', 'error');
+      lossPercent.classList.remove('good', 'warning', 'bad');
+      
+      if (lossPercentage === 0) {
+        lossPercent.classList.add('good');
+      } else if (lossPercentage < 5) {
+        lossPercent.classList.add('warning');
+        lossCard.classList.add('warning');
+      } else {
+        lossPercent.classList.add('bad');
+        lossCard.classList.add('error');
+      }
+      
       // Record data if session is active
       if (isRecording) {
-        const timestamp = (Date.now() - recordingStartTime) / 1000; // seconds
-        recordingData.push({ time: timestamp, value: value });
+        const timestamp = (Date.now() - recordingStartTime) / 1000;
+        recordingData.push({ time: timestamp, value: sensor0 });
       }
     }
 
@@ -589,7 +740,6 @@
       recordingIndicator.classList.add('active');
       graphContainer.classList.remove('visible');
       
-      // Start timer
       timerInterval = setInterval(updateTimer, 1000);
       
       console.log('🔴 Recording started');
@@ -604,7 +754,6 @@
       
       clearInterval(timerInterval);
       
-      // Generate graph
       generateGraph();
       
       console.log('⏹ Recording stopped. Data points:', recordingData.length);
@@ -625,7 +774,6 @@
 
       graphContainer.classList.add('visible');
 
-      // Calculate stats
       const duration = recordingData[recordingData.length - 1].time;
       const values = recordingData.map(d => d.value);
       const avgValue = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
@@ -635,17 +783,15 @@
       document.getElementById('statAvg').textContent = avgValue;
       document.getElementById('statMax').textContent = maxValue;
 
-      // Destroy old chart if exists
       if (chart) chart.destroy();
 
-      // Create chart
       const ctx = document.getElementById('sessionChart').getContext('2d');
       chart = new Chart(ctx, {
         type: 'line',
         data: {
           labels: recordingData.map(d => d.time.toFixed(1)),
           datasets: [{
-            label: 'Sensor Value',
+            label: 'Sensor Value (12-bit)',
             data: recordingData.map(d => d.value),
             borderColor: '#0066CC',
             backgroundColor: 'rgba(0, 102, 204, 0.1)',
@@ -688,12 +834,12 @@
             y: {
               title: {
                 display: true,
-                text: 'Sensor Value',
+                text: 'Sensor Value (12-bit)',
                 color: '#8A8FA8',
                 font: { size: 11, weight: 'bold' }
               },
               min: 0,
-              max: 255,
+              max: 4095,
               ticks: { color: '#8A8FA8' },
               grid: { color: 'rgba(138, 143, 168, 0.1)' }
             }
@@ -702,7 +848,6 @@
       });
     }
 
-    // Check browser support
     if (!navigator.bluetooth) {
       alert('Web Bluetooth not supported. Use Chrome on Android.');
       connectBtn.disabled = true;
