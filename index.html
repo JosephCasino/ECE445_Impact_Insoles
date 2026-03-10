@@ -4,7 +4,7 @@
   <link rel="manifest" href="manifest.json" />
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ImpactInsoles • 12-bit + Packet Test</title>
+  <title>ImpactInsoles • Sensor Monitor</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Exo+2:wght@300;600;900&display=swap');
@@ -56,7 +56,7 @@
     }
 
     .container {
-      max-width: 700px;
+      max-width: 600px;
       margin: 0 auto;
       padding: 24px;
       position: relative;
@@ -164,33 +164,26 @@
       box-shadow: none;
     }
 
-    /* Stats Grid */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      margin: 32px 0;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.5s ease;
-    }
-
-    .stats-grid.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .stat-card {
+    .value-display {
       background: var(--bg-card);
       border: 2px solid var(--blue);
-      border-radius: 20px;
-      padding: 24px;
+      border-radius: 24px;
+      padding: 40px;
       text-align: center;
+      margin: 32px 0;
       position: relative;
       overflow: hidden;
+      opacity: 0;
+      transform: scale(0.9);
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .stat-card::before {
+    .value-display.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .value-display::before {
       content: '';
       position: absolute;
       top: -50%;
@@ -201,17 +194,17 @@
       animation: rotate 20s linear infinite;
     }
 
-    .stat-label {
+    .value-label {
       font-size: 11px;
       color: var(--text-gray);
       letter-spacing: 3px;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
       position: relative;
       font-weight: 600;
     }
 
-    .stat-value {
-      font-size: 48px;
+    .value-number {
+      font-size: 96px;
       font-weight: 900;
       font-family: 'Roboto Mono', monospace;
       background: linear-gradient(135deg, var(--blue-light) 0%, var(--blue) 100%);
@@ -223,89 +216,18 @@
       transition: transform 0.2s ease;
     }
 
-    .stat-value.updating {
+    .value-number.updating {
       transform: scale(1.05);
     }
 
-    .stat-unit {
-      font-size: 12px;
+    .value-range {
+      font-size: 13px;
       color: var(--text-gray);
       font-family: 'Roboto Mono', monospace;
-      margin-top: 8px;
+      margin-top: 12px;
       position: relative;
     }
 
-    /* Packet Loss Card */
-    .loss-card {
-      background: var(--bg-card);
-      border: 2px solid var(--green);
-      border-radius: 20px;
-      padding: 24px;
-      margin: 24px 0;
-      opacity: 0;
-      transform: scale(0.95);
-      transition: all 0.5s ease;
-    }
-
-    .loss-card.visible {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    .loss-card.warning {
-      border-color: var(--orange);
-    }
-
-    .loss-card.error {
-      border-color: var(--red);
-    }
-
-    .loss-title {
-      font-size: 14px;
-      font-weight: 900;
-      color: var(--text-white);
-      letter-spacing: 3px;
-      margin-bottom: 16px;
-      text-align: center;
-    }
-
-    .loss-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-top: 16px;
-    }
-
-    .loss-stat {
-      text-align: center;
-    }
-
-    .loss-stat-label {
-      font-size: 10px;
-      color: var(--text-gray);
-      letter-spacing: 2px;
-      margin-bottom: 8px;
-    }
-
-    .loss-stat-value {
-      font-size: 24px;
-      font-weight: 900;
-      font-family: 'Roboto Mono', monospace;
-    }
-
-    .loss-percent {
-      font-size: 56px;
-      font-weight: 900;
-      text-align: center;
-      margin: 16px 0;
-      font-family: 'Roboto Mono', monospace;
-    }
-
-    .loss-percent.good { color: var(--green); }
-    .loss-percent.warning { color: var(--orange); }
-    .loss-percent.bad { color: var(--red); }
-
-    /* Recording Controls */
     .recording-controls {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -470,13 +392,68 @@
       color: var(--blue-light);
       font-family: 'Roboto Mono', monospace;
     }
+
+    /* SMALLER Packet Loss Display */
+    .packet-loss-mini {
+      background: var(--bg-card);
+      border: 1px solid var(--text-gray);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin: 24px 0;
+      opacity: 0;
+      transition: all 0.5s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .packet-loss-mini.visible {
+      opacity: 1;
+    }
+
+    .packet-loss-mini.good {
+      border-color: var(--green);
+    }
+
+    .packet-loss-mini.warning {
+      border-color: var(--orange);
+    }
+
+    .packet-loss-mini.bad {
+      border-color: var(--red);
+    }
+
+    .loss-mini-label {
+      font-size: 10px;
+      color: var(--text-gray);
+      letter-spacing: 2px;
+      font-weight: 600;
+    }
+
+    .loss-mini-value {
+      font-size: 18px;
+      font-weight: 900;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .loss-mini-value.good { color: var(--green); }
+    .loss-mini-value.warning { color: var(--orange); }
+    .loss-mini-value.bad { color: var(--red); }
+
+    .loss-mini-stats {
+      display: flex;
+      gap: 16px;
+      font-size: 11px;
+      color: var(--text-gray);
+      font-family: 'Roboto Mono', monospace;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <div class="brand">IMPACT INSOLES</div>
-      <div class="tagline">12-Bit Resolution • Packet Loss Testing</div>
+      <div class="tagline">Sensor Monitor</div>
     </div>
 
     <center>
@@ -490,42 +467,12 @@
       🔵 Scan & Connect
     </button>
 
-    <!-- Live Stats -->
-    <div class="stats-grid" id="statsGrid">
-      <div class="stat-card">
-        <div class="stat-label">SENSOR VALUE</div>
-        <div class="stat-value" id="sensorValue">0</div>
-        <div class="stat-unit">0 – 4095 (12-bit)</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-label">PACKET COUNT</div>
-        <div class="stat-value" id="packetCount">0</div>
-        <div class="stat-unit">Total Received</div>
-      </div>
+    <div class="value-display" id="valueDisplay">
+      <div class="value-label">SENSOR VALUE</div>
+      <div class="value-number" id="valueNumber">0</div>
+      <div class="value-range">0 – 4095 (12-bit)</div>
     </div>
 
-    <!-- Packet Loss Stats -->
-    <div class="loss-card" id="lossCard">
-      <div class="loss-title">PACKET LOSS TEST</div>
-      <div class="loss-percent good" id="lossPercent">0.00%</div>
-      <div class="loss-stats">
-        <div class="loss-stat">
-          <div class="loss-stat-label">RECEIVED</div>
-          <div class="loss-stat-value" id="packetsReceived" style="color: var(--green)">0</div>
-        </div>
-        <div class="loss-stat">
-          <div class="loss-stat-label">LOST</div>
-          <div class="loss-stat-value" id="packetsLost" style="color: var(--red)">0</div>
-        </div>
-        <div class="loss-stat">
-          <div class="loss-stat-label">EXPECTED</div>
-          <div class="loss-stat-value" id="packetsExpected" style="color: var(--text-gray)">0</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Recording Controls -->
     <div class="recording-controls" id="recordingControls">
       <button class="record-btn start-btn" id="startBtn" onclick="startRecording()">
         ▶ Start Session
@@ -541,9 +488,8 @@
       <span class="rec-time" id="recTime">00:00</span>
     </div>
 
-    <!-- Graph -->
     <div class="graph-container" id="graphContainer">
-      <div class="graph-title">SESSION GRAPH (12-BIT)</div>
+      <div class="graph-title">SESSION GRAPH</div>
       <canvas id="sessionChart"></canvas>
       
       <div class="session-stats">
@@ -559,6 +505,18 @@
           <div class="session-stat-label">MAX VALUE</div>
           <div class="session-stat-value" id="statMax">0</div>
         </div>
+      </div>
+    </div>
+
+    <!-- SMALLER Packet Loss at Bottom -->
+    <div class="packet-loss-mini" id="packetLossMini">
+      <div>
+        <div class="loss-mini-label">PACKET LOSS</div>
+        <div class="loss-mini-value" id="lossPercent">0.00%</div>
+      </div>
+      <div class="loss-mini-stats">
+        <span>RX: <strong id="packetsReceived">0</strong></span>
+        <span>Lost: <strong id="packetsLost">0</strong></span>
       </div>
     </div>
   </div>
@@ -579,27 +537,24 @@
     let lastPacketID = -1;
     let totalPacketsReceived = 0;
     let totalPacketsLost = 0;
-    let currentPacketID = 0;
 
     // UI Elements
     const connectBtn = document.getElementById('connectBtn');
     const statusBadge = document.getElementById('statusBadge');
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
-    const statsGrid = document.getElementById('statsGrid');
-    const sensorValue = document.getElementById('sensorValue');
-    const packetCount = document.getElementById('packetCount');
-    const lossCard = document.getElementById('lossCard');
-    const lossPercent = document.getElementById('lossPercent');
-    const packetsReceived = document.getElementById('packetsReceived');
-    const packetsLost = document.getElementById('packetsLost');
-    const packetsExpected = document.getElementById('packetsExpected');
+    const valueDisplay = document.getElementById('valueDisplay');
+    const valueNumber = document.getElementById('valueNumber');
     const recordingControls = document.getElementById('recordingControls');
     const startBtn = document.getElementById('startBtn');
     const stopBtn = document.getElementById('stopBtn');
     const recordingIndicator = document.getElementById('recordingIndicator');
     const recTime = document.getElementById('recTime');
     const graphContainer = document.getElementById('graphContainer');
+    const packetLossMini = document.getElementById('packetLossMini');
+    const lossPercent = document.getElementById('lossPercent');
+    const packetsReceived = document.getElementById('packetsReceived');
+    const packetsLost = document.getElementById('packetsLost');
 
     async function toggleConnection() {
       if (bluetoothDevice && bluetoothDevice.gatt.connected) {
@@ -634,16 +589,16 @@
         connectBtn.textContent = '🔴 DISCONNECT';
         connectBtn.disabled = false;
         
-        statsGrid.classList.add('visible');
-        lossCard.classList.add('visible');
+        valueDisplay.classList.add('visible');
         recordingControls.classList.add('visible');
+        packetLossMini.classList.add('visible');
 
         // Reset counters
         lastPacketID = -1;
         totalPacketsReceived = 0;
         totalPacketsLost = 0;
 
-        console.log('✅ Connected to ImpactInsoles (12-bit mode)');
+        console.log('✅ Connected to ImpactInsoles');
       } catch (error) {
         console.error('Connection failed:', error);
         alert('Connection failed: ' + error.message);
@@ -660,9 +615,9 @@
         statusText.textContent = 'Disconnected';
         connectBtn.textContent = '🔵 SCAN & CONNECT';
         
-        statsGrid.classList.remove('visible');
-        lossCard.classList.remove('visible');
+        valueDisplay.classList.remove('visible');
         recordingControls.classList.remove('visible');
+        packetLossMini.classList.remove('visible');
         
         if (isRecording) stopRecording();
         
@@ -673,18 +628,18 @@
     function handleData(event) {
       const data = new Uint8Array(event.target.value.buffer);
       
-      // Decode 12-bit sensor value from bytes 0-1
-      const sensor0 = (data[0] << 8) | data[1];  // 0-4095
+      // Decode 12-bit sensor value
+      const sensor0 = (data[0] << 8) | data[1];
       
-      // Decode packet ID from bytes 16-19
+      // Decode packet ID
       const packetID = (data[16] << 24) | (data[17] << 16) | (data[18] << 8) | data[19];
       
       // Update sensor display
-      sensorValue.classList.add('updating');
-      sensorValue.textContent = sensor0;
-      setTimeout(() => sensorValue.classList.remove('updating'), 200);
+      valueNumber.classList.add('updating');
+      valueNumber.textContent = sensor0;
+      setTimeout(() => valueNumber.classList.remove('updating'), 200);
       
-      // Packet loss calculation
+      // Packet loss calculation - FIXED
       totalPacketsReceived++;
       
       if (lastPacketID !== -1) {
@@ -692,38 +647,37 @@
         if (packetID !== expectedID) {
           const lost = packetID - expectedID;
           totalPacketsLost += lost;
-          console.warn(`⚠️ Packet loss detected! Expected ${expectedID}, got ${packetID}. Lost: ${lost}`);
+          console.warn(`⚠️ Lost ${lost} packets (expected ${expectedID}, got ${packetID})`);
         }
       }
       
       lastPacketID = packetID;
-      currentPacketID = packetID;
       
-      // Update packet stats
-      const totalExpected = currentPacketID + 1;
-      const lossPercentage = (totalPacketsLost / totalExpected) * 100;
+      // Calculate loss percentage using TOTAL EXPECTED (packetID + 1)
+      const totalExpected = packetID + 1;  // ESP32 starts at 0
+      const lossPercentage = totalExpected > 0 ? (totalPacketsLost / totalExpected) * 100 : 0;
       
-      packetCount.textContent = totalPacketsReceived;
+      // Update UI
       packetsReceived.textContent = totalPacketsReceived;
       packetsLost.textContent = totalPacketsLost;
-      packetsExpected.textContent = totalExpected;
       lossPercent.textContent = lossPercentage.toFixed(2) + '%';
       
-      // Color code based on loss percentage
-      lossCard.classList.remove('warning', 'error');
+      // Color code
+      packetLossMini.classList.remove('good', 'warning', 'bad');
       lossPercent.classList.remove('good', 'warning', 'bad');
       
       if (lossPercentage === 0) {
+        packetLossMini.classList.add('good');
         lossPercent.classList.add('good');
       } else if (lossPercentage < 5) {
+        packetLossMini.classList.add('warning');
         lossPercent.classList.add('warning');
-        lossCard.classList.add('warning');
       } else {
+        packetLossMini.classList.add('bad');
         lossPercent.classList.add('bad');
-        lossCard.classList.add('error');
       }
       
-      // Record data if session is active
+      // Record data if session active
       if (isRecording) {
         const timestamp = (Date.now() - recordingStartTime) / 1000;
         recordingData.push({ time: timestamp, value: sensor0 });
@@ -791,7 +745,7 @@
         data: {
           labels: recordingData.map(d => d.time.toFixed(1)),
           datasets: [{
-            label: 'Sensor Value (12-bit)',
+            label: 'Sensor Value',
             data: recordingData.map(d => d.value),
             borderColor: '#0066CC',
             backgroundColor: 'rgba(0, 102, 204, 0.1)',
