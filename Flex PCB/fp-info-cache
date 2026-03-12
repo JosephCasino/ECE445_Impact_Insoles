@@ -1,4 +1,4 @@
-27248270085385495
+27250043433214065
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -11243,6 +11243,13 @@ F32J
 61
 Connector_FFC-FPC
 FPC-Male-18P-0.5mm
+
+
+0
+18
+18
+Connector_FFC-FPC
+FPC-Male-18P-1mm
 
 
 0
