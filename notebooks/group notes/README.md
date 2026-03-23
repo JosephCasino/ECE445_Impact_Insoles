@@ -15,6 +15,15 @@ TODO before then:
 - [ ] Make order form for new PCBs
 	- [ ] Finalize FSR range
 
+Software Side: 
+- [ ] Complete UI for Web App
+	- [ ] Display Sensor Readings
+	- [ ] Animated Sensor Map 
+	- [ ] Foot Heat Map Generation After Session
+	- [ ] Step Counter
+	- [ ] Cadence Calculator
+- [ ] Write FSR driver code
+- [ ] Write IMU driver code
 
 
 **Wednesday, April 1st** - Individual progress report
