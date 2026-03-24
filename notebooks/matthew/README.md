@@ -41,6 +41,7 @@ We did a design marathon to finish up the layout for the PCB for the first round
 but other than that, it was pretty smooth sailing. 
 
 Rev1 final design:
+
 <img height="683" alt="image" src="https://github.com/user-attachments/assets/204cb265-5d8e-4339-8272-d555b42509e1" />
 
 
@@ -66,6 +67,7 @@ Finished up the breadboard demo as well as showed the breadboard demo. Started o
 in the engineering log as well as changed the connector size. We were able to receive our flex pcb and saw that our connector was too small for it. 
 
 Breadboard Demo:
+
 <img width="653" height="923" alt="image" src="https://github.com/user-attachments/assets/5b287c0e-bc94-4b45-86fd-367452fe34ff" />
 
 
@@ -76,6 +78,7 @@ to version 1. In addition, we went into the lab to play around with the FPC sens
 thinking on using a more consistent weight so we are able to properly get measurements for certain values. 
 
 Rev2 Layout
+
 <img height="683" alt="image" src="https://github.com/user-attachments/assets/8ce373a2-b06a-4755-9b6e-8f92dcfbf812" />
 
 
