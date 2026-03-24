@@ -40,6 +40,10 @@ Rough Layout:
 We did a design marathon to finish up the layout for the PCB for the first round. There were a little bit of bugs that we found such as orientation of the connector
 but other than that, it was pretty smooth sailing. 
 
+Rev1 final design:
+<img height="683" alt="image" src="https://github.com/user-attachments/assets/204cb265-5d8e-4339-8272-d555b42509e1" />
+
+
 ## 2/28/26
 
 Worked on the components of the design doc that were assigned to me as well as looked over my parteners components. I gave feedback and did little changes here and there
@@ -50,7 +54,8 @@ to their respective sections.
 Deciding wheter to not we should order for the second round but decided not to since our parts have not arrived yet. However, looked into more research regarding
 the BMS and found there was a bug in the chip according to the datasheet. I forgot to add some passives mentioned in the datasheet.
 
-Datasheet:  
+[Datasheet]([https://www.adafruit.com/product/4236](https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Fbq24075
+))
 
 Helped start to plan out the parts needed and what we wanted to showcase regarding the breadboard demo. We decided on that we wanted to show BLE since it was one of the most
 important aspects. In addition, since we did not have our flex sensors in yet, we decided to use potentiometers to show ADC functionality due to their dynamic nature.
@@ -60,11 +65,19 @@ important aspects. In addition, since we did not have our flex sensors in yet, w
 Finished up the breadboard demo as well as showed the breadboard demo. Started on cleaning up the schematic for the version 2 of our PCB. Debugged the issues mentioned earlier 
 in the engineering log as well as changed the connector size. We were able to receive our flex pcb and saw that our connector was too small for it. 
 
+Breadboard Demo:
+<img width="653" height="923" alt="image" src="https://github.com/user-attachments/assets/5b287c0e-bc94-4b45-86fd-367452fe34ff" />
+
+
 ## 3/12/26
 
 Finished up the layout of the version 2 of the PCB. It is layout a little poorly due to the new size of the connector but functionality-wise should be a lot better compared
 to version 1. In addition, we went into the lab to play around with the FPC sensors. We saw how resistivity changed and voltage when we hooked it up to a power supply. We are
 thinking on using a more consistent weight so we are able to properly get measurements for certain values. 
+
+Rev2 Layout
+<img height="683" alt="image" src="https://github.com/user-attachments/assets/8ce373a2-b06a-4755-9b6e-8f92dcfbf812" />
+
 
 
 
