@@ -8,11 +8,13 @@ TODO before then:
 	- [ ] Test if first round works in general
 		- [ ] Test FPC connection
 		- [ ] Test if single-resistor MUXing works
+		- [ ] Test BMS circuit
 	- [ ] Complete new design/necessary modifications
+		- [ ] Research oven-safe connectors
 - [ ] Complete flex PCB design
 	- [ ] Choose between full-piece and three-prong design
 	- [ ] If full-piece design full board, if three-prong design connector hub based on measured sizes
-- [ ] Make order form for new PCBs
+- [ ] Make final parts order form
 	- [ ] Finalize FSR range
 
 Software Side: 
