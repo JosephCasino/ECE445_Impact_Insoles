@@ -2056,7 +2056,7 @@
 		(layer "Edge.Cuts")
 		(uuid "fecb7075-a485-4856-814e-38f9962c0ba8")
 	)
-	(gr_text "ImpactInsoles\nFlex V2\nECE445 Spring 26\nGroup 68\n"
+	(gr_text "ImpactInsoles\nShortFlex\nECE445 Spring 26\nGroup 68\n"
 		(at 179.5 99.725 90)
 		(layer "F.SilkS")
 		(uuid "494145d6-dbe2-45c3-95e0-1a8aea758ad9")

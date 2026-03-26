@@ -72,9 +72,9 @@
 			(subtractmaskfromsilk no)
 			(outputformat 1)
 			(mirror no)
-			(drillshape 1)
+			(drillshape 0)
 			(scaleselection 1)
-			(outputdirectory "")
+			(outputdirectory "Gerbers/")
 		)
 	)
 	(net 0 "")
@@ -1325,7 +1325,7 @@
 	)
 	(gr_line
 		(start 131 32.5)
-		(end 90 32.5)
+		(end 92 32.5)
 		(stroke
 			(width 0.05)
 			(type default)
@@ -1352,6 +1352,17 @@
 		)
 		(layer "Edge.Cuts")
 		(uuid "3ab8bb1c-722f-4d65-98b2-c10222c4b00f")
+	)
+	(gr_arc
+		(start 92 55)
+		(mid 90.585786 54.414214)
+		(end 90 53)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "Edge.Cuts")
+		(uuid "482cf139-fbed-49d0-b8f7-d960b74f830a")
 	)
 	(gr_line
 		(start 122 60)
@@ -1384,8 +1395,8 @@
 		(uuid "acbcdf53-8c1e-4a30-809f-747127c29801")
 	)
 	(gr_line
-		(start 90 32.5)
-		(end 90 55)
+		(start 90 34.5)
+		(end 90 53)
 		(stroke
 			(width 0.05)
 			(type default)
@@ -1404,7 +1415,7 @@
 		(uuid "b6df2b6b-bf8d-472c-8e7d-7ae1398cd09c")
 	)
 	(gr_line
-		(start 90 55)
+		(start 92 55)
 		(end 113 55)
 		(stroke
 			(width 0.05)
@@ -1412,6 +1423,30 @@
 		)
 		(layer "Edge.Cuts")
 		(uuid "c517b9b0-0d51-4a25-aec2-25f02017fce8")
+	)
+	(gr_arc
+		(start 90 34.5)
+		(mid 90.585786 33.085786)
+		(end 92 32.5)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "Edge.Cuts")
+		(uuid "fb2a7b63-244b-417f-aae3-43e3de01590c")
+	)
+	(gr_text "ImpactInsoles\nFlexHubV1\nECE445 Spring 26\nGroup 68\n"
+		(at 129 56.5 0)
+		(layer "F.SilkS")
+		(uuid "02c3c6c5-275d-4f61-8ddb-f99df8d1ff34")
+		(effects
+			(font
+				(size 0.8984 0.8984)
+				(thickness 0.14986)
+				(bold yes)
+			)
+			(justify left bottom)
+		)
 	)
 	(segment
 		(start 107.408465 43.238095)
