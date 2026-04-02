@@ -28,7 +28,7 @@
 		(29 "B.CrtYd" user "B.Courtyard")
 		(35 "F.Fab" user)
 		(33 "B.Fab" user)
-		(39 "User.1" user)
+		(39 "User.1" user "F.Stiffener_PI_0.2mm")
 		(41 "User.2" user)
 		(43 "User.3" user)
 		(45 "User.4" user)
@@ -38,13 +38,13 @@
 		(allow_soldermask_bridges_in_footprints no)
 		(tenting front back)
 		(pcbplotparams
-			(layerselection 0x00000000_00000000_55555555_5755f5ff)
+			(layerselection 0x00000000_00000000_555555d5_575df5ff)
 			(plot_on_all_layers_selection 0x00000000_00000000_00000000_00000000)
 			(disableapertmacros no)
-			(usegerberextensions no)
+			(usegerberextensions yes)
 			(usegerberattributes yes)
 			(usegerberadvancedattributes yes)
-			(creategerberjobfile yes)
+			(creategerberjobfile no)
 			(dashed_line_dash_ratio 12.000000)
 			(dashed_line_gap_ratio 3.000000)
 			(svgprecision 4)
@@ -74,7 +74,7 @@
 			(mirror no)
 			(drillshape 0)
 			(scaleselection 1)
-			(outputdirectory "Gerbers/")
+			(outputdirectory "Gerbers_Stiffener/")
 		)
 	)
 	(net 0 "")
@@ -923,14 +923,26 @@
 			(justify left bottom)
 		)
 	)
+	(gr_text "Stiffener TOP"
+		(at 158.1 77.7 0)
+		(layer "Cmts.User")
+		(uuid "cee6737b-06f3-4001-9f25-aeb16dc5e7cd")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify left bottom)
+		)
+	)
 	(dimension
 		(type orthogonal)
 		(layer "Cmts.User")
-		(uuid "fa94677a-8aa3-42ee-803a-8b765516f399")
+		(uuid "9535112f-0f5a-4440-adde-e41e8b3b8a6e")
 		(pts
-			(xy 160 75.5921) (xy 162 130.5921)
+			(xy 148.2 75.3) (xy 148.2 78.8)
 		)
-		(height 9)
+		(height 8.7)
 		(orientation 1)
 		(format
 			(prefix "")
@@ -941,7 +953,7 @@
 			(suppress_zeroes yes)
 		)
 		(style
-			(thickness 0.2)
+			(thickness 0.1)
 			(arrow_length 1.27)
 			(text_position_mode 0)
 			(arrow_direction outward)
@@ -949,14 +961,14 @@
 			(extension_offset 0.5)
 			(keep_text_aligned yes)
 		)
-		(gr_text "55"
-			(at 167.2 103.0921 90)
+		(gr_text "3.5"
+			(at 155.75 77.05 90)
 			(layer "Cmts.User")
-			(uuid "fa94677a-8aa3-42ee-803a-8b765516f399")
+			(uuid "9535112f-0f5a-4440-adde-e41e8b3b8a6e")
 			(effects
 				(font
-					(size 1.5 1.5)
-					(thickness 0.3)
+					(size 1 1)
+					(thickness 0.15)
 				)
 			)
 		)
