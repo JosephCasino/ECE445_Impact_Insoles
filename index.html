@@ -4,462 +4,1062 @@
   <link rel="manifest" href="manifest.json" />
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ImpactInsoles • Sensor Monitor</title>
+  <title>ImpactInsoles • Pressure Monitor</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Exo+2:wght@300;600;900&display=swap');
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 
+  <style>
     :root {
-      --orange:     #FF6B35;
-      --blue:       #0066CC;
-      --blue-light: #338FDB;
-      --bg-dark:    #0A0E1A;
-      --bg-card:    #141824;
-      --text-white: #FFFFFF;
-      --text-gray:  #8A8FA8;
-      --green:      #00E5A0;
-      --red:        #FF3B30;
-      --s0: #338FDB;
-      --s1: #FF6B35;
-      --s2: #00E5A0;
-      --s3: #C97BFF;
+      --orange:      #E84A00;
+      --orange-dim:  rgba(232,74,0,0.18);
+      --orange-glow: rgba(232,74,0,0.35);
+      --blue:        #1C6EBF;
+      --blue-dim:    rgba(28,110,191,0.18);
+      --blue-glow:   rgba(28,110,191,0.35);
+      --bg:          #080a0f;
+      --bg-card:     #0e1118;
+      --bg-panel:    #121620;
+      --border:      rgba(255,255,255,0.07);
+      --border-lit:  rgba(255,255,255,0.13);
+      --text:        #e8ecf4;
+      --muted:       #5a6278;
+      --dim:         #3a3f52;
     }
 
-    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
     body {
-      font-family:'Exo 2', -apple-system, sans-serif;
-      background:var(--bg-dark); color:var(--text-white);
-      min-height:100vh; overflow-x:hidden;
+      font-family: 'Barlow Condensed', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
     }
 
+    /* ─── Ambient background ─── */
     body::before {
-      content:''; position:fixed; top:-50%; left:-50%; width:200%; height:200%;
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
       background:
-        radial-gradient(circle at 20% 50%, rgba(255,107,53,0.12) 0%, transparent 50%),
-        radial-gradient(circle at 80% 50%, rgba(0,102,204,0.12) 0%, transparent 50%);
-      animation:rotate 30s linear infinite; pointer-events:none;
+        radial-gradient(ellipse 60% 40% at 15% 20%, rgba(28,110,191,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 35% at 85% 75%, rgba(232,74,0,0.07) 0%, transparent 70%);
     }
 
-    @keyframes rotate   { from{transform:rotate(0deg)}   to{transform:rotate(360deg)} }
-    @keyframes slideDown{ from{opacity:0;transform:translateY(-30px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes fadeInUp { from{opacity:0;transform:translateY(30px)}  to{opacity:1;transform:translateY(0)} }
-    @keyframes pulse    { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.2)} }
-    @keyframes blink    { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    /* ─── Layout ─── */
+    .app { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; padding: 20px 16px 60px; }
 
-    .container { max-width:620px; margin:0 auto; padding:24px; position:relative; z-index:1; }
-
-    .header { text-align:center; margin-bottom:28px; animation:slideDown 0.8s cubic-bezier(0.16,1,0.3,1); }
+    /* ─── Header ─── */
+    .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .brand-block {}
     .brand {
-      font-size:38px; font-weight:900; letter-spacing:5px;
-      background:linear-gradient(135deg, var(--orange) 0%, var(--blue) 100%);
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-      margin-bottom:6px;
+      font-size: 34px; font-weight: 900; letter-spacing: 3px; line-height: 1;
+      color: var(--text);
     }
-    .tagline { font-size:10px; color:var(--text-gray); letter-spacing:4px; text-transform:uppercase; font-weight:300; }
+    .brand span.o { color: var(--orange); }
+    .brand span.b { color: var(--blue); }
+    .tagline { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 3px; margin-top: 5px; }
 
-    .status-badge {
-      display:inline-flex; align-items:center; gap:10px;
-      background:var(--bg-card); border:2px solid transparent;
-      border-radius:24px; padding:10px 20px; margin:16px 0; transition:all 0.3s ease;
+    .status-pill {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-panel); border: 1px solid var(--border);
+      border-radius: 20px; padding: 8px 14px;
+      font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted);
+      transition: all 0.4s ease;
     }
-    .status-badge.connected { border-color:var(--blue); box-shadow:0 0 20px rgba(0,102,204,0.3); }
-    .status-dot { width:10px; height:10px; border-radius:50%; background:var(--text-gray); transition:all 0.3s ease; }
-    .status-dot.connected { background:var(--blue); box-shadow:0 0 12px var(--blue); animation:pulse 2s ease-in-out infinite; }
-    .status-text { font-size:13px; font-weight:600; letter-spacing:1px; }
+    .status-pill.connected { border-color: var(--blue); color: var(--text); box-shadow: 0 0 18px var(--blue-glow); }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--dim);
+      transition: all 0.4s ease;
+    }
+    .dot.on { background: var(--blue); box-shadow: 0 0 10px var(--blue); animation: pulse-dot 2.2s ease-in-out infinite; }
+    .dot.rec { background: var(--orange); box-shadow: 0 0 10px var(--orange); animation: blink-dot 1s ease-in-out infinite; }
+    @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
+    @keyframes blink-dot { 0%,100%{opacity:1} 50%{opacity:.25} }
 
+    /* ─── Connect Button ─── */
     .connect-btn {
-      width:100%; padding:18px;
-      background:linear-gradient(135deg, var(--orange) 0%, #E85A2A 100%);
-      border:none; border-radius:14px; color:white;
-      font-size:15px; font-weight:900; letter-spacing:3px;
-      cursor:pointer; transition:all 0.3s ease;
-      box-shadow:0 6px 24px rgba(255,107,53,0.4);
-      font-family:'Exo 2',sans-serif; text-transform:uppercase;
+      width: 100%; padding: 15px 20px;
+      background: transparent;
+      border: 2px solid var(--orange);
+      border-radius: 8px;
+      color: var(--orange);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
+      cursor: pointer; transition: all 0.25s ease;
+      margin-bottom: 24px;
     }
-    .connect-btn:hover { transform:translateY(-3px); box-shadow:0 10px 30px rgba(255,107,53,0.5); }
-    .connect-btn:disabled { background:var(--bg-card); color:var(--text-gray); cursor:not-allowed; box-shadow:none; }
+    .connect-btn:hover:not(:disabled) { background: var(--orange); color: #fff; box-shadow: 0 4px 24px var(--orange-glow); }
+    .connect-btn.is-connected { border-color: var(--muted); color: var(--muted); }
+    .connect-btn.is-connected:hover { background: #1e0000; border-color: #ff4444; color: #ff4444; }
+    .connect-btn:disabled { opacity: .35; cursor: not-allowed; }
 
-    .sensors-section {
-      opacity:0; transform:scale(0.95);
-      transition:all 0.5s cubic-bezier(0.16,1,0.3,1); margin:28px 0;
+    /* ─── Main Grid ─── */
+    .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    @media(max-width: 520px) { .main-grid { grid-template-columns: 1fr; } }
+
+    /* ─── Foot Heatmap Panel ─── */
+    .heatmap-panel {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px; display: flex; flex-direction: column;
+      align-items: center;
+      opacity: 0; transform: translateY(16px); transition: all 0.5s cubic-bezier(.16,1,.3,1);
     }
-    .sensors-section.visible { opacity:1; transform:scale(1); }
-    .sensors-label { font-size:10px; color:var(--text-gray); letter-spacing:3px; text-transform:uppercase; font-weight:600; margin-bottom:14px; text-align:center; }
-    .sensor-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .heatmap-panel.visible { opacity: 1; transform: translateY(0); }
+    .panel-label { font-size: 10px; font-weight: 700; letter-spacing: 3px; color: var(--muted); margin-bottom: 14px; text-transform: uppercase; align-self: flex-start; }
 
-    .sensor-card {
-      background:var(--bg-card); border-radius:18px; padding:18px 16px;
-      border:2px solid transparent; position:relative; overflow:hidden;
-      transition:border-color 0.3s ease, box-shadow 0.3s ease;
+    .foot-svg-wrap { position: relative; width: 140px; }
+    .foot-svg-wrap svg { width: 100%; height: auto; display: block; }
+
+    /* Sensor circles on the SVG foot */
+    .sensor-spot {
+      transition: opacity 0.1s ease;
+      cursor: default;
     }
-    .sensor-card.s0 { border-color:rgba(51,143,219,0.4); }
-    .sensor-card.s1 { border-color:rgba(255,107,53,0.4); }
-    .sensor-card.s2 { border-color:rgba(0,229,160,0.4); }
-    .sensor-card.s3 { border-color:rgba(201,123,255,0.4); }
+    .sensor-spot circle { transition: r 0.1s ease; }
 
-    .sensor-card::before {
-      content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:18px 18px 0 0;
+    /* Heatmap Legend */
+    .heatmap-legend {
+      margin-top: 14px; width: 100%;
+      display: flex; align-items: center; gap: 6px;
     }
-    .sensor-card.s0::before { background:var(--s0); }
-    .sensor-card.s1::before { background:var(--s1); }
-    .sensor-card.s2::before { background:var(--s2); }
-    .sensor-card.s3::before { background:var(--s3); }
-
-    .sensor-name { font-size:9px; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:10px; }
-    .sensor-card.s0 .sensor-name { color:var(--s0); }
-    .sensor-card.s1 .sensor-name { color:var(--s1); }
-    .sensor-card.s2 .sensor-name { color:var(--s2); }
-    .sensor-card.s3 .sensor-name { color:var(--s3); }
-
-    .sensor-value {
-      font-size:44px; font-weight:900; font-family:'Roboto Mono',monospace;
-      line-height:1; transition:transform 0.15s ease;
+    .legend-bar {
+      flex: 1; height: 6px; border-radius: 3px;
+      background: linear-gradient(to right, #1c3a7a, #0a6eb4, #00b4d8, #84e296, #f4c430, #e84a00, #7f0000);
     }
-    .sensor-value.updating { transform:scale(1.06); }
-    .sensor-card.s0 .sensor-value { color:var(--s0); }
-    .sensor-card.s1 .sensor-value { color:var(--s1); }
-    .sensor-card.s2 .sensor-value { color:var(--s2); }
-    .sensor-card.s3 .sensor-value { color:var(--s3); }
+    .legend-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); }
 
-    .sensor-bar-track { height:5px; background:rgba(255,255,255,0.07); border-radius:3px; margin-top:12px; overflow:hidden; }
-    .sensor-bar-fill  { height:100%; width:0%; border-radius:3px; transition:width 0.12s ease; }
-    .sensor-card.s0 .sensor-bar-fill { background:var(--s0); }
-    .sensor-card.s1 .sensor-bar-fill { background:var(--s1); }
-    .sensor-card.s2 .sensor-bar-fill { background:var(--s2); }
-    .sensor-card.s3 .sensor-bar-fill { background:var(--s3); }
-
-    .sensor-range { font-size:9px; color:var(--text-gray); font-family:'Roboto Mono',monospace; margin-top:6px; }
-
-    .recording-controls {
-      display:grid; grid-template-columns:1fr 1fr; gap:14px;
-      margin:20px 0; opacity:0; transform:translateY(20px); transition:all 0.5s ease;
+    /* ─── Debug Panel ─── */
+    .debug-panel {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px;
+      opacity: 0; transform: translateY(16px); transition: all 0.5s cubic-bezier(.16,1,.3,1) 0.08s;
     }
-    .recording-controls.visible { opacity:1; transform:translateY(0); }
+    .debug-panel.visible { opacity: 1; transform: translateY(0); }
 
-    .record-btn {
-      padding:16px; border:none; border-radius:12px;
-      font-size:13px; font-weight:800; letter-spacing:2px;
-      cursor:pointer; transition:all 0.3s ease;
-      font-family:'Exo 2',sans-serif; text-transform:uppercase;
+    .sensor-table { width: 100%; border-collapse: collapse; }
+    .sensor-table th {
+      font-size: 9px; letter-spacing: 2px; color: var(--muted); font-weight: 700;
+      text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--border);
     }
-    .start-btn { background:linear-gradient(135deg,var(--blue) 0%,#004C99 100%); color:white; box-shadow:0 4px 16px rgba(0,102,204,0.3); }
-    .start-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,102,204,0.4); }
-    .start-btn.recording { background:var(--bg-card); color:var(--text-gray); cursor:default; }
-    .stop-btn { background:var(--bg-card); border:2px solid var(--orange); color:var(--orange); }
-    .stop-btn:hover:not(:disabled) { background:var(--orange); color:white; }
-    .stop-btn:disabled { opacity:0.3; cursor:not-allowed; }
+    .sensor-table td {
+      font-family: 'DM Mono', monospace; font-size: 12px;
+      padding: 5px 6px; border-bottom: 1px solid rgba(255,255,255,.04);
+      transition: background 0.15s;
+    }
+    .sensor-table tr:last-child td { border-bottom: none; }
+    .sensor-table td.region-col { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+    .sensor-table td.val-col { color: var(--text); font-weight: 500; }
+    .sensor-table td.bar-col { width: 60px; }
+    .mini-bar-track { height: 4px; background: rgba(255,255,255,.06); border-radius: 2px; overflow: hidden; }
+    .mini-bar-fill { height: 100%; width: 0; border-radius: 2px; transition: width 0.1s ease; background: var(--blue); }
+    .sensor-table tr.active-row td { background: rgba(232,74,0,.06); }
 
-    .recording-indicator {
-      display:none; align-items:center; justify-content:center; gap:10px;
-      padding:12px 20px; background:rgba(255,107,53,0.12);
-      border:2px solid var(--orange); border-radius:12px; margin:14px 0;
+    /* ─── Recording Controls ─── */
+    .recording-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;
+      opacity: 0; transform: translateY(12px); transition: all .45s ease .1s;
     }
-    .recording-indicator.active { display:flex; }
-    .rec-dot  { width:12px; height:12px; border-radius:50%; background:var(--orange); animation:blink 1s ease-in-out infinite; }
-    .rec-text { font-size:11px; font-weight:700; color:var(--orange); letter-spacing:2px; }
-    .rec-time { font-family:'Roboto Mono',monospace; font-size:13px; color:var(--orange); font-weight:700; }
+    .recording-row.visible { opacity: 1; transform: translateY(0); }
 
-    .graph-container {
-      background:var(--bg-card); border:2px solid var(--blue);
-      border-radius:20px; padding:22px; margin:22px 0; display:none;
+    .rec-btn {
+      padding: 14px; border-radius: 8px; border: none;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+      cursor: pointer; transition: all .25s ease;
     }
-    .graph-container.visible { display:block; animation:fadeInUp 0.6s ease; }
-    .graph-title { font-size:13px; font-weight:900; color:var(--text-white); letter-spacing:3px; margin-bottom:18px; text-align:center; }
-    canvas { max-width:100%; }
+    .start-btn { background: var(--blue); color: #fff; box-shadow: 0 4px 20px var(--blue-dim); }
+    .start-btn:hover:not(:disabled):not(.is-active) { background: #2481d6; box-shadow: 0 6px 24px var(--blue-glow); }
+    .start-btn.is-active { background: var(--bg-panel); color: var(--muted); cursor: default; border: 1px solid var(--border); }
+    .stop-btn { background: transparent; border: 2px solid var(--muted); color: var(--muted); }
+    .stop-btn:hover:not(:disabled) { border-color: var(--orange); color: var(--orange); background: var(--orange-dim); }
+    .stop-btn:disabled { opacity: .3; cursor: not-allowed; }
 
-    .session-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:16px; }
-    .session-stat-card {
-      background:rgba(0,102,204,0.1); border:1px solid var(--blue);
-      border-radius:10px; padding:10px; text-align:center;
+    /* Recording indicator */
+    .rec-indicator {
+      display: none; align-items: center; gap: 10px;
+      padding: 10px 16px; border: 1px solid var(--orange);
+      background: var(--orange-dim); border-radius: 8px; margin-bottom: 16px;
     }
-    .session-stat-label { font-size:8px; color:var(--text-gray); letter-spacing:2px; margin-bottom:4px; text-transform:uppercase; }
-    .session-stat-value { font-size:16px; font-weight:900; color:var(--blue-light); font-family:'Roboto Mono',monospace; }
+    .rec-indicator.active { display: flex; }
+    .rec-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--orange); }
+    .rec-timer { font-family: 'DM Mono', monospace; font-size: 15px; color: var(--orange); margin-left: auto; }
 
-    .packet-loss-mini {
-      background:var(--bg-card); border:1px solid var(--text-gray);
-      border-radius:12px; padding:12px 16px; margin:20px 0;
-      opacity:0; transition:all 0.5s ease;
-      display:flex; justify-content:space-between; align-items:center;
+    /* Packet loss bar */
+    .packet-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px; margin-bottom: 20px;
+      opacity: 0; transition: opacity .45s ease .15s;
     }
-    .packet-loss-mini.visible  { opacity:1; }
-    .packet-loss-mini.good     { border-color:var(--green); }
-    .packet-loss-mini.warning  { border-color:var(--orange); }
-    .packet-loss-mini.bad      { border-color:var(--red); }
-    .loss-mini-label { font-size:10px; color:var(--text-gray); letter-spacing:2px; font-weight:600; }
-    .loss-mini-value { font-size:18px; font-weight:900; font-family:'Roboto Mono',monospace; }
-    .loss-mini-value.good    { color:var(--green); }
-    .loss-mini-value.warning { color:var(--orange); }
-    .loss-mini-value.bad     { color:var(--red); }
-    .loss-mini-stats { display:flex; gap:14px; font-size:11px; color:var(--text-gray); font-family:'Roboto Mono',monospace; }
+    .packet-row.visible { opacity: 1; }
+    .pkt-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--muted); }
+    .pkt-val { font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; }
+    .pkt-val.good { color: #00d98b; }
+    .pkt-val.warn { color: var(--orange); }
+    .pkt-val.bad  { color: #ff3838; }
+    .pkt-stats { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+
+    /* ─── Session Results ─── */
+    .session-section {
+      background: var(--bg-card); border: 1px solid var(--blue);
+      border-radius: 12px; padding: 20px; margin-bottom: 20px;
+      display: none;
+    }
+    .session-section.visible { display: block; animation: slide-up .5s cubic-bezier(.16,1,.3,1); }
+    @keyframes slide-up { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+    .session-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
+      padding-bottom: 14px; border-bottom: 1px solid var(--border);
+    }
+    .session-title { font-size: 16px; font-weight: 700; letter-spacing: 2px; color: var(--text); }
+    .session-date { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-left: auto; }
+
+    .session-stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px; }
+    .stat-card {
+      background: var(--bg-panel); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 8px; text-align: center;
+    }
+    .stat-card-label { font-size: 8px; letter-spacing: 2px; color: var(--muted); margin-bottom: 5px; }
+    .stat-card-val { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--blue); }
+
+    .session-heatmap-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; align-items: start;
+    }
+    .session-heatmap-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; }
+    .session-foot-wrap { display: flex; justify-content: center; }
+    .session-foot-wrap svg { width: 120px; height: auto; }
+
+    /* Pressure zone bars for session */
+    .zone-bars { display: flex; flex-direction: column; gap: 8px; }
+    .zone-bar-item { display: flex; flex-direction: column; gap: 3px; }
+    .zone-bar-item .zone-name { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--muted); display: flex; justify-content: space-between; }
+    .zone-bar-track { height: 6px; background: rgba(255,255,255,.06); border-radius: 3px; overflow: hidden; }
+    .zone-bar-fill-orange { height: 100%; border-radius: 3px; background: var(--orange); transition: width 1s cubic-bezier(.16,1,.3,1); }
+    .zone-bar-fill-blue { height: 100%; border-radius: 3px; background: var(--blue); transition: width 1s cubic-bezier(.16,1,.3,1); }
+    .zone-bar-fill-green { height: 100%; border-radius: 3px; background: #00d98b; transition: width 1s cubic-bezier(.16,1,.3,1); }
+
+    .chart-wrap { border-radius: 8px; overflow: hidden; background: var(--bg-panel); padding: 14px; }
+    .chart-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--muted); margin-bottom: 12px; }
+
+    /* ─── Footer ─── */
+    .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); }
+    .footer-text { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--dim); letter-spacing: 2px; }
+
   </style>
 </head>
 <body>
-<div class="container">
 
+<div class="app">
+
+  <!-- Header -->
   <div class="header">
-    <div class="brand">IMPACT INSOLES</div>
-    <div class="tagline">4-Sensor Monitor</div>
-  </div>
-
-  <center>
-    <div class="status-badge" id="statusBadge">
-      <div class="status-dot" id="statusDot"></div>
-      <span class="status-text" id="statusText">Not Connected</span>
+    <div class="brand-block">
+      <div class="brand">IMPACT<span class="o"> IN</span><span class="b">SOLES</span></div>
+      <div class="tagline">ECE445 · GROUP 68 · 12-SENSOR FSR MONITOR</div>
     </div>
-  </center>
-
-  <button class="connect-btn" id="connectBtn" onclick="toggleConnection()">🔵 Scan & Connect</button>
-
-  <div class="sensors-section" id="sensorsSection">
-    <div class="sensors-label">Live Sensor Values</div>
-    <div class="sensor-grid">
-      <div class="sensor-card s0">
-        <div class="sensor-name">POT 0 · ADC0</div>
-        <div class="sensor-value" id="val0">0</div>
-        <div class="sensor-bar-track"><div class="sensor-bar-fill" id="bar0"></div></div>
-        <div class="sensor-range">0 – 4095 (12-bit)</div>
-      </div>
-      <div class="sensor-card s1">
-        <div class="sensor-name">POT 1 · ADC3</div>
-        <div class="sensor-value" id="val1">0</div>
-        <div class="sensor-bar-track"><div class="sensor-bar-fill" id="bar1"></div></div>
-        <div class="sensor-range">0 – 4095 (12-bit)</div>
-      </div>
-      <div class="sensor-card s2">
-        <div class="sensor-name">POT 2 · ADC6</div>
-        <div class="sensor-value" id="val2">0</div>
-        <div class="sensor-bar-track"><div class="sensor-bar-fill" id="bar2"></div></div>
-        <div class="sensor-range">0 – 4095 (12-bit)</div>
-      </div>
-      <div class="sensor-card s3">
-        <div class="sensor-name">POT 3 · ADC7</div>
-        <div class="sensor-value" id="val3">0</div>
-        <div class="sensor-bar-track"><div class="sensor-bar-fill" id="bar3"></div></div>
-        <div class="sensor-range">0 – 4095 (12-bit)</div>
-      </div>
+    <div class="status-pill" id="statusPill">
+      <div class="dot" id="statusDot"></div>
+      <span id="statusText">OFFLINE</span>
     </div>
   </div>
 
-  <div class="recording-controls" id="recordingControls">
-    <button class="record-btn start-btn" id="startBtn" onclick="startRecording()">▶ Start Session</button>
-    <button class="record-btn stop-btn"  id="stopBtn"  onclick="stopRecording()" disabled>⏹ Stop Session</button>
-  </div>
+  <!-- Connect -->
+  <button class="connect-btn" id="connectBtn" onclick="toggleConnection()">
+    ⬡ Scan &amp; Connect via Bluetooth
+  </button>
 
-  <div class="recording-indicator" id="recordingIndicator">
-    <div class="rec-dot"></div>
-    <span class="rec-text">RECORDING</span>
-    <span class="rec-time" id="recTime">00:00</span>
-  </div>
+  <!-- Main sensor panels -->
+  <div class="main-grid">
 
-  <div class="graph-container" id="graphContainer">
-    <div class="graph-title">SESSION GRAPH</div>
-    <canvas id="sessionChart"></canvas>
-    <div class="session-stats">
-      <div class="session-stat-card">
-        <div class="session-stat-label">Duration</div>
-        <div class="session-stat-value" id="statDuration">0s</div>
+    <!-- Heatmap -->
+    <div class="heatmap-panel" id="heatmapPanel">
+      <div class="panel-label">Live Pressure Map</div>
+
+      <div class="foot-svg-wrap">
+        <!--
+          12 FSR sensors layout (viewed from BELOW / sole):
+          Forefoot row:    S0 S1 S2 S3  (4 sensors across toes)
+          Upper-mid row:   S4 S5         (2 sensors, arch area)
+          Lower-mid row:   S6 S7         (2 sensors, mid-arch)
+          Heel row:        S8 S9 S10 S11 (4 sensors across heel)
+        -->
+        <svg id="footSvg" viewBox="0 0 100 260" xmlns="http://www.w3.org/2000/svg">
+          <!-- Foot outline path (right foot, top view) -->
+          <defs>
+            <radialGradient id="spotGrad0" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#1c3a7a" stop-opacity="0.9"/>
+              <stop offset="100%" stop-color="#1c3a7a" stop-opacity="0.1"/>
+            </radialGradient>
+          </defs>
+
+          <!-- Foot silhouette -->
+          <path d="
+            M 50 12
+            C 60 12, 72 16, 78 24
+            C 84 32, 84 44, 80 55
+            C 76 64, 68 68, 66 76
+            C 64 84, 66 92, 66 100
+            C 66 112, 64 124, 62 136
+            C 60 148, 58 158, 56 170
+            C 54 182, 52 192, 50 204
+            C 48 216, 46 226, 44 234
+            C 42 242, 40 248, 38 250
+            C 34 254, 28 252, 26 246
+            C 24 240, 26 230, 28 220
+            C 30 210, 34 200, 36 190
+            C 38 180, 38 170, 38 160
+            C 38 148, 36 136, 34 124
+            C 32 112, 30 100, 30 88
+            C 30 76, 32 66, 30 56
+            C 28 46, 22 38, 22 28
+            C 22 18, 32 10, 50 12
+            Z
+          " fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+
+          <!-- Toe bumps (subtle) -->
+          <ellipse cx="50" cy="13" rx="8" ry="5" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
+
+          <!-- FOREFOOT sensors: S0 S1 S2 S3 -->
+          <g class="sensor-spot" id="spot0">
+            <circle cx="36" cy="38" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+            <circle cx="36" cy="38" r="5" fill="#1c3a7a" opacity="0.7"/>
+          </g>
+          <g class="sensor-spot" id="spot1">
+            <circle cx="46" cy="33" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+            <circle cx="46" cy="33" r="5" fill="#1c3a7a" opacity="0.7"/>
+          </g>
+          <g class="sensor-spot" id="spot2">
+            <circle cx="56" cy="33" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+            <circle cx="56" cy="33" r="5" fill="#1c3a7a" opacity="0.7"/>
+          </g>
+          <g class="sensor-spot" id="spot3">
+            <circle cx="66" cy="38" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+            <circle cx="66" cy="38" r="5" fill="#1c3a7a" opacity="0.7"/>
+          </g>
+
+          <!-- UPPER-MID sensors: S4 S5 -->
+          <g class="sensor-spot" id="spot4">
+            <circle cx="40" cy="75" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+            <circle cx="40" cy="75" r="5" fill="#1c3a7a" opacity="0.7"/>
+          </g>
+          <g class="sensor-spot" id="spot5">
+            <circle cx="60" cy="75" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+            <circle cx="60" cy="75" r="5" fill="#1c3a7a" opacity="0.7"/>
+          </g>
+
+          <!-- LOWER-MID sensors: S6 S7 -->
+          <g class="sensor-spot" id="spot6">
+            <circle cx="38" cy="115" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+            <circle cx="38" cy="115" r="5" fill="#1c3a7a" opacity="0.7"/>
+          </g>
+          <g class="sensor-spot" id="spot7">
+            <circle cx="58" cy="115" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+            <circle cx="58" cy="115" r="5" fill="#1c3a7a" opacity="0.7"/>
+          </g>
+
+          <!-- HEEL sensors: S8 S9 S10 S11 -->
+          <g class="sensor-spot" id="spot8">
+            <circle cx="34" cy="165" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+            <circle cx="34" cy="165" r="5" fill="#1c3a7a" opacity="0.7"/>
+          </g>
+          <g class="sensor-spot" id="spot9">
+            <circle cx="44" cy="175" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+            <circle cx="44" cy="175" r="5" fill="#1c3a7a" opacity="0.7"/>
+          </g>
+          <g class="sensor-spot" id="spot10">
+            <circle cx="54" cy="175" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+            <circle cx="54" cy="175" r="5" fill="#1c3a7a" opacity="0.7"/>
+          </g>
+          <g class="sensor-spot" id="spot11">
+            <circle cx="64" cy="165" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+            <circle cx="64" cy="165" r="5" fill="#1c3a7a" opacity="0.7"/>
+          </g>
+
+          <!-- Region labels -->
+          <text x="50" y="22" text-anchor="middle" font-size="5" fill="rgba(255,255,255,0.2)" font-family="monospace" letter-spacing="1">FORE</text>
+          <text x="50" y="62" text-anchor="middle" font-size="5" fill="rgba(255,255,255,0.2)" font-family="monospace" letter-spacing="1">U·MID</text>
+          <text x="50" y="102" text-anchor="middle" font-size="5" fill="rgba(255,255,255,0.2)" font-family="monospace" letter-spacing="1">L·MID</text>
+          <text x="50" y="148" text-anchor="middle" font-size="5" fill="rgba(255,255,255,0.2)" font-family="monospace" letter-spacing="1">HEEL</text>
+        </svg>
       </div>
-      <div class="session-stat-card">
-        <div class="session-stat-label">Avg POT0</div>
-        <div class="session-stat-value" id="statAvg0">0</div>
-      </div>
-      <div class="session-stat-card">
-        <div class="session-stat-label">Avg POT1</div>
-        <div class="session-stat-value" id="statAvg1">0</div>
-      </div>
-      <div class="session-stat-card">
-        <div class="session-stat-label">Avg POT2</div>
-        <div class="session-stat-value" id="statAvg2">0</div>
+
+      <div class="heatmap-legend">
+        <span class="legend-label">0</span>
+        <div class="legend-bar"></div>
+        <span class="legend-label">MAX</span>
       </div>
     </div>
+
+    <!-- Debug / Raw Values -->
+    <div class="debug-panel" id="debugPanel">
+      <div class="panel-label">Raw Sensor Values</div>
+
+      <table class="sensor-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>ZONE</th>
+            <th>VAL</th>
+            <th>LEVEL</th>
+          </tr>
+        </thead>
+        <tbody id="sensorTableBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+
+  </div><!-- /main-grid -->
+
+  <!-- Recording controls -->
+  <div class="recording-row" id="recordingRow">
+    <button class="rec-btn start-btn" id="startBtn" onclick="startRecording()">▶ Start Session</button>
+    <button class="rec-btn stop-btn" id="stopBtn" onclick="stopRecording()" disabled>⏹ End Session</button>
   </div>
 
-  <div class="packet-loss-mini" id="packetLossMini">
+  <!-- Recording indicator -->
+  <div class="rec-indicator" id="recIndicator">
+    <div class="dot rec"></div>
+    <span class="rec-label">RECORDING</span>
+    <span class="rec-timer" id="recTimer">00:00</span>
+  </div>
+
+  <!-- Packet loss -->
+  <div class="packet-row" id="packetRow">
     <div>
-      <div class="loss-mini-label">PACKET LOSS</div>
-      <div class="loss-mini-value" id="lossPercent">0.00%</div>
+      <div class="pkt-label">PACKET LOSS</div>
+      <div class="pkt-val good" id="pktLoss">0.00%</div>
     </div>
-    <div class="loss-mini-stats">
-      <span>RX: <strong id="packetsReceived">0</strong></span>
-      <span>Lost: <strong id="packetsLost">0</strong></span>
+    <div class="pkt-stats">
+      RX: <span id="pktRx">0</span> &nbsp; LOST: <span id="pktLost">0</span>
     </div>
   </div>
 
-</div>
+  <!-- Session results -->
+  <div class="session-section" id="sessionSection">
+
+    <div class="session-header">
+      <div class="session-title">SESSION RESULTS</div>
+      <div class="session-date" id="sessionDate">—</div>
+    </div>
+
+    <div class="session-stat-grid">
+      <div class="stat-card">
+        <div class="stat-card-label">DURATION</div>
+        <div class="stat-card-val" id="sessDuration">0s</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">SAMPLES</div>
+        <div class="stat-card-val" id="sessSamples">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">PEAK PSI</div>
+        <div class="stat-card-val" id="sessPeak">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">AVG LOAD</div>
+        <div class="stat-card-val" id="sessAvg">0</div>
+      </div>
+    </div>
+
+    <!-- Session heatmap + zone breakdown -->
+    <div class="session-heatmap-row">
+      <div>
+        <div class="session-heatmap-label">AVG PRESSURE MAP</div>
+        <div class="session-foot-wrap">
+          <svg id="sessFootSvg" viewBox="0 0 100 260" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 50 12 C 60 12, 72 16, 78 24 C 84 32, 84 44, 80 55 C 76 64, 68 68, 66 76 C 64 84, 66 92, 66 100 C 66 112, 64 124, 62 136 C 60 148, 58 158, 56 170 C 54 182, 52 192, 50 204 C 48 216, 46 226, 44 234 C 42 242, 40 248, 38 250 C 34 254, 28 252, 26 246 C 24 240, 26 230, 28 220 C 30 210, 34 200, 36 190 C 38 180, 38 170, 38 160 C 38 148, 36 136, 34 124 C 32 112, 30 100, 30 88 C 30 76, 32 66, 30 56 C 28 46, 22 38, 22 28 C 22 18, 32 10, 50 12 Z"
+              fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+            <ellipse cx="50" cy="13" rx="8" ry="5" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
+            <!-- 12 session sensor spots filled by JS -->
+            <g id="sessSpots"></g>
+          </svg>
+        </div>
+      </div>
+
+      <div>
+        <div class="session-heatmap-label">ZONE BREAKDOWN</div>
+        <div class="zone-bars">
+          <div class="zone-bar-item">
+            <div class="zone-name"><span>FOREFOOT</span><span id="zoneForePct">0%</span></div>
+            <div class="zone-bar-track"><div class="zone-bar-fill-orange" id="zoneForeFill" style="width:0%"></div></div>
+          </div>
+          <div class="zone-bar-item">
+            <div class="zone-name"><span>MID-FOOT</span><span id="zoneMidPct">0%</span></div>
+            <div class="zone-bar-track"><div class="zone-bar-fill-green" id="zoneMidFill" style="width:0%"></div></div>
+          </div>
+          <div class="zone-bar-item">
+            <div class="zone-name"><span>HEEL</span><span id="zoneHeelPct">0%</span></div>
+            <div class="zone-bar-track"><div class="zone-bar-fill-blue" id="zoneHeelFill" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Time-series chart -->
+    <div class="chart-wrap">
+      <div class="chart-label">SENSOR VALUES OVER TIME</div>
+      <canvas id="sessionChart" height="180"></canvas>
+    </div>
+
+  </div><!-- /session-section -->
+
+  <div class="footer">
+    <div class="footer-text">ECE445 · GROUP 68 · CASINO · SIVANESAN · WENG &nbsp;·&nbsp; UIUC 2025</div>
+  </div>
+
+</div><!-- /app -->
 
 <script>
-  const SERVICE_UUID        = '12345678-1234-1234-1234-123456789abc';
-  const CHARACTERISTIC_UUID = 'abcd1234-ab12-ab12-ab12-abcdef123456';
-  const SENSOR_COLORS = ['#338FDB', '#FF6B35', '#00E5A0', '#C97BFF'];
-  const SENSOR_NAMES  = ['POT 0', 'POT 1', 'POT 2', 'POT 3'];
+// ═══════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════
+const SERVICE_UUID        = '12345678-1234-1234-1234-123456789abc';
+const CHARACTERISTIC_UUID = 'abcd1234-ab12-ab12-ab12-abcdef123456';
+const NUM_SENSORS = 12;
+const MAX_RAW     = 4095;   // 12-bit ADC
 
-  let bluetoothDevice = null, characteristic = null;
-  let isRecording = false, recordingData = [], recordingStartTime = null;
-  let timerInterval = null, chart = null;
-  let lastPacketID = -1, totalPacketsReceived = 0, totalPacketsLost = 0;
+// Sensor metadata: [id, label, zone, cx, cy in SVG viewBox]
+const SENSORS = [
+  { id: 0,  label: 'S0',  zone: 'Fore',    cx: 36,  cy: 38  },
+  { id: 1,  label: 'S1',  zone: 'Fore',    cx: 46,  cy: 33  },
+  { id: 2,  label: 'S2',  zone: 'Fore',    cx: 56,  cy: 33  },
+  { id: 3,  label: 'S3',  zone: 'Fore',    cx: 66,  cy: 38  },
+  { id: 4,  label: 'S4',  zone: 'U-Mid',   cx: 40,  cy: 75  },
+  { id: 5,  label: 'S5',  zone: 'U-Mid',   cx: 60,  cy: 75  },
+  { id: 6,  label: 'S6',  zone: 'L-Mid',   cx: 38,  cy: 115 },
+  { id: 7,  label: 'S7',  zone: 'L-Mid',   cx: 58,  cy: 115 },
+  { id: 8,  label: 'S8',  zone: 'Heel',    cx: 34,  cy: 165 },
+  { id: 9,  label: 'S9',  zone: 'Heel',    cx: 44,  cy: 175 },
+  { id: 10, label: 'S10', zone: 'Heel',    cx: 54,  cy: 175 },
+  { id: 11, label: 'S11', zone: 'Heel',    cx: 64,  cy: 165 },
+];
 
-  const connectBtn         = document.getElementById('connectBtn');
-  const statusBadge        = document.getElementById('statusBadge');
-  const statusDot          = document.getElementById('statusDot');
-  const statusText         = document.getElementById('statusText');
-  const sensorsSection     = document.getElementById('sensorsSection');
-  const recordingControls  = document.getElementById('recordingControls');
-  const startBtn           = document.getElementById('startBtn');
-  const stopBtn            = document.getElementById('stopBtn');
-  const recordingIndicator = document.getElementById('recordingIndicator');
-  const recTime            = document.getElementById('recTime');
-  const graphContainer     = document.getElementById('graphContainer');
-  const packetLossMini     = document.getElementById('packetLossMini');
-  const lossPercent        = document.getElementById('lossPercent');
-  const packetsReceived    = document.getElementById('packetsReceived');
-  const packetsLost        = document.getElementById('packetsLost');
-  const valEls = [0,1,2,3].map(i => document.getElementById('val' + i));
-  const barEls = [0,1,2,3].map(i => document.getElementById('bar' + i));
+// Zone group indices
+const ZONE_FORE  = [0,1,2,3];
+const ZONE_MID   = [4,5,6,7];
+const ZONE_HEEL  = [8,9,10,11];
 
-  async function toggleConnection() {
-    if (bluetoothDevice && bluetoothDevice.gatt.connected) disconnect();
-    else await connect();
+// Chart colors: 4 groups of 3 sensors
+const CHART_COLORS = [
+  '#E84A00', '#ff8c5a', '#ffc19a',   // forefoot
+  '#1C6EBF', '#5aa3e0',               // upper mid
+  '#00b4d8', '#90e0ef',               // lower mid
+  '#00d98b', '#6affd0', '#b5ffe7',   // heel
+  '#c4a4ff', '#e8d5ff',
+];
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let bleDevice = null, bleChar = null;
+let sensorValues = new Array(NUM_SENSORS).fill(0);
+let isRecording = false;
+let recordingData = [];   // [{t, vals:[12]}]
+let recordingStart = 0;
+let timerHandle = null;
+let chart = null;
+let lastPacketId = -1, rxCount = 0, lostCount = 0;
+
+// ═══════════════════════════════════════════════════════════
+// DOM REFS
+// ═══════════════════════════════════════════════════════════
+const connectBtn    = document.getElementById('connectBtn');
+const statusPill    = document.getElementById('statusPill');
+const statusDot     = document.getElementById('statusDot');
+const statusText    = document.getElementById('statusText');
+const heatmapPanel  = document.getElementById('heatmapPanel');
+const debugPanel    = document.getElementById('debugPanel');
+const recordingRow  = document.getElementById('recordingRow');
+const packetRow     = document.getElementById('packetRow');
+const startBtn      = document.getElementById('startBtn');
+const stopBtn       = document.getElementById('stopBtn');
+const recIndicator  = document.getElementById('recIndicator');
+const recTimer      = document.getElementById('recTimer');
+const sessionSection= document.getElementById('sessionSection');
+
+// ═══════════════════════════════════════════════════════════
+// BUILD DEBUG TABLE
+// ═══════════════════════════════════════════════════════════
+(function buildTable() {
+  const tbody = document.getElementById('sensorTableBody');
+  SENSORS.forEach(s => {
+    const tr = document.createElement('tr');
+    tr.id = `row${s.id}`;
+    tr.innerHTML = `
+      <td class="region-col" style="font-family:'DM Mono',monospace;font-size:11px;color:#5a6278;">${s.label}</td>
+      <td class="region-col">${s.zone}</td>
+      <td class="val-col" id="dbgVal${s.id}">0</td>
+      <td class="bar-col">
+        <div class="mini-bar-track">
+          <div class="mini-bar-fill" id="dbgBar${s.id}"></div>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+})();
+
+// ═══════════════════════════════════════════════════════════
+// HEATMAP COLOR  (0=cool blue → 0.5=green → 1=hot orange/red)
+// ═══════════════════════════════════════════════════════════
+function heatColor(norm) {
+  // Stops: 0=navy, 0.25=blue, 0.5=cyan/green, 0.75=yellow, 1=orange/red
+  const stops = [
+    [0,    [28,  58, 122]],
+    [0.20, [10, 110, 180]],
+    [0.40, [ 0, 180, 216]],
+    [0.55, [132, 226, 150]],
+    [0.70, [244, 196,  48]],
+    [0.85, [232, 100,  20]],
+    [1.0,  [180,   0,   0]],
+  ];
+  let lo = stops[0], hi = stops[stops.length-1];
+  for (let i=0; i<stops.length-1; i++) {
+    if (norm >= stops[i][0] && norm <= stops[i+1][0]) { lo=stops[i]; hi=stops[i+1]; break; }
   }
+  const t = (norm - lo[0]) / (hi[0] - lo[0] + 0.001);
+  const r = Math.round(lo[1][0] + t*(hi[1][0]-lo[1][0]));
+  const g = Math.round(lo[1][1] + t*(hi[1][1]-lo[1][1]));
+  const b = Math.round(lo[1][2] + t*(hi[1][2]-lo[1][2]));
+  return `rgb(${r},${g},${b})`;
+}
 
-  async function connect() {
-    try {
-      connectBtn.disabled = true;
-      connectBtn.textContent = '🔍 SCANNING...';
-      bluetoothDevice = await navigator.bluetooth.requestDevice({
-        filters: [{ name: 'ImpactInsoles' }],
-        optionalServices: [SERVICE_UUID]
-      });
-      connectBtn.textContent = '🔗 CONNECTING...';
-      const server = await bluetoothDevice.gatt.connect();
-      const service = await server.getPrimaryService(SERVICE_UUID);
-      characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
-      await characteristic.startNotifications();
-      characteristic.addEventListener('characteristicvaluechanged', handleData);
-      statusBadge.classList.add('connected');
-      statusDot.classList.add('connected');
-      statusText.textContent = 'Connected';
-      connectBtn.textContent = '🔴 DISCONNECT';
-      connectBtn.disabled = false;
-      sensorsSection.classList.add('visible');
-      recordingControls.classList.add('visible');
-      packetLossMini.classList.add('visible');
-      lastPacketID = -1; totalPacketsReceived = 0; totalPacketsLost = 0;
-    } catch (error) {
-      alert('Connection failed: ' + error.message);
-      connectBtn.textContent = '🔵 SCAN & CONNECT';
-      connectBtn.disabled = false;
+// ═══════════════════════════════════════════════════════════
+// UPDATE LIVE UI
+// ═══════════════════════════════════════════════════════════
+function updateUI() {
+  const maxVal = Math.max(...sensorValues, 1);
+
+  SENSORS.forEach(s => {
+    const v = sensorValues[s.id];
+    const norm = v / MAX_RAW;
+
+    // Heatmap spot
+    const spot = document.getElementById(`spot${s.id}`);
+    if (spot) {
+      const outer = spot.children[0];
+      const inner = spot.children[1];
+      const col = heatColor(norm);
+      const radius = 5 + norm * 6;   // grows from 5 to 11
+      outer.setAttribute('fill', `rgba(${hexToRgb(col)},0.25)`);
+      outer.setAttribute('stroke', col);
+      inner.setAttribute('fill', col);
+      inner.setAttribute('r', radius.toFixed(1));
+      inner.setAttribute('opacity', (0.5 + norm * 0.5).toFixed(2));
     }
-  }
 
-  function disconnect() {
-    if (bluetoothDevice) {
-      bluetoothDevice.gatt.disconnect();
-      statusBadge.classList.remove('connected');
-      statusDot.classList.remove('connected');
-      statusText.textContent = 'Disconnected';
-      connectBtn.textContent = '🔵 SCAN & CONNECT';
-      sensorsSection.classList.remove('visible');
-      recordingControls.classList.remove('visible');
-      packetLossMini.classList.remove('visible');
-      if (isRecording) stopRecording();
+    // Debug table
+    const valEl = document.getElementById(`dbgVal${s.id}`);
+    const barEl = document.getElementById(`dbgBar${s.id}`);
+    if (valEl) {
+      valEl.textContent = v;
+      // Color the value text with heat color
+      valEl.style.color = v > 100 ? heatColor(norm) : '#5a6278';
     }
-  }
-
-  function handleData(event) {
-    const data = new Uint8Array(event.target.value.buffer);
-    const sensors = [];
-    for (let i = 0; i < 4; i++) sensors[i] = (data[i * 2] << 8) | data[i * 2 + 1];
-    const packetID = (data[16] << 24) | (data[17] << 16) | (data[18] << 8) | data[19];
-
-    for (let i = 0; i < 4; i++) {
-      valEls[i].textContent = sensors[i];
-      valEls[i].classList.add('updating');
-      barEls[i].style.width = ((sensors[i] / 4095) * 100).toFixed(1) + '%';
-      setTimeout(() => valEls[i].classList.remove('updating'), 150);
+    if (barEl) {
+      barEl.style.width = ((v / MAX_RAW) * 100).toFixed(1) + '%';
+      barEl.style.background = heatColor(norm);
     }
 
-    totalPacketsReceived++;
-    if (lastPacketID !== -1) {
-      const expected = lastPacketID + 1;
-      if (packetID !== expected) totalPacketsLost += packetID - expected;
-    }
-    lastPacketID = packetID;
+    // Highlight row if active
+    const row = document.getElementById(`row${s.id}`);
+    if (row) row.classList.toggle('active-row', v > 200);
+  });
+}
 
-    const lossPct = (packetID + 1) > 0 ? (totalPacketsLost / (packetID + 1)) * 100 : 0;
-    packetsReceived.textContent = totalPacketsReceived;
-    packetsLost.textContent     = totalPacketsLost;
-    lossPercent.textContent     = lossPct.toFixed(2) + '%';
-    const cls = lossPct === 0 ? 'good' : lossPct < 5 ? 'warning' : 'bad';
-    packetLossMini.className = `packet-loss-mini visible ${cls}`;
-    lossPercent.className    = `loss-mini-value ${cls}`;
+// Helper: naive color string → rgb components
+function hexToRgb(rgbStr) {
+  const m = rgbStr.match(/\d+/g);
+  return m ? `${m[0]},${m[1]},${m[2]}` : '28,110,191';
+}
 
-    if (isRecording) recordingData.push({ time: (Date.now() - recordingStartTime) / 1000, values: [...sensors] });
+// ═══════════════════════════════════════════════════════════
+// BLE
+// ═══════════════════════════════════════════════════════════
+async function toggleConnection() {
+  if (bleDevice && bleDevice.gatt.connected) {
+    disconnect();
+  } else {
+    await connect();
+  }
+}
+
+async function connect() {
+  try {
+    connectBtn.disabled = true;
+    connectBtn.textContent = '◌ Scanning...';
+
+    bleDevice = await navigator.bluetooth.requestDevice({
+      filters: [{ name: 'ImpactInsoles' }],
+      optionalServices: [SERVICE_UUID]
+    });
+
+    connectBtn.textContent = '↻ Connecting...';
+    const server  = await bleDevice.gatt.connect();
+    const service = await server.getPrimaryService(SERVICE_UUID);
+    bleChar        = await service.getCharacteristic(CHARACTERISTIC_UUID);
+
+    await bleChar.startNotifications();
+    bleChar.addEventListener('characteristicvaluechanged', handleBleData);
+
+    bleDevice.addEventListener('gattserverdisconnected', onDisconnect);
+
+    // Update UI to connected state
+    setConnectedState(true);
+    rxCount = 0; lostCount = 0; lastPacketId = -1;
+
+  } catch(err) {
+    alert('Connection failed: ' + err.message);
+    setConnectedState(false);
+  } finally {
+    connectBtn.disabled = false;
+  }
+}
+
+function disconnect() {
+  if (bleDevice) {
+    bleDevice.gatt.disconnect();
+  }
+}
+
+function onDisconnect() {
+  setConnectedState(false);
+  if (isRecording) stopRecording();
+}
+
+function setConnectedState(connected) {
+  if (connected) {
+    statusPill.classList.add('connected');
+    statusDot.className = 'dot on';
+    statusText.textContent = 'CONNECTED';
+    connectBtn.textContent = '⬡ Disconnect';
+    connectBtn.className = 'connect-btn is-connected';
+    heatmapPanel.classList.add('visible');
+    debugPanel.classList.add('visible');
+    recordingRow.classList.add('visible');
+    packetRow.classList.add('visible');
+  } else {
+    statusPill.classList.remove('connected');
+    statusDot.className = 'dot';
+    statusText.textContent = 'OFFLINE';
+    connectBtn.textContent = '⬡ Scan & Connect via Bluetooth';
+    connectBtn.className = 'connect-btn';
+    heatmapPanel.classList.remove('visible');
+    debugPanel.classList.remove('visible');
+    recordingRow.classList.remove('visible');
+    packetRow.classList.remove('visible');
+  }
+}
+
+// ─── BLE Packet parser ───
+// Packet layout (28 bytes for 12 sensors):
+//   Bytes  0–23: 12 × 2 bytes, big-endian 12-bit sensor values
+//   Bytes 24–27: packet counter uint32 big-endian
+function handleBleData(event) {
+  const data = new Uint8Array(event.target.value.buffer);
+
+  for (let i = 0; i < NUM_SENSORS; i++) {
+    sensorValues[i] = (data[i*2] << 8) | data[i*2 + 1];
   }
 
-  function startRecording() {
-    isRecording = true; recordingData = []; recordingStartTime = Date.now();
-    startBtn.classList.add('recording'); stopBtn.disabled = false;
-    recordingIndicator.classList.add('active'); graphContainer.classList.remove('visible');
-    timerInterval = setInterval(updateTimer, 1000);
+  // Packet counter (bytes 24-27)
+  const pktId = (data[24]<<24)|(data[25]<<16)|(data[26]<<8)|data[27];
+  rxCount++;
+  if (lastPacketId >= 0) {
+    const expected = lastPacketId + 1;
+    if (pktId !== expected) lostCount += Math.abs(pktId - expected);
   }
+  lastPacketId = pktId;
 
-  function stopRecording() {
-    isRecording = false;
-    startBtn.classList.remove('recording'); stopBtn.disabled = true;
-    recordingIndicator.classList.remove('active');
-    clearInterval(timerInterval); generateGraph();
-  }
+  // Update packet loss display
+  const totalExpected = pktId + 1;
+  const pct = totalExpected > 0 ? (lostCount / totalExpected * 100) : 0;
+  const pktLossEl = document.getElementById('pktLoss');
+  pktLossEl.textContent = pct.toFixed(2) + '%';
+  pktLossEl.className = 'pkt-val ' + (pct === 0 ? 'good' : pct < 5 ? 'warn' : 'bad');
+  document.getElementById('pktRx').textContent   = rxCount;
+  document.getElementById('pktLost').textContent = lostCount;
 
-  function updateTimer() {
-    const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
-    recTime.textContent = `${String(Math.floor(elapsed/60)).padStart(2,'0')}:${String(elapsed%60).padStart(2,'0')}`;
-  }
+  // Update live heatmap
+  updateUI();
 
-  function generateGraph() {
-    if (!recordingData.length) { alert('No data recorded!'); return; }
-    graphContainer.classList.add('visible');
-    const duration = recordingData[recordingData.length - 1].time;
-    document.getElementById('statDuration').textContent = `${Math.round(duration)}s`;
-    for (let s = 0; s < 3; s++) {
-      const vals = recordingData.map(d => d.values[s]);
-      document.getElementById('statAvg' + s).textContent = Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
-    }
-    if (chart) chart.destroy();
-    chart = new Chart(document.getElementById('sessionChart').getContext('2d'), {
-      type: 'line',
-      data: {
-        labels: recordingData.map(d => d.time.toFixed(1)),
-        datasets: SENSOR_NAMES.map((name, i) => ({
-          label: name,
-          data: recordingData.map(d => d.values[i]),
-          borderColor: SENSOR_COLORS[i],
-          backgroundColor: SENSOR_COLORS[i] + '18',
-          borderWidth: 2, tension: 0.4, fill: false,
-          pointRadius: 0, pointHoverRadius: 5,
-          pointHoverBackgroundColor: SENSOR_COLORS[i],
-          pointHoverBorderColor: '#FFF', pointHoverBorderWidth: 2,
-        }))
-      },
-      options: {
-        responsive: true, maintainAspectRatio: true,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: { display: true, labels: { color: '#8A8FA8', font: { size: 11 }, boxWidth: 14 } },
-          tooltip: { backgroundColor: '#141824', titleColor: '#FFF', bodyColor: '#8A8FA8', borderColor: '#0066CC', borderWidth: 1, padding: 10 }
-        },
-        scales: {
-          x: { title: { display:true, text:'Time (seconds)', color:'#8A8FA8', font:{size:11} }, ticks:{color:'#8A8FA8',maxTicksLimit:8}, grid:{color:'rgba(138,143,168,0.1)'} },
-          y: { title: { display:true, text:'Sensor Value (12-bit)', color:'#8A8FA8', font:{size:11} }, min:0, max:4095, ticks:{color:'#8A8FA8'}, grid:{color:'rgba(138,143,168,0.1)'} }
-        }
-      }
+  // Record
+  if (isRecording) {
+    recordingData.push({
+      t: (Date.now() - recordingStart) / 1000,
+      vals: [...sensorValues]
     });
   }
+}
 
-  if (!navigator.bluetooth) {
-    alert('Web Bluetooth not supported. Use Chrome on Android or Chrome desktop.');
-    connectBtn.disabled = true; connectBtn.textContent = 'NOT SUPPORTED';
+// ═══════════════════════════════════════════════════════════
+// RECORDING
+// ═══════════════════════════════════════════════════════════
+function startRecording() {
+  isRecording = true;
+  recordingData = [];
+  recordingStart = Date.now();
+
+  startBtn.classList.add('is-active');
+  startBtn.textContent = '● Recording';
+  stopBtn.disabled = false;
+
+  recIndicator.classList.add('active');
+  statusDot.className = 'dot rec';
+  statusText.textContent = 'RECORDING';
+
+  sessionSection.classList.remove('visible');
+
+  timerHandle = setInterval(() => {
+    const s = Math.floor((Date.now() - recordingStart) / 1000);
+    const m = Math.floor(s / 60);
+    recTimer.textContent = `${String(m).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+  }, 500);
+}
+
+function stopRecording() {
+  isRecording = false;
+  clearInterval(timerHandle);
+
+  startBtn.classList.remove('is-active');
+  startBtn.textContent = '▶ Start Session';
+  stopBtn.disabled = true;
+
+  recIndicator.classList.remove('active');
+  statusDot.className = 'dot on';
+  statusText.textContent = 'CONNECTED';
+
+  renderSessionResults();
+}
+
+// ═══════════════════════════════════════════════════════════
+// SESSION RESULTS
+// ═══════════════════════════════════════════════════════════
+function renderSessionResults() {
+  if (!recordingData.length) { alert('No data recorded.'); return; }
+
+  const n = recordingData.length;
+  const duration = recordingData[n-1].t;
+
+  // Compute averages per sensor
+  const avgVals = new Array(NUM_SENSORS).fill(0);
+  let globalPeak = 0, globalSum = 0;
+  recordingData.forEach(d => {
+    d.vals.forEach((v,i) => {
+      avgVals[i] += v;
+      if (v > globalPeak) globalPeak = v;
+      globalSum += v;
+    });
+  });
+  avgVals.forEach((v,i) => avgVals[i] = v / n);
+  const globalAvg = globalSum / (n * NUM_SENSORS);
+
+  // Stats
+  document.getElementById('sessDuration').textContent = `${Math.round(duration)}s`;
+  document.getElementById('sessSamples').textContent   = n;
+  document.getElementById('sessPeak').textContent      = globalPeak;
+  document.getElementById('sessAvg').textContent       = Math.round(globalAvg);
+  document.getElementById('sessionDate').textContent   = new Date().toLocaleString();
+
+  // Zone breakdown
+  const foreSum  = ZONE_FORE.reduce((a,i)=> a+avgVals[i], 0);
+  const midSum   = ZONE_MID.reduce((a,i) => a+avgVals[i], 0);
+  const heelSum  = ZONE_HEEL.reduce((a,i)=> a+avgVals[i], 0);
+  const zoneTotal = foreSum + midSum + heelSum || 1;
+
+  const forePct  = Math.round(foreSum  / zoneTotal * 100);
+  const midPct   = Math.round(midSum   / zoneTotal * 100);
+  const heelPct  = Math.round(heelSum  / zoneTotal * 100);
+
+  document.getElementById('zoneForePct').textContent  = forePct + '%';
+  document.getElementById('zoneMidPct').textContent   = midPct  + '%';
+  document.getElementById('zoneHeelPct').textContent  = heelPct + '%';
+
+  // Animate zone bars after a tick
+  requestAnimationFrame(() => {
+    document.getElementById('zoneForeFill').style.width = forePct + '%';
+    document.getElementById('zoneMidFill').style.width  = midPct  + '%';
+    document.getElementById('zoneHeelFill').style.width = heelPct + '%';
+  });
+
+  // Session heatmap foot
+  renderSessionFoot(avgVals);
+
+  // Chart
+  renderChart(recordingData);
+
+  sessionSection.classList.add('visible');
+  setTimeout(() => sessionSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+}
+
+function renderSessionFoot(avgVals) {
+  const container = document.getElementById('sessSpots');
+  container.innerHTML = '';
+
+  SENSORS.forEach(s => {
+    const v    = avgVals[s.id];
+    const norm = v / MAX_RAW;
+    const col  = heatColor(norm);
+    const r    = 5 + norm * 6;
+
+    container.innerHTML += `
+      <g>
+        <circle cx="${s.cx}" cy="${s.cy}" r="${(r+3).toFixed(1)}" fill="${col}" opacity="0.18"/>
+        <circle cx="${s.cx}" cy="${s.cy}" r="${r.toFixed(1)}" fill="${col}" opacity="${(0.5+norm*0.5).toFixed(2)}"
+                stroke="rgba(255,255,255,0.2)" stroke-width="0.8"/>
+      </g>
+    `;
+  });
+}
+
+function renderChart(data) {
+  // Downsample if too many points
+  let pts = data;
+  if (pts.length > 400) {
+    const step = Math.ceil(pts.length / 400);
+    pts = pts.filter((_,i) => i % step === 0);
   }
+
+  const labels = pts.map(d => d.t.toFixed(1));
+
+  // Build datasets — one per sensor (12 lines), but only show 4 zones in legend
+  const zoneLabels = ['Forefoot (avg)', 'Upper-Mid (avg)', 'Lower-Mid (avg)', 'Heel (avg)'];
+  const zoneGroups = [ZONE_FORE, ZONE_MID, ZONE_HEEL]; // show 3 zone-average lines for clarity
+  const zoneColors = ['#E84A00', '#00d98b', '#1C6EBF'];
+  const zoneNames  = ['Forefoot', 'Mid-Foot', 'Heel'];
+
+  const datasets = zoneGroups.map((grp, gi) => ({
+    label: zoneNames[gi],
+    data: pts.map(d => {
+      const s = grp.reduce((a,i) => a + d.vals[i], 0);
+      return Math.round(s / grp.length);
+    }),
+    borderColor: zoneColors[gi],
+    backgroundColor: zoneColors[gi] + '14',
+    borderWidth: 2,
+    tension: 0.4,
+    fill: true,
+    pointRadius: 0,
+    pointHoverRadius: 4,
+    pointHoverBackgroundColor: zoneColors[gi],
+    pointHoverBorderColor: '#fff',
+    pointHoverBorderWidth: 2,
+  }));
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(document.getElementById('sessionChart').getContext('2d'), {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          display: true,
+          labels: { color: '#5a6278', font: { size: 10, family: "'DM Mono', monospace" }, boxWidth: 12 }
+        },
+        tooltip: {
+          backgroundColor: '#0e1118',
+          titleColor: '#e8ecf4',
+          bodyColor: '#5a6278',
+          borderColor: '#1C6EBF',
+          borderWidth: 1,
+          padding: 10,
+          titleFont: { family: "'DM Mono', monospace", size: 11 },
+          bodyFont:  { family: "'DM Mono', monospace", size: 10 },
+        }
+      },
+      scales: {
+        x: {
+          title: { display: true, text: 'Time (s)', color: '#5a6278', font: { size: 10 } },
+          ticks: { color: '#5a6278', maxTicksLimit: 8, font: { family: "'DM Mono',monospace", size: 9 } },
+          grid:  { color: 'rgba(255,255,255,0.04)' }
+        },
+        y: {
+          title: { display: true, text: 'ADC Value (12-bit)', color: '#5a6278', font: { size: 10 } },
+          min: 0, max: MAX_RAW,
+          ticks: { color: '#5a6278', font: { family: "'DM Mono',monospace", size: 9 } },
+          grid:  { color: 'rgba(255,255,255,0.04)' }
+        }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// DEMO MODE (no BLE — for testing)
+// ═══════════════════════════════════════════════════════════
+// Press 'D' to toggle demo mode
+let demoMode = false;
+let demoHandle = null;
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'd' || e.key === 'D') toggleDemo();
+});
+
+function toggleDemo() {
+  if (demoMode) {
+    demoMode = false;
+    clearInterval(demoHandle);
+    setConnectedState(false);
+    return;
+  }
+  demoMode = true;
+  setConnectedState(true);
+  let t = 0;
+
+  demoHandle = setInterval(() => {
+    t += 0.08;
+    // Simulate walking gait pattern
+    const heelStrike = Math.max(0, Math.sin(t) * 0.9 + Math.random() * 0.15);
+    const toeOff     = Math.max(0, Math.sin(t + 1.2) * 0.85 + Math.random() * 0.15);
+    const mid        = Math.max(0, Math.sin(t + 0.6) * 0.5 + Math.random() * 0.1);
+
+    sensorValues[0]  = Math.round(toeOff   * MAX_RAW * (0.7 + Math.random()*0.3));
+    sensorValues[1]  = Math.round(toeOff   * MAX_RAW * (0.8 + Math.random()*0.2));
+    sensorValues[2]  = Math.round(toeOff   * MAX_RAW * (0.75+ Math.random()*0.25));
+    sensorValues[3]  = Math.round(toeOff   * MAX_RAW * (0.65+ Math.random()*0.35));
+    sensorValues[4]  = Math.round(mid      * MAX_RAW * (0.6 + Math.random()*0.2));
+    sensorValues[5]  = Math.round(mid      * MAX_RAW * (0.55+ Math.random()*0.2));
+    sensorValues[6]  = Math.round(mid      * MAX_RAW * (0.5 + Math.random()*0.15));
+    sensorValues[7]  = Math.round(mid      * MAX_RAW * (0.5 + Math.random()*0.15));
+    sensorValues[8]  = Math.round(heelStrike*MAX_RAW * (0.85+ Math.random()*0.15));
+    sensorValues[9]  = Math.round(heelStrike*MAX_RAW * (0.9 + Math.random()*0.1));
+    sensorValues[10] = Math.round(heelStrike*MAX_RAW * (0.88+ Math.random()*0.12));
+    sensorValues[11] = Math.round(heelStrike*MAX_RAW * (0.8 + Math.random()*0.2));
+
+    sensorValues = sensorValues.map(v => Math.max(0, Math.min(MAX_RAW, Math.round(v))));
+
+    updateUI();
+
+    if (isRecording) {
+      recordingData.push({
+        t: (Date.now() - recordingStart) / 1000,
+        vals: [...sensorValues]
+      });
+    }
+  }, 20); // 50 Hz demo
+
+  console.log('Demo mode ON — press D again to disable');
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT CHECKS
+// ═══════════════════════════════════════════════════════════
+if (!navigator.bluetooth) {
+  connectBtn.disabled = true;
+  connectBtn.textContent = 'Web Bluetooth Not Supported (use Chrome)';
+  // Still allow demo mode
+}
+
+// Initial render (shows zeroed foot)
+updateUI();
 </script>
+
 </body>
 </html>
