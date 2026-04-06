@@ -67,19 +67,31 @@
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
     @keyframes blink-dot { 0%,100%{opacity:1} 50%{opacity:.25} }
 
-    /* ─── Connect Button ─── */
+    /* ─── Connect / Demo Buttons ─── */
+    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
     .connect-btn {
-      width: 100%; padding: 15px 20px;
+      padding: 15px 20px;
       background: transparent; border: 2px solid var(--orange); border-radius: 8px;
       color: var(--orange);
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 14px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
-      cursor: pointer; transition: all 0.25s ease; margin-bottom: 24px;
+      cursor: pointer; transition: all 0.25s ease;
     }
     .connect-btn:hover:not(:disabled) { background: var(--orange); color: #fff; box-shadow: 0 4px 24px var(--orange-glow); }
     .connect-btn.is-connected { border-color: var(--muted); color: var(--muted); }
     .connect-btn.is-connected:hover { background: #1e0000; border-color: #ff4444; color: #ff4444; }
     .connect-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+    .demo-btn {
+      padding: 15px 20px;
+      background: transparent; border: 2px solid #00c896; border-radius: 8px;
+      color: #00c896;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
+      cursor: pointer; transition: all 0.25s ease;
+    }
+    .demo-btn:hover { background: rgba(0,200,150,0.12); box-shadow: 0 4px 24px rgba(0,200,150,0.3); }
+    .demo-btn.is-active { background: rgba(0,200,150,0.15); color: #00ffba; border-color: #00ffba; box-shadow: 0 0 18px rgba(0,200,150,0.4); }
 
     /* ─── Main Grid ─── */
     .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
@@ -229,10 +241,15 @@
     </div>
   </div>
 
-  <!-- Connect -->
-  <button class="connect-btn" id="connectBtn" onclick="toggleConnection()">
-    ⬡ Scan &amp; Connect via Bluetooth
-  </button>
+  <!-- Connect / Demo -->
+  <div class="btn-row">
+    <button class="connect-btn" id="connectBtn" onclick="toggleConnection()">
+      ⬡ Connect ESP32
+    </button>
+    <button class="demo-btn" id="demoBtn" onclick="toggleDemo()">
+      ◈ Demo Mode
+    </button>
+  </div>
 
   <!-- Main sensor panels -->
   <div class="main-grid">
@@ -361,54 +378,48 @@ const MAX_RAW     = 4095;
 // ═══════════════════════════════════════════════════════════
 // INSOLE SHAPE
 // ═══════════════════════════════════════════════════════════
-// Proper shoe insole: wide toe box at top, narrow arch waist, wider heel at bottom.
-// Viewbox 160×320. Path is the right foot sole (toe at top, heel at bottom).
+// Insole shape matching reference photo: wide rounded toe box at top,
+// sides gently narrowing toward arch, wider rounded heel at bottom.
+// Viewbox 160×320. Toe at top, heel at bottom.
 const INSOLE_PATH_D = `
-  M 80 10
-  C 100 10, 118 16, 128 28
-  C 138 40, 140 56, 138 70
-  C 136 82, 128 90, 122 100
-  C 116 110, 112 118, 110 128
-  C 108 136, 108 142, 106 150
-  C 104 158, 100 164, 96 170
-  C 92 176, 90 182, 90 190
-  C 90 200, 94 212, 98 224
-  C 102 236, 106 246, 106 258
-  C 106 272, 100 284, 90 292
-  C 80 300, 66 304, 54 300
-  C 42 296, 34 284, 34 272
-  C 34 260, 40 248, 44 236
-  C 48 224, 52 212, 52 200
-  C 52 190, 50 180, 48 170
-  C 46 162, 44 156, 42 148
-  C 40 140, 38 132, 36 122
-  C 34 112, 30 102, 26 92
-  C 22 82, 20 70, 22 56
-  C 24 42, 32 28, 46 18
-  C 58 10, 68 10, 80 10
+  M 80 15
+  C 100 15, 126 22, 138 42
+  C 148 60, 144 82, 136 98
+  C 128 112, 118 120, 114 134
+  C 110 148, 110 162, 110 176
+  C 110 190, 114 204, 116 220
+  C 118 236, 118 252, 114 266
+  C 110 280, 100 296, 84 304
+  C 70 312, 54 308, 42 298
+  C 30 288, 28 272, 30 256
+  C 32 240, 36 224, 38 210
+  C 40 196, 40 182, 40 168
+  C 40 154, 38 140, 34 126
+  C 30 112, 22 102, 18 88
+  C 14 74, 16 56, 26 40
+  C 38 24, 60 15, 80 15
   Z
 `;
 
-// Sensor positions in the 160×320 canvas coordinate space.
-// Mapped to match the insole diagram: 4 forefoot across top,
-// 2+2 mid, 4 heel across bottom.
+// Sensor positions verified to be inside the insole shape above.
+// Forefoot (top) → Upper-mid → Lower-mid → Heel (bottom).
 const SENSORS = [
   // Forefoot — spread across the wide toe box
-  { id:0,  label:'S0',  zone:'Fore',  cx: 56,  cy: 52  },
-  { id:1,  label:'S1',  zone:'Fore',  cx: 74,  cy: 42  },
-  { id:2,  label:'S2',  zone:'Fore',  cx: 94,  cy: 42  },
-  { id:3,  label:'S3',  zone:'Fore',  cx: 112, cy: 52  },
+  { id:0,  label:'S0',  zone:'Fore',  cx: 52,  cy: 52  },
+  { id:1,  label:'S1',  zone:'Fore',  cx: 72,  cy: 40  },
+  { id:2,  label:'S2',  zone:'Fore',  cx: 96,  cy: 40  },
+  { id:3,  label:'S3',  zone:'Fore',  cx: 116, cy: 54  },
   // Upper-mid — narrower arch region
-  { id:4,  label:'S4',  zone:'U-Mid', cx: 62,  cy: 112 },
-  { id:5,  label:'S5',  zone:'U-Mid', cx: 90,  cy: 108 },
+  { id:4,  label:'S4',  zone:'U-Mid', cx: 60,  cy: 108 },
+  { id:5,  label:'S5',  zone:'U-Mid', cx: 96,  cy: 106 },
   // Lower-mid
-  { id:6,  label:'S6',  zone:'L-Mid', cx: 60,  cy: 158 },
-  { id:7,  label:'S7',  zone:'L-Mid', cx: 86,  cy: 154 },
+  { id:6,  label:'S6',  zone:'L-Mid', cx: 58,  cy: 158 },
+  { id:7,  label:'S7',  zone:'L-Mid', cx: 90,  cy: 156 },
   // Heel — spread across the wider heel
-  { id:8,  label:'S8',  zone:'Heel',  cx: 52,  cy: 228 },
-  { id:9,  label:'S9',  zone:'Heel',  cx: 68,  cy: 248 },
-  { id:10, label:'S10', zone:'Heel',  cx: 88,  cy: 250 },
-  { id:11, label:'S11', zone:'Heel',  cx: 102, cy: 232 },
+  { id:8,  label:'S8',  zone:'Heel',  cx: 54,  cy: 232 },
+  { id:9,  label:'S9',  zone:'Heel',  cx: 72,  cy: 258 },
+  { id:10, label:'S10', zone:'Heel',  cx: 96,  cy: 258 },
+  { id:11, label:'S11', zone:'Heel',  cx: 110, cy: 234 },
 ];
 
 const ZONE_FORE = [0,1,2,3];
@@ -665,6 +676,12 @@ async function toggleConnection() {
 }
 
 async function connect() {
+  // Stop demo mode if active before connecting live hardware
+  if (demoMode) {
+    demoMode = false; clearInterval(demoHandle);
+    const btn = document.getElementById('demoBtn');
+    btn.textContent = '◈ Demo Mode'; btn.classList.remove('is-active');
+  }
   try {
     connectBtn.disabled = true;
     connectBtn.textContent = '◌ Scanning...';
@@ -852,16 +869,19 @@ function renderChart(data) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// DEMO MODE  — press D to toggle
+// DEMO MODE  — button or press D to toggle
 // ═══════════════════════════════════════════════════════════
 let demoMode = false, demoHandle = null;
 document.addEventListener('keydown', e => { if (e.key === 'd' || e.key === 'D') toggleDemo(); });
 
 function toggleDemo() {
+  const btn = document.getElementById('demoBtn');
   if (demoMode) {
-    demoMode = false; clearInterval(demoHandle); setConnectedState(false); return;
+    demoMode = false; clearInterval(demoHandle); setConnectedState(false);
+    btn.textContent = '◈ Demo Mode'; btn.classList.remove('is-active'); return;
   }
   demoMode = true; setConnectedState(true);
+  btn.textContent = '◈ Exit Demo'; btn.classList.add('is-active');
   let t = 0;
   demoHandle = setInterval(() => {
     t += 0.08;
@@ -891,11 +911,11 @@ function toggleDemo() {
 // ═══════════════════════════════════════════════════════════
 if (!navigator.bluetooth) {
   connectBtn.disabled = true;
-  connectBtn.textContent = 'Web Bluetooth Not Supported (use Chrome)';
+  connectBtn.textContent = '⚠ BLE Not Supported (use Chrome)';
 }
 
-// Draw zeroed heatmap on load so the insole shape is visible
-updateUI();
+// Auto-start demo mode so the UI is visible without needing an ESP32
+toggleDemo();
 </script>
 </body>
 </html>
