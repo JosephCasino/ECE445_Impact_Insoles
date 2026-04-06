@@ -21,7 +21,6 @@
       --bg-card:     #0e1118;
       --bg-panel:    #121620;
       --border:      rgba(255,255,255,0.07);
-      --border-lit:  rgba(255,255,255,0.13);
       --text:        #e8ecf4;
       --muted:       #5a6278;
       --dim:         #3a3f52;
@@ -37,7 +36,6 @@
       overflow-x: hidden;
     }
 
-    /* ─── Ambient background ─── */
     body::before {
       content: '';
       position: fixed; inset: 0; pointer-events: none; z-index: 0;
@@ -46,16 +44,11 @@
         radial-gradient(ellipse 50% 35% at 85% 75%, rgba(232,74,0,0.07) 0%, transparent 70%);
     }
 
-    /* ─── Layout ─── */
     .app { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; padding: 20px 16px 60px; }
 
     /* ─── Header ─── */
     .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
-    .brand-block {}
-    .brand {
-      font-size: 34px; font-weight: 900; letter-spacing: 3px; line-height: 1;
-      color: var(--text);
-    }
+    .brand { font-size: 34px; font-weight: 900; letter-spacing: 3px; line-height: 1; color: var(--text); }
     .brand span.o { color: var(--orange); }
     .brand span.b { color: var(--blue); }
     .tagline { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 3px; margin-top: 5px; }
@@ -68,11 +61,8 @@
       transition: all 0.4s ease;
     }
     .status-pill.connected { border-color: var(--blue); color: var(--text); box-shadow: 0 0 18px var(--blue-glow); }
-    .dot {
-      width: 8px; height: 8px; border-radius: 50%; background: var(--dim);
-      transition: all 0.4s ease;
-    }
-    .dot.on { background: var(--blue); box-shadow: 0 0 10px var(--blue); animation: pulse-dot 2.2s ease-in-out infinite; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); transition: all 0.4s ease; }
+    .dot.on  { background: var(--blue);   box-shadow: 0 0 10px var(--blue);   animation: pulse-dot 2.2s ease-in-out infinite; }
     .dot.rec { background: var(--orange); box-shadow: 0 0 10px var(--orange); animation: blink-dot 1s ease-in-out infinite; }
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
     @keyframes blink-dot { 0%,100%{opacity:1} 50%{opacity:.25} }
@@ -80,14 +70,11 @@
     /* ─── Connect Button ─── */
     .connect-btn {
       width: 100%; padding: 15px 20px;
-      background: transparent;
-      border: 2px solid var(--orange);
-      border-radius: 8px;
+      background: transparent; border: 2px solid var(--orange); border-radius: 8px;
       color: var(--orange);
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 14px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
-      cursor: pointer; transition: all 0.25s ease;
-      margin-bottom: 24px;
+      cursor: pointer; transition: all 0.25s ease; margin-bottom: 24px;
     }
     .connect-btn:hover:not(:disabled) { background: var(--orange); color: #fff; box-shadow: 0 4px 24px var(--orange-glow); }
     .connect-btn.is-connected { border-color: var(--muted); color: var(--muted); }
@@ -98,34 +85,37 @@
     .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
     @media(max-width: 520px) { .main-grid { grid-template-columns: 1fr; } }
 
-    /* ─── Foot Heatmap Panel ─── */
+    /* ─── Heatmap Panel ─── */
     .heatmap-panel {
       background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 18px; display: flex; flex-direction: column;
-      align-items: center;
+      border-radius: 12px; padding: 18px; display: flex; flex-direction: column; align-items: center;
       opacity: 0; transform: translateY(16px); transition: all 0.5s cubic-bezier(.16,1,.3,1);
     }
     .heatmap-panel.visible { opacity: 1; transform: translateY(0); }
     .panel-label { font-size: 10px; font-weight: 700; letter-spacing: 3px; color: var(--muted); margin-bottom: 14px; text-transform: uppercase; align-self: flex-start; }
 
-    .foot-svg-wrap { position: relative; width: 140px; }
-    .foot-svg-wrap svg { width: 100%; height: auto; display: block; }
-
-    /* Sensor circles on the SVG foot */
-    .sensor-spot {
-      transition: opacity 0.1s ease;
-      cursor: default;
+    /* Canvas heatmap wrapper — canvas is clipped to insole shape */
+    .heatmap-canvas-wrap {
+      position: relative;
+      width: 160px;
+      height: 320px;
     }
-    .sensor-spot circle { transition: r 0.1s ease; }
+    /* SVG insole outline sits on top of canvas for visual border */
+    .heatmap-canvas-wrap canvas {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+    .insole-overlay {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
 
     /* Heatmap Legend */
-    .heatmap-legend {
-      margin-top: 14px; width: 100%;
-      display: flex; align-items: center; gap: 6px;
-    }
+    .heatmap-legend { margin-top: 14px; width: 100%; display: flex; align-items: center; gap: 6px; }
     .legend-bar {
       flex: 1; height: 6px; border-radius: 3px;
-      background: linear-gradient(to right, #1c3a7a, #0a6eb4, #00b4d8, #84e296, #f4c430, #e84a00, #7f0000);
+      background: linear-gradient(to right, #0a1a5c, #1c5fa8, #00b4d8, #80ed99, #f4c430, #e84a00, #7f0000);
     }
     .legend-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); }
 
@@ -138,15 +128,8 @@
     .debug-panel.visible { opacity: 1; transform: translateY(0); }
 
     .sensor-table { width: 100%; border-collapse: collapse; }
-    .sensor-table th {
-      font-size: 9px; letter-spacing: 2px; color: var(--muted); font-weight: 700;
-      text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--border);
-    }
-    .sensor-table td {
-      font-family: 'DM Mono', monospace; font-size: 12px;
-      padding: 5px 6px; border-bottom: 1px solid rgba(255,255,255,.04);
-      transition: background 0.15s;
-    }
+    .sensor-table th { font-size: 9px; letter-spacing: 2px; color: var(--muted); font-weight: 700; text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--border); }
+    .sensor-table td { font-family: 'DM Mono', monospace; font-size: 12px; padding: 5px 6px; border-bottom: 1px solid rgba(255,255,255,.04); transition: background 0.15s; }
     .sensor-table tr:last-child td { border-bottom: none; }
     .sensor-table td.region-col { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
     .sensor-table td.val-col { color: var(--text); font-weight: 500; }
@@ -162,12 +145,7 @@
     }
     .recording-row.visible { opacity: 1; transform: translateY(0); }
 
-    .rec-btn {
-      padding: 14px; border-radius: 8px; border: none;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 13px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
-      cursor: pointer; transition: all .25s ease;
-    }
+    .rec-btn { padding: 14px; border-radius: 8px; border: none; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: all .25s ease; }
     .start-btn { background: var(--blue); color: #fff; box-shadow: 0 4px 20px var(--blue-dim); }
     .start-btn:hover:not(:disabled):not(.is-active) { background: #2481d6; box-shadow: 0 6px 24px var(--blue-glow); }
     .start-btn.is-active { background: var(--bg-panel); color: var(--muted); cursor: default; border: 1px solid var(--border); }
@@ -175,17 +153,11 @@
     .stop-btn:hover:not(:disabled) { border-color: var(--orange); color: var(--orange); background: var(--orange-dim); }
     .stop-btn:disabled { opacity: .3; cursor: not-allowed; }
 
-    /* Recording indicator */
-    .rec-indicator {
-      display: none; align-items: center; gap: 10px;
-      padding: 10px 16px; border: 1px solid var(--orange);
-      background: var(--orange-dim); border-radius: 8px; margin-bottom: 16px;
-    }
+    .rec-indicator { display: none; align-items: center; gap: 10px; padding: 10px 16px; border: 1px solid var(--orange); background: var(--orange-dim); border-radius: 8px; margin-bottom: 16px; }
     .rec-indicator.active { display: flex; }
     .rec-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--orange); }
     .rec-timer { font-family: 'DM Mono', monospace; font-size: 15px; color: var(--orange); margin-left: auto; }
 
-    /* Packet loss bar */
     .packet-row {
       display: flex; align-items: center; justify-content: space-between;
       background: var(--bg-card); border: 1px solid var(--border);
@@ -201,56 +173,48 @@
     .pkt-stats { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
 
     /* ─── Session Results ─── */
-    .session-section {
-      background: var(--bg-card); border: 1px solid var(--blue);
-      border-radius: 12px; padding: 20px; margin-bottom: 20px;
-      display: none;
-    }
+    .session-section { background: var(--bg-card); border: 1px solid var(--blue); border-radius: 12px; padding: 20px; margin-bottom: 20px; display: none; }
     .session-section.visible { display: block; animation: slide-up .5s cubic-bezier(.16,1,.3,1); }
     @keyframes slide-up { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
 
-    .session-header {
-      display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
-      padding-bottom: 14px; border-bottom: 1px solid var(--border);
-    }
+    .session-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
     .session-title { font-size: 16px; font-weight: 700; letter-spacing: 2px; color: var(--text); }
     .session-date { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-left: auto; }
 
     .session-stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px; }
-    .stat-card {
-      background: var(--bg-panel); border: 1px solid var(--border);
-      border-radius: 8px; padding: 10px 8px; text-align: center;
-    }
+    .stat-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px 8px; text-align: center; }
     .stat-card-label { font-size: 8px; letter-spacing: 2px; color: var(--muted); margin-bottom: 5px; }
     .stat-card-val { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--blue); }
 
-    .session-heatmap-row {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; align-items: start;
-    }
+    .session-heatmap-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; align-items: start; }
     .session-heatmap-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; }
-    .session-foot-wrap { display: flex; justify-content: center; }
-    .session-foot-wrap svg { width: 120px; height: auto; }
 
-    /* Pressure zone bars for session */
+    .session-canvas-wrap {
+      position: relative; width: 130px; height: 260px; margin: 0 auto;
+    }
+    .session-canvas-wrap canvas {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    }
+    .session-canvas-wrap .insole-overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;
+    }
+
     .zone-bars { display: flex; flex-direction: column; gap: 8px; }
     .zone-bar-item { display: flex; flex-direction: column; gap: 3px; }
     .zone-bar-item .zone-name { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--muted); display: flex; justify-content: space-between; }
     .zone-bar-track { height: 6px; background: rgba(255,255,255,.06); border-radius: 3px; overflow: hidden; }
     .zone-bar-fill-orange { height: 100%; border-radius: 3px; background: var(--orange); transition: width 1s cubic-bezier(.16,1,.3,1); }
-    .zone-bar-fill-blue { height: 100%; border-radius: 3px; background: var(--blue); transition: width 1s cubic-bezier(.16,1,.3,1); }
-    .zone-bar-fill-green { height: 100%; border-radius: 3px; background: #00d98b; transition: width 1s cubic-bezier(.16,1,.3,1); }
+    .zone-bar-fill-blue   { height: 100%; border-radius: 3px; background: var(--blue);   transition: width 1s cubic-bezier(.16,1,.3,1); }
+    .zone-bar-fill-green  { height: 100%; border-radius: 3px; background: #00d98b;        transition: width 1s cubic-bezier(.16,1,.3,1); }
 
     .chart-wrap { border-radius: 8px; overflow: hidden; background: var(--bg-panel); padding: 14px; }
     .chart-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--muted); margin-bottom: 12px; }
 
-    /* ─── Footer ─── */
     .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); }
     .footer-text { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--dim); letter-spacing: 2px; }
-
   </style>
 </head>
 <body>
-
 <div class="app">
 
   <!-- Header -->
@@ -277,111 +241,12 @@
     <div class="heatmap-panel" id="heatmapPanel">
       <div class="panel-label">Live Pressure Map</div>
 
-      <div class="foot-svg-wrap">
-        <!--
-          12 FSR sensors layout (viewed from BELOW / sole):
-          Forefoot row:    S0 S1 S2 S3  (4 sensors across toes)
-          Upper-mid row:   S4 S5         (2 sensors, arch area)
-          Lower-mid row:   S6 S7         (2 sensors, mid-arch)
-          Heel row:        S8 S9 S10 S11 (4 sensors across heel)
-        -->
-        <svg id="footSvg" viewBox="0 0 100 260" xmlns="http://www.w3.org/2000/svg">
-          <!-- Foot outline path (right foot, top view) -->
-          <defs>
-            <radialGradient id="spotGrad0" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#1c3a7a" stop-opacity="0.9"/>
-              <stop offset="100%" stop-color="#1c3a7a" stop-opacity="0.1"/>
-            </radialGradient>
-          </defs>
-
-          <!-- Foot silhouette -->
-          <path d="
-            M 50 12
-            C 60 12, 72 16, 78 24
-            C 84 32, 84 44, 80 55
-            C 76 64, 68 68, 66 76
-            C 64 84, 66 92, 66 100
-            C 66 112, 64 124, 62 136
-            C 60 148, 58 158, 56 170
-            C 54 182, 52 192, 50 204
-            C 48 216, 46 226, 44 234
-            C 42 242, 40 248, 38 250
-            C 34 254, 28 252, 26 246
-            C 24 240, 26 230, 28 220
-            C 30 210, 34 200, 36 190
-            C 38 180, 38 170, 38 160
-            C 38 148, 36 136, 34 124
-            C 32 112, 30 100, 30 88
-            C 30 76, 32 66, 30 56
-            C 28 46, 22 38, 22 28
-            C 22 18, 32 10, 50 12
-            Z
-          " fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-
-          <!-- Toe bumps (subtle) -->
-          <ellipse cx="50" cy="13" rx="8" ry="5" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
-
-          <!-- FOREFOOT sensors: S0 S1 S2 S3 -->
-          <g class="sensor-spot" id="spot0">
-            <circle cx="36" cy="38" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-            <circle cx="36" cy="38" r="5" fill="#1c3a7a" opacity="0.7"/>
-          </g>
-          <g class="sensor-spot" id="spot1">
-            <circle cx="46" cy="33" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-            <circle cx="46" cy="33" r="5" fill="#1c3a7a" opacity="0.7"/>
-          </g>
-          <g class="sensor-spot" id="spot2">
-            <circle cx="56" cy="33" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-            <circle cx="56" cy="33" r="5" fill="#1c3a7a" opacity="0.7"/>
-          </g>
-          <g class="sensor-spot" id="spot3">
-            <circle cx="66" cy="38" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-            <circle cx="66" cy="38" r="5" fill="#1c3a7a" opacity="0.7"/>
-          </g>
-
-          <!-- UPPER-MID sensors: S4 S5 -->
-          <g class="sensor-spot" id="spot4">
-            <circle cx="40" cy="75" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-            <circle cx="40" cy="75" r="5" fill="#1c3a7a" opacity="0.7"/>
-          </g>
-          <g class="sensor-spot" id="spot5">
-            <circle cx="60" cy="75" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-            <circle cx="60" cy="75" r="5" fill="#1c3a7a" opacity="0.7"/>
-          </g>
-
-          <!-- LOWER-MID sensors: S6 S7 -->
-          <g class="sensor-spot" id="spot6">
-            <circle cx="38" cy="115" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-            <circle cx="38" cy="115" r="5" fill="#1c3a7a" opacity="0.7"/>
-          </g>
-          <g class="sensor-spot" id="spot7">
-            <circle cx="58" cy="115" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-            <circle cx="58" cy="115" r="5" fill="#1c3a7a" opacity="0.7"/>
-          </g>
-
-          <!-- HEEL sensors: S8 S9 S10 S11 -->
-          <g class="sensor-spot" id="spot8">
-            <circle cx="34" cy="165" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-            <circle cx="34" cy="165" r="5" fill="#1c3a7a" opacity="0.7"/>
-          </g>
-          <g class="sensor-spot" id="spot9">
-            <circle cx="44" cy="175" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-            <circle cx="44" cy="175" r="5" fill="#1c3a7a" opacity="0.7"/>
-          </g>
-          <g class="sensor-spot" id="spot10">
-            <circle cx="54" cy="175" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-            <circle cx="54" cy="175" r="5" fill="#1c3a7a" opacity="0.7"/>
-          </g>
-          <g class="sensor-spot" id="spot11">
-            <circle cx="64" cy="165" r="8" fill="rgba(28,58,122,0.15)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-            <circle cx="64" cy="165" r="5" fill="#1c3a7a" opacity="0.7"/>
-          </g>
-
-          <!-- Region labels -->
-          <text x="50" y="22" text-anchor="middle" font-size="5" fill="rgba(255,255,255,0.2)" font-family="monospace" letter-spacing="1">FORE</text>
-          <text x="50" y="62" text-anchor="middle" font-size="5" fill="rgba(255,255,255,0.2)" font-family="monospace" letter-spacing="1">U·MID</text>
-          <text x="50" y="102" text-anchor="middle" font-size="5" fill="rgba(255,255,255,0.2)" font-family="monospace" letter-spacing="1">L·MID</text>
-          <text x="50" y="148" text-anchor="middle" font-size="5" fill="rgba(255,255,255,0.2)" font-family="monospace" letter-spacing="1">HEEL</text>
+      <div class="heatmap-canvas-wrap" id="heatmapWrap">
+        <!-- canvas drawn by JS -->
+        <canvas id="heatCanvas" width="160" height="320"></canvas>
+        <!-- SVG insole outline rendered on top -->
+        <svg class="insole-overlay" id="insoleSvg" viewBox="0 0 160 320" xmlns="http://www.w3.org/2000/svg">
+          <path id="insolePath" d="" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linejoin="round"/>
         </svg>
       </div>
 
@@ -395,28 +260,20 @@
     <!-- Debug / Raw Values -->
     <div class="debug-panel" id="debugPanel">
       <div class="panel-label">Raw Sensor Values</div>
-
       <table class="sensor-table">
         <thead>
-          <tr>
-            <th>#</th>
-            <th>ZONE</th>
-            <th>VAL</th>
-            <th>LEVEL</th>
-          </tr>
+          <tr><th>#</th><th>ZONE</th><th>VAL</th><th>LEVEL</th></tr>
         </thead>
-        <tbody id="sensorTableBody">
-          <!-- Populated by JS -->
-        </tbody>
+        <tbody id="sensorTableBody"></tbody>
       </table>
     </div>
 
-  </div><!-- /main-grid -->
+  </div>
 
   <!-- Recording controls -->
   <div class="recording-row" id="recordingRow">
     <button class="rec-btn start-btn" id="startBtn" onclick="startRecording()">▶ Start Session</button>
-    <button class="rec-btn stop-btn" id="stopBtn" onclick="stopRecording()" disabled>⏹ End Session</button>
+    <button class="rec-btn stop-btn"  id="stopBtn"  onclick="stopRecording()"  disabled>⏹ End Session</button>
   </div>
 
   <!-- Recording indicator -->
@@ -439,46 +296,28 @@
 
   <!-- Session results -->
   <div class="session-section" id="sessionSection">
-
     <div class="session-header">
       <div class="session-title">SESSION RESULTS</div>
       <div class="session-date" id="sessionDate">—</div>
     </div>
 
     <div class="session-stat-grid">
-      <div class="stat-card">
-        <div class="stat-card-label">DURATION</div>
-        <div class="stat-card-val" id="sessDuration">0s</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-label">SAMPLES</div>
-        <div class="stat-card-val" id="sessSamples">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-label">PEAK PSI</div>
-        <div class="stat-card-val" id="sessPeak">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-label">AVG LOAD</div>
-        <div class="stat-card-val" id="sessAvg">0</div>
-      </div>
+      <div class="stat-card"><div class="stat-card-label">DURATION</div><div class="stat-card-val" id="sessDuration">0s</div></div>
+      <div class="stat-card"><div class="stat-card-label">SAMPLES</div><div class="stat-card-val"  id="sessSamples">0</div></div>
+      <div class="stat-card"><div class="stat-card-label">PEAK ADC</div><div class="stat-card-val" id="sessPeak">0</div></div>
+      <div class="stat-card"><div class="stat-card-label">AVG LOAD</div><div class="stat-card-val" id="sessAvg">0</div></div>
     </div>
 
-    <!-- Session heatmap + zone breakdown -->
     <div class="session-heatmap-row">
       <div>
         <div class="session-heatmap-label">AVG PRESSURE MAP</div>
-        <div class="session-foot-wrap">
-          <svg id="sessFootSvg" viewBox="0 0 100 260" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 50 12 C 60 12, 72 16, 78 24 C 84 32, 84 44, 80 55 C 76 64, 68 68, 66 76 C 64 84, 66 92, 66 100 C 66 112, 64 124, 62 136 C 60 148, 58 158, 56 170 C 54 182, 52 192, 50 204 C 48 216, 46 226, 44 234 C 42 242, 40 248, 38 250 C 34 254, 28 252, 26 246 C 24 240, 26 230, 28 220 C 30 210, 34 200, 36 190 C 38 180, 38 170, 38 160 C 38 148, 36 136, 34 124 C 32 112, 30 100, 30 88 C 30 76, 32 66, 30 56 C 28 46, 22 38, 22 28 C 22 18, 32 10, 50 12 Z"
-              fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-            <ellipse cx="50" cy="13" rx="8" ry="5" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
-            <!-- 12 session sensor spots filled by JS -->
-            <g id="sessSpots"></g>
+        <div class="session-canvas-wrap" id="sessCanvasWrap">
+          <canvas id="sessCanvas" width="130" height="260"></canvas>
+          <svg class="insole-overlay" viewBox="0 0 160 320" xmlns="http://www.w3.org/2000/svg">
+            <path id="sessInsolePath" d="" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linejoin="round"/>
           </svg>
         </div>
       </div>
-
       <div>
         <div class="session-heatmap-label">ZONE BREAKDOWN</div>
         <div class="zone-bars">
@@ -498,13 +337,11 @@
       </div>
     </div>
 
-    <!-- Time-series chart -->
     <div class="chart-wrap">
       <div class="chart-label">SENSOR VALUES OVER TIME</div>
       <canvas id="sessionChart" height="180"></canvas>
     </div>
-
-  </div><!-- /session-section -->
+  </div>
 
   <div class="footer">
     <div class="footer-text">ECE445 · GROUP 68 · CASINO · SIVANESAN · WENG &nbsp;·&nbsp; UIUC 2025</div>
@@ -519,37 +356,64 @@
 const SERVICE_UUID        = '12345678-1234-1234-1234-123456789abc';
 const CHARACTERISTIC_UUID = 'abcd1234-ab12-ab12-ab12-abcdef123456';
 const NUM_SENSORS = 12;
-const MAX_RAW     = 4095;   // 12-bit ADC
+const MAX_RAW     = 4095;
 
-// Sensor metadata: [id, label, zone, cx, cy in SVG viewBox]
+// ═══════════════════════════════════════════════════════════
+// INSOLE SHAPE
+// ═══════════════════════════════════════════════════════════
+// Proper shoe insole: wide toe box at top, narrow arch waist, wider heel at bottom.
+// Viewbox 160×320. Path is the right foot sole (toe at top, heel at bottom).
+const INSOLE_PATH_D = `
+  M 80 10
+  C 100 10, 118 16, 128 28
+  C 138 40, 140 56, 138 70
+  C 136 82, 128 90, 122 100
+  C 116 110, 112 118, 110 128
+  C 108 136, 108 142, 106 150
+  C 104 158, 100 164, 96 170
+  C 92 176, 90 182, 90 190
+  C 90 200, 94 212, 98 224
+  C 102 236, 106 246, 106 258
+  C 106 272, 100 284, 90 292
+  C 80 300, 66 304, 54 300
+  C 42 296, 34 284, 34 272
+  C 34 260, 40 248, 44 236
+  C 48 224, 52 212, 52 200
+  C 52 190, 50 180, 48 170
+  C 46 162, 44 156, 42 148
+  C 40 140, 38 132, 36 122
+  C 34 112, 30 102, 26 92
+  C 22 82, 20 70, 22 56
+  C 24 42, 32 28, 46 18
+  C 58 10, 68 10, 80 10
+  Z
+`;
+
+// Sensor positions in the 160×320 canvas coordinate space.
+// Mapped to match the insole diagram: 4 forefoot across top,
+// 2+2 mid, 4 heel across bottom.
 const SENSORS = [
-  { id: 0,  label: 'S0',  zone: 'Fore',    cx: 36,  cy: 38  },
-  { id: 1,  label: 'S1',  zone: 'Fore',    cx: 46,  cy: 33  },
-  { id: 2,  label: 'S2',  zone: 'Fore',    cx: 56,  cy: 33  },
-  { id: 3,  label: 'S3',  zone: 'Fore',    cx: 66,  cy: 38  },
-  { id: 4,  label: 'S4',  zone: 'U-Mid',   cx: 40,  cy: 75  },
-  { id: 5,  label: 'S5',  zone: 'U-Mid',   cx: 60,  cy: 75  },
-  { id: 6,  label: 'S6',  zone: 'L-Mid',   cx: 38,  cy: 115 },
-  { id: 7,  label: 'S7',  zone: 'L-Mid',   cx: 58,  cy: 115 },
-  { id: 8,  label: 'S8',  zone: 'Heel',    cx: 34,  cy: 165 },
-  { id: 9,  label: 'S9',  zone: 'Heel',    cx: 44,  cy: 175 },
-  { id: 10, label: 'S10', zone: 'Heel',    cx: 54,  cy: 175 },
-  { id: 11, label: 'S11', zone: 'Heel',    cx: 64,  cy: 165 },
+  // Forefoot — spread across the wide toe box
+  { id:0,  label:'S0',  zone:'Fore',  cx: 56,  cy: 52  },
+  { id:1,  label:'S1',  zone:'Fore',  cx: 74,  cy: 42  },
+  { id:2,  label:'S2',  zone:'Fore',  cx: 94,  cy: 42  },
+  { id:3,  label:'S3',  zone:'Fore',  cx: 112, cy: 52  },
+  // Upper-mid — narrower arch region
+  { id:4,  label:'S4',  zone:'U-Mid', cx: 62,  cy: 112 },
+  { id:5,  label:'S5',  zone:'U-Mid', cx: 90,  cy: 108 },
+  // Lower-mid
+  { id:6,  label:'S6',  zone:'L-Mid', cx: 60,  cy: 158 },
+  { id:7,  label:'S7',  zone:'L-Mid', cx: 86,  cy: 154 },
+  // Heel — spread across the wider heel
+  { id:8,  label:'S8',  zone:'Heel',  cx: 52,  cy: 228 },
+  { id:9,  label:'S9',  zone:'Heel',  cx: 68,  cy: 248 },
+  { id:10, label:'S10', zone:'Heel',  cx: 88,  cy: 250 },
+  { id:11, label:'S11', zone:'Heel',  cx: 102, cy: 232 },
 ];
 
-// Zone group indices
-const ZONE_FORE  = [0,1,2,3];
-const ZONE_MID   = [4,5,6,7];
-const ZONE_HEEL  = [8,9,10,11];
-
-// Chart colors: 4 groups of 3 sensors
-const CHART_COLORS = [
-  '#E84A00', '#ff8c5a', '#ffc19a',   // forefoot
-  '#1C6EBF', '#5aa3e0',               // upper mid
-  '#00b4d8', '#90e0ef',               // lower mid
-  '#00d98b', '#6affd0', '#b5ffe7',   // heel
-  '#c4a4ff', '#e8d5ff',
-];
+const ZONE_FORE = [0,1,2,3];
+const ZONE_MID  = [4,5,6,7];
+const ZONE_HEEL = [8,9,10,11];
 
 // ═══════════════════════════════════════════════════════════
 // STATE
@@ -557,11 +421,174 @@ const CHART_COLORS = [
 let bleDevice = null, bleChar = null;
 let sensorValues = new Array(NUM_SENSORS).fill(0);
 let isRecording = false;
-let recordingData = [];   // [{t, vals:[12]}]
+let recordingData = [];
 let recordingStart = 0;
 let timerHandle = null;
 let chart = null;
 let lastPacketId = -1, rxCount = 0, lostCount = 0;
+
+// ═══════════════════════════════════════════════════════════
+// INSOLE PATH — set on both SVG overlays
+// ═══════════════════════════════════════════════════════════
+document.getElementById('insolePath').setAttribute('d', INSOLE_PATH_D);
+document.getElementById('sessInsolePath').setAttribute('d', INSOLE_PATH_D);
+
+// ═══════════════════════════════════════════════════════════
+// HEATMAP RENDERER
+// Using a canvas and inverse-distance weighting (IDW) to
+// compute a smooth pressure field at every pixel, then masking
+// it to the insole shape — identical technique to clinical
+// plantar pressure imaging systems.
+// ═══════════════════════════════════════════════════════════
+
+// Build the insole clip mask from the SVG path on an offscreen canvas
+function buildMask(W, H) {
+  const mc = document.createElement('canvas');
+  mc.width = W; mc.height = H;
+  const mx = mc.getContext('2d');
+  // Scale path from viewBox 160×320 to canvas W×H
+  const sx = W / 160, sy = H / 320;
+  mx.save();
+  mx.scale(sx, sy);
+  const p = new Path2D(INSOLE_PATH_D);
+  mx.fillStyle = '#fff';
+  mx.fill(p);
+  mx.restore();
+  return mx.getImageData(0, 0, W, H);
+}
+
+// Map a normalized value 0–1 → [R,G,B] thermal color
+// Cool (low) = dark blue → blue → cyan → green → yellow → orange → dark red (high)
+function normToRGB(n) {
+  const stops = [
+    [0.00, [ 10,  20,  80]],
+    [0.15, [ 15,  80, 160]],
+    [0.30, [  0, 160, 210]],
+    [0.50, [ 80, 220, 130]],
+    [0.65, [240, 210,  30]],
+    [0.80, [232,  80,  10]],
+    [1.00, [140,   0,   0]],
+  ];
+  let lo = stops[0], hi = stops[stops.length - 1];
+  for (let i = 0; i < stops.length - 1; i++) {
+    if (n <= stops[i + 1][0]) { lo = stops[i]; hi = stops[i + 1]; break; }
+  }
+  const t = (n - lo[0]) / (hi[0] - lo[0] + 1e-9);
+  return [
+    Math.round(lo[1][0] + t * (hi[1][0] - lo[1][0])),
+    Math.round(lo[1][1] + t * (hi[1][1] - lo[1][1])),
+    Math.round(lo[1][2] + t * (hi[1][2] - lo[1][2])),
+  ];
+}
+
+// Draw heatmap onto a canvas element given an array of 12 sensor values
+// canvasEl : HTMLCanvasElement
+// vals     : Float array length 12, values 0–MAX_RAW
+function drawHeatmap(canvasEl, vals) {
+  const W = canvasEl.width;
+  const H = canvasEl.height;
+  const ctx = canvasEl.getContext('2d');
+
+  // Scale sensor positions from 160×320 space to canvas space
+  const sx = W / 160, sy = H / 320;
+
+  // Normalise values
+  const norm = vals.map(v => Math.max(0, Math.min(1, v / MAX_RAW)));
+
+  // IDW power parameter — higher = sharper transitions between sensors
+  const POWER = 2.5;
+  // Influence radius (in canvas pixels, before scaling). Beyond this a sensor
+  // has very little weight. This makes the heatmap look like distinct pressure
+  // zones rather than a uniform blur.
+  const RADIUS = 110 * Math.min(sx, sy);
+
+  // Build or reuse mask
+  if (!drawHeatmap._mask || drawHeatmap._maskW !== W || drawHeatmap._maskH !== H) {
+    drawHeatmap._mask  = buildMask(W, H);
+    drawHeatmap._maskW = W;
+    drawHeatmap._maskH = H;
+  }
+  const mask = drawHeatmap._mask;
+
+  // Prepare sensor pixel coordinates
+  const sensorPx = SENSORS.map(s => ({ x: s.cx * sx, y: s.cy * sy }));
+
+  // Fill pixel buffer
+  const imgData = ctx.createImageData(W, H);
+  const buf = imgData.data;
+
+  // Step size — draw every Nth pixel for performance, then scale up
+  const STEP = 3;
+
+  for (let py = 0; py < H; py += STEP) {
+    for (let px = 0; px < W; px += STEP) {
+      // Check mask — skip if outside insole
+      const mi = (py * W + px) * 4;
+      if (mask.data[mi] < 128) continue;
+
+      // IDW interpolation
+      let weightSum = 0;
+      let valueSum  = 0;
+      let onSensor  = false;
+
+      for (let s = 0; s < NUM_SENSORS; s++) {
+        const dx = px - sensorPx[s].x;
+        const dy = py - sensorPx[s].y;
+        const dist2 = dx * dx + dy * dy;
+
+        if (dist2 < 1) {
+          // Pixel is exactly on a sensor — use its value directly
+          valueSum  = norm[s];
+          weightSum = 1;
+          onSensor  = true;
+          break;
+        }
+
+        const dist = Math.sqrt(dist2);
+        if (dist > RADIUS) continue;  // Beyond influence radius
+
+        // Smooth falloff: blend IDW with Gaussian envelope
+        const w = Math.pow(1 / dist2, POWER / 2) * Math.exp(-dist2 / (2 * RADIUS * RADIUS * 0.25));
+        weightSum += w;
+        valueSum  += w * norm[s];
+      }
+
+      let n = weightSum > 0 ? valueSum / weightSum : 0;
+
+      // Outside all sensor influence → show cold floor (not black)
+      if (weightSum === 0) n = 0;
+
+      const [r, g, b] = normToRGB(n);
+      // Alpha: make low-pressure areas translucent so the dark card shows subtly through
+      const alpha = weightSum === 0 ? 60 : Math.round(180 + n * 75);
+
+      // Paint a STEP×STEP block
+      for (let dy2 = 0; dy2 < STEP && py + dy2 < H; dy2++) {
+        for (let dx2 = 0; dx2 < STEP && px + dx2 < W; dx2++) {
+          const idx = ((py + dy2) * W + (px + dx2)) * 4;
+          if (mask.data[idx] < 128) continue;
+          buf[idx]     = r;
+          buf[idx + 1] = g;
+          buf[idx + 2] = b;
+          buf[idx + 3] = alpha;
+        }
+      }
+    }
+  }
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.putImageData(imgData, 0, 0);
+
+  // Draw subtle sensor dot markers on top so you can see where sensors are
+  for (let s = 0; s < NUM_SENSORS; s++) {
+    const { x, y } = sensorPx[s];
+    ctx.beginPath();
+    ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+  }
+}
 
 // ═══════════════════════════════════════════════════════════
 // DOM REFS
@@ -579,6 +606,7 @@ const stopBtn       = document.getElementById('stopBtn');
 const recIndicator  = document.getElementById('recIndicator');
 const recTimer      = document.getElementById('recTimer');
 const sessionSection= document.getElementById('sessionSection');
+const heatCanvas    = document.getElementById('heatCanvas');
 
 // ═══════════════════════════════════════════════════════════
 // BUILD DEBUG TABLE
@@ -593,9 +621,7 @@ const sessionSection= document.getElementById('sessionSection');
       <td class="region-col">${s.zone}</td>
       <td class="val-col" id="dbgVal${s.id}">0</td>
       <td class="bar-col">
-        <div class="mini-bar-track">
-          <div class="mini-bar-fill" id="dbgBar${s.id}"></div>
-        </div>
+        <div class="mini-bar-track"><div class="mini-bar-fill" id="dbgBar${s.id}"></div></div>
       </td>
     `;
     tbody.appendChild(tr);
@@ -603,114 +629,58 @@ const sessionSection= document.getElementById('sessionSection');
 })();
 
 // ═══════════════════════════════════════════════════════════
-// HEATMAP COLOR  (0=cool blue → 0.5=green → 1=hot orange/red)
+// UPDATE LIVE UI
 // ═══════════════════════════════════════════════════════════
-function heatColor(norm) {
-  // Stops: 0=navy, 0.25=blue, 0.5=cyan/green, 0.75=yellow, 1=orange/red
-  const stops = [
-    [0,    [28,  58, 122]],
-    [0.20, [10, 110, 180]],
-    [0.40, [ 0, 180, 216]],
-    [0.55, [132, 226, 150]],
-    [0.70, [244, 196,  48]],
-    [0.85, [232, 100,  20]],
-    [1.0,  [180,   0,   0]],
-  ];
-  let lo = stops[0], hi = stops[stops.length-1];
-  for (let i=0; i<stops.length-1; i++) {
-    if (norm >= stops[i][0] && norm <= stops[i+1][0]) { lo=stops[i]; hi=stops[i+1]; break; }
-  }
-  const t = (norm - lo[0]) / (hi[0] - lo[0] + 0.001);
-  const r = Math.round(lo[1][0] + t*(hi[1][0]-lo[1][0]));
-  const g = Math.round(lo[1][1] + t*(hi[1][1]-lo[1][1]));
-  const b = Math.round(lo[1][2] + t*(hi[1][2]-lo[1][2]));
+function normToHex(n) {
+  const [r, g, b] = normToRGB(n);
   return `rgb(${r},${g},${b})`;
 }
 
-// ═══════════════════════════════════════════════════════════
-// UPDATE LIVE UI
-// ═══════════════════════════════════════════════════════════
 function updateUI() {
-  const maxVal = Math.max(...sensorValues, 1);
+  // Redraw canvas heatmap
+  drawHeatmap(heatCanvas, sensorValues);
 
+  // Update debug table
   SENSORS.forEach(s => {
-    const v = sensorValues[s.id];
+    const v    = sensorValues[s.id];
     const norm = v / MAX_RAW;
+    const col  = normToHex(norm);
 
-    // Heatmap spot
-    const spot = document.getElementById(`spot${s.id}`);
-    if (spot) {
-      const outer = spot.children[0];
-      const inner = spot.children[1];
-      const col = heatColor(norm);
-      const radius = 5 + norm * 6;   // grows from 5 to 11
-      outer.setAttribute('fill', `rgba(${hexToRgb(col)},0.25)`);
-      outer.setAttribute('stroke', col);
-      inner.setAttribute('fill', col);
-      inner.setAttribute('r', radius.toFixed(1));
-      inner.setAttribute('opacity', (0.5 + norm * 0.5).toFixed(2));
-    }
-
-    // Debug table
     const valEl = document.getElementById(`dbgVal${s.id}`);
     const barEl = document.getElementById(`dbgBar${s.id}`);
-    if (valEl) {
-      valEl.textContent = v;
-      // Color the value text with heat color
-      valEl.style.color = v > 100 ? heatColor(norm) : '#5a6278';
-    }
-    if (barEl) {
-      barEl.style.width = ((v / MAX_RAW) * 100).toFixed(1) + '%';
-      barEl.style.background = heatColor(norm);
-    }
+    if (valEl) { valEl.textContent = v; valEl.style.color = v > 80 ? col : '#5a6278'; }
+    if (barEl) { barEl.style.width = ((v / MAX_RAW) * 100).toFixed(1) + '%'; barEl.style.background = col; }
 
-    // Highlight row if active
     const row = document.getElementById(`row${s.id}`);
     if (row) row.classList.toggle('active-row', v > 200);
   });
-}
-
-// Helper: naive color string → rgb components
-function hexToRgb(rgbStr) {
-  const m = rgbStr.match(/\d+/g);
-  return m ? `${m[0]},${m[1]},${m[2]}` : '28,110,191';
 }
 
 // ═══════════════════════════════════════════════════════════
 // BLE
 // ═══════════════════════════════════════════════════════════
 async function toggleConnection() {
-  if (bleDevice && bleDevice.gatt.connected) {
-    disconnect();
-  } else {
-    await connect();
-  }
+  if (bleDevice && bleDevice.gatt.connected) disconnect();
+  else await connect();
 }
 
 async function connect() {
   try {
     connectBtn.disabled = true;
     connectBtn.textContent = '◌ Scanning...';
-
     bleDevice = await navigator.bluetooth.requestDevice({
       filters: [{ name: 'ImpactInsoles' }],
       optionalServices: [SERVICE_UUID]
     });
-
     connectBtn.textContent = '↻ Connecting...';
     const server  = await bleDevice.gatt.connect();
     const service = await server.getPrimaryService(SERVICE_UUID);
-    bleChar        = await service.getCharacteristic(CHARACTERISTIC_UUID);
-
+    bleChar = await service.getCharacteristic(CHARACTERISTIC_UUID);
     await bleChar.startNotifications();
     bleChar.addEventListener('characteristicvaluechanged', handleBleData);
-
     bleDevice.addEventListener('gattserverdisconnected', onDisconnect);
-
-    // Update UI to connected state
     setConnectedState(true);
     rxCount = 0; lostCount = 0; lastPacketId = -1;
-
   } catch(err) {
     alert('Connection failed: ' + err.message);
     setConnectedState(false);
@@ -719,16 +689,8 @@ async function connect() {
   }
 }
 
-function disconnect() {
-  if (bleDevice) {
-    bleDevice.gatt.disconnect();
-  }
-}
-
-function onDisconnect() {
-  setConnectedState(false);
-  if (isRecording) stopRecording();
-}
+function disconnect() { if (bleDevice) bleDevice.gatt.disconnect(); }
+function onDisconnect() { setConnectedState(false); if (isRecording) stopRecording(); }
 
 function setConnectedState(connected) {
   if (connected) {
@@ -754,84 +716,51 @@ function setConnectedState(connected) {
   }
 }
 
-// ─── BLE Packet parser ───
-// Packet layout (28 bytes for 12 sensors):
-//   Bytes  0–23: 12 × 2 bytes, big-endian 12-bit sensor values
-//   Bytes 24–27: packet counter uint32 big-endian
+// Packet format: bytes 0–23 = 12×2-byte sensor values, bytes 24–27 = counter
 function handleBleData(event) {
   const data = new Uint8Array(event.target.value.buffer);
-
   for (let i = 0; i < NUM_SENSORS; i++) {
-    sensorValues[i] = (data[i*2] << 8) | data[i*2 + 1];
+    sensorValues[i] = (data[i * 2] << 8) | data[i * 2 + 1];
   }
-
-  // Packet counter (bytes 24-27)
-  const pktId = (data[24]<<24)|(data[25]<<16)|(data[26]<<8)|data[27];
+  const pktId = (data[24] << 24) | (data[25] << 16) | (data[26] << 8) | data[27];
   rxCount++;
-  if (lastPacketId >= 0) {
-    const expected = lastPacketId + 1;
-    if (pktId !== expected) lostCount += Math.abs(pktId - expected);
-  }
+  if (lastPacketId >= 0 && pktId !== lastPacketId + 1) lostCount += Math.abs(pktId - lastPacketId - 1);
   lastPacketId = pktId;
 
-  // Update packet loss display
-  const totalExpected = pktId + 1;
-  const pct = totalExpected > 0 ? (lostCount / totalExpected * 100) : 0;
+  const pct = (pktId + 1) > 0 ? (lostCount / (pktId + 1) * 100) : 0;
   const pktLossEl = document.getElementById('pktLoss');
   pktLossEl.textContent = pct.toFixed(2) + '%';
   pktLossEl.className = 'pkt-val ' + (pct === 0 ? 'good' : pct < 5 ? 'warn' : 'bad');
   document.getElementById('pktRx').textContent   = rxCount;
   document.getElementById('pktLost').textContent = lostCount;
 
-  // Update live heatmap
   updateUI();
 
-  // Record
-  if (isRecording) {
-    recordingData.push({
-      t: (Date.now() - recordingStart) / 1000,
-      vals: [...sensorValues]
-    });
-  }
+  if (isRecording) recordingData.push({ t: (Date.now() - recordingStart) / 1000, vals: [...sensorValues] });
 }
 
 // ═══════════════════════════════════════════════════════════
 // RECORDING
 // ═══════════════════════════════════════════════════════════
 function startRecording() {
-  isRecording = true;
-  recordingData = [];
-  recordingStart = Date.now();
-
-  startBtn.classList.add('is-active');
-  startBtn.textContent = '● Recording';
+  isRecording = true; recordingData = []; recordingStart = Date.now();
+  startBtn.classList.add('is-active'); startBtn.textContent = '● Recording';
   stopBtn.disabled = false;
-
   recIndicator.classList.add('active');
-  statusDot.className = 'dot rec';
-  statusText.textContent = 'RECORDING';
-
+  statusDot.className = 'dot rec'; statusText.textContent = 'RECORDING';
   sessionSection.classList.remove('visible');
-
   timerHandle = setInterval(() => {
     const s = Math.floor((Date.now() - recordingStart) / 1000);
-    const m = Math.floor(s / 60);
-    recTimer.textContent = `${String(m).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+    recTimer.textContent = `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
   }, 500);
 }
 
 function stopRecording() {
-  isRecording = false;
-  clearInterval(timerHandle);
-
-  startBtn.classList.remove('is-active');
-  startBtn.textContent = '▶ Start Session';
+  isRecording = false; clearInterval(timerHandle);
+  startBtn.classList.remove('is-active'); startBtn.textContent = '▶ Start Session';
   stopBtn.disabled = true;
-
   recIndicator.classList.remove('active');
-  statusDot.className = 'dot on';
-  statusText.textContent = 'CONNECTED';
-
+  statusDot.className = 'dot on'; statusText.textContent = 'CONNECTED';
   renderSessionResults();
 }
 
@@ -842,224 +771,131 @@ function renderSessionResults() {
   if (!recordingData.length) { alert('No data recorded.'); return; }
 
   const n = recordingData.length;
-  const duration = recordingData[n-1].t;
+  const duration = recordingData[n - 1].t;
 
-  // Compute averages per sensor
   const avgVals = new Array(NUM_SENSORS).fill(0);
   let globalPeak = 0, globalSum = 0;
-  recordingData.forEach(d => {
-    d.vals.forEach((v,i) => {
-      avgVals[i] += v;
-      if (v > globalPeak) globalPeak = v;
-      globalSum += v;
-    });
-  });
-  avgVals.forEach((v,i) => avgVals[i] = v / n);
+  recordingData.forEach(d => d.vals.forEach((v, i) => {
+    avgVals[i] += v;
+    if (v > globalPeak) globalPeak = v;
+    globalSum += v;
+  }));
+  avgVals.forEach((v, i) => avgVals[i] = v / n);
   const globalAvg = globalSum / (n * NUM_SENSORS);
 
-  // Stats
   document.getElementById('sessDuration').textContent = `${Math.round(duration)}s`;
-  document.getElementById('sessSamples').textContent   = n;
-  document.getElementById('sessPeak').textContent      = globalPeak;
-  document.getElementById('sessAvg').textContent       = Math.round(globalAvg);
-  document.getElementById('sessionDate').textContent   = new Date().toLocaleString();
+  document.getElementById('sessSamples').textContent  = n;
+  document.getElementById('sessPeak').textContent     = globalPeak;
+  document.getElementById('sessAvg').textContent      = Math.round(globalAvg);
+  document.getElementById('sessionDate').textContent  = new Date().toLocaleString();
 
-  // Zone breakdown
-  const foreSum  = ZONE_FORE.reduce((a,i)=> a+avgVals[i], 0);
-  const midSum   = ZONE_MID.reduce((a,i) => a+avgVals[i], 0);
-  const heelSum  = ZONE_HEEL.reduce((a,i)=> a+avgVals[i], 0);
+  const foreSum   = ZONE_FORE.reduce((a, i) => a + avgVals[i], 0);
+  const midSum    = ZONE_MID.reduce((a, i)  => a + avgVals[i], 0);
+  const heelSum   = ZONE_HEEL.reduce((a, i) => a + avgVals[i], 0);
   const zoneTotal = foreSum + midSum + heelSum || 1;
+  const forePct   = Math.round(foreSum  / zoneTotal * 100);
+  const midPct    = Math.round(midSum   / zoneTotal * 100);
+  const heelPct   = Math.round(heelSum  / zoneTotal * 100);
 
-  const forePct  = Math.round(foreSum  / zoneTotal * 100);
-  const midPct   = Math.round(midSum   / zoneTotal * 100);
-  const heelPct  = Math.round(heelSum  / zoneTotal * 100);
-
-  document.getElementById('zoneForePct').textContent  = forePct + '%';
-  document.getElementById('zoneMidPct').textContent   = midPct  + '%';
-  document.getElementById('zoneHeelPct').textContent  = heelPct + '%';
-
-  // Animate zone bars after a tick
+  document.getElementById('zoneForePct').textContent = forePct + '%';
+  document.getElementById('zoneMidPct').textContent  = midPct  + '%';
+  document.getElementById('zoneHeelPct').textContent = heelPct + '%';
   requestAnimationFrame(() => {
     document.getElementById('zoneForeFill').style.width = forePct + '%';
     document.getElementById('zoneMidFill').style.width  = midPct  + '%';
     document.getElementById('zoneHeelFill').style.width = heelPct + '%';
   });
 
-  // Session heatmap foot
-  renderSessionFoot(avgVals);
+  // Draw session average heatmap
+  const sessCanvas = document.getElementById('sessCanvas');
+  drawHeatmap(sessCanvas, avgVals);
 
-  // Chart
   renderChart(recordingData);
-
   sessionSection.classList.add('visible');
   setTimeout(() => sessionSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
 }
 
-function renderSessionFoot(avgVals) {
-  const container = document.getElementById('sessSpots');
-  container.innerHTML = '';
-
-  SENSORS.forEach(s => {
-    const v    = avgVals[s.id];
-    const norm = v / MAX_RAW;
-    const col  = heatColor(norm);
-    const r    = 5 + norm * 6;
-
-    container.innerHTML += `
-      <g>
-        <circle cx="${s.cx}" cy="${s.cy}" r="${(r+3).toFixed(1)}" fill="${col}" opacity="0.18"/>
-        <circle cx="${s.cx}" cy="${s.cy}" r="${r.toFixed(1)}" fill="${col}" opacity="${(0.5+norm*0.5).toFixed(2)}"
-                stroke="rgba(255,255,255,0.2)" stroke-width="0.8"/>
-      </g>
-    `;
-  });
-}
-
 function renderChart(data) {
-  // Downsample if too many points
   let pts = data;
-  if (pts.length > 400) {
-    const step = Math.ceil(pts.length / 400);
-    pts = pts.filter((_,i) => i % step === 0);
-  }
+  if (pts.length > 400) { const step = Math.ceil(pts.length / 400); pts = pts.filter((_, i) => i % step === 0); }
 
-  const labels = pts.map(d => d.t.toFixed(1));
-
-  // Build datasets — one per sensor (12 lines), but only show 4 zones in legend
-  const zoneLabels = ['Forefoot (avg)', 'Upper-Mid (avg)', 'Lower-Mid (avg)', 'Heel (avg)'];
-  const zoneGroups = [ZONE_FORE, ZONE_MID, ZONE_HEEL]; // show 3 zone-average lines for clarity
+  const zoneGroups = [ZONE_FORE, ZONE_MID, ZONE_HEEL];
   const zoneColors = ['#E84A00', '#00d98b', '#1C6EBF'];
   const zoneNames  = ['Forefoot', 'Mid-Foot', 'Heel'];
 
   const datasets = zoneGroups.map((grp, gi) => ({
     label: zoneNames[gi],
-    data: pts.map(d => {
-      const s = grp.reduce((a,i) => a + d.vals[i], 0);
-      return Math.round(s / grp.length);
-    }),
+    data: pts.map(d => Math.round(grp.reduce((a, i) => a + d.vals[i], 0) / grp.length)),
     borderColor: zoneColors[gi],
     backgroundColor: zoneColors[gi] + '14',
-    borderWidth: 2,
-    tension: 0.4,
-    fill: true,
-    pointRadius: 0,
-    pointHoverRadius: 4,
-    pointHoverBackgroundColor: zoneColors[gi],
-    pointHoverBorderColor: '#fff',
-    pointHoverBorderWidth: 2,
+    borderWidth: 2, tension: 0.4, fill: true,
+    pointRadius: 0, pointHoverRadius: 4,
   }));
 
   if (chart) chart.destroy();
-
   chart = new Chart(document.getElementById('sessionChart').getContext('2d'), {
     type: 'line',
-    data: { labels, datasets },
+    data: { labels: pts.map(d => d.t.toFixed(1)), datasets },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: {
-          display: true,
-          labels: { color: '#5a6278', font: { size: 10, family: "'DM Mono', monospace" }, boxWidth: 12 }
-        },
-        tooltip: {
-          backgroundColor: '#0e1118',
-          titleColor: '#e8ecf4',
-          bodyColor: '#5a6278',
-          borderColor: '#1C6EBF',
-          borderWidth: 1,
-          padding: 10,
-          titleFont: { family: "'DM Mono', monospace", size: 11 },
-          bodyFont:  { family: "'DM Mono', monospace", size: 10 },
-        }
+        legend: { display: true, labels: { color: '#5a6278', font: { size: 10, family: "'DM Mono',monospace" }, boxWidth: 12 } },
+        tooltip: { backgroundColor: '#0e1118', titleColor: '#e8ecf4', bodyColor: '#5a6278', borderColor: '#1C6EBF', borderWidth: 1, padding: 10 }
       },
       scales: {
-        x: {
-          title: { display: true, text: 'Time (s)', color: '#5a6278', font: { size: 10 } },
-          ticks: { color: '#5a6278', maxTicksLimit: 8, font: { family: "'DM Mono',monospace", size: 9 } },
-          grid:  { color: 'rgba(255,255,255,0.04)' }
-        },
-        y: {
-          title: { display: true, text: 'ADC Value (12-bit)', color: '#5a6278', font: { size: 10 } },
-          min: 0, max: MAX_RAW,
-          ticks: { color: '#5a6278', font: { family: "'DM Mono',monospace", size: 9 } },
-          grid:  { color: 'rgba(255,255,255,0.04)' }
-        }
+        x: { title: { display:true, text:'Time (s)', color:'#5a6278', font:{size:10} }, ticks:{color:'#5a6278',maxTicksLimit:8,font:{family:"'DM Mono',monospace",size:9}}, grid:{color:'rgba(255,255,255,0.04)'} },
+        y: { title: { display:true, text:'ADC (12-bit)', color:'#5a6278', font:{size:10} }, min:0, max:MAX_RAW, ticks:{color:'#5a6278',font:{family:"'DM Mono',monospace",size:9}}, grid:{color:'rgba(255,255,255,0.04)'} }
       }
     }
   });
 }
 
 // ═══════════════════════════════════════════════════════════
-// DEMO MODE (no BLE — for testing)
+// DEMO MODE  — press D to toggle
 // ═══════════════════════════════════════════════════════════
-// Press 'D' to toggle demo mode
-let demoMode = false;
-let demoHandle = null;
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'd' || e.key === 'D') toggleDemo();
-});
+let demoMode = false, demoHandle = null;
+document.addEventListener('keydown', e => { if (e.key === 'd' || e.key === 'D') toggleDemo(); });
 
 function toggleDemo() {
   if (demoMode) {
-    demoMode = false;
-    clearInterval(demoHandle);
-    setConnectedState(false);
-    return;
+    demoMode = false; clearInterval(demoHandle); setConnectedState(false); return;
   }
-  demoMode = true;
-  setConnectedState(true);
+  demoMode = true; setConnectedState(true);
   let t = 0;
-
   demoHandle = setInterval(() => {
     t += 0.08;
-    // Simulate walking gait pattern
-    const heelStrike = Math.max(0, Math.sin(t) * 0.9 + Math.random() * 0.15);
-    const toeOff     = Math.max(0, Math.sin(t + 1.2) * 0.85 + Math.random() * 0.15);
-    const mid        = Math.max(0, Math.sin(t + 0.6) * 0.5 + Math.random() * 0.1);
-
-    sensorValues[0]  = Math.round(toeOff   * MAX_RAW * (0.7 + Math.random()*0.3));
-    sensorValues[1]  = Math.round(toeOff   * MAX_RAW * (0.8 + Math.random()*0.2));
-    sensorValues[2]  = Math.round(toeOff   * MAX_RAW * (0.75+ Math.random()*0.25));
-    sensorValues[3]  = Math.round(toeOff   * MAX_RAW * (0.65+ Math.random()*0.35));
-    sensorValues[4]  = Math.round(mid      * MAX_RAW * (0.6 + Math.random()*0.2));
-    sensorValues[5]  = Math.round(mid      * MAX_RAW * (0.55+ Math.random()*0.2));
-    sensorValues[6]  = Math.round(mid      * MAX_RAW * (0.5 + Math.random()*0.15));
-    sensorValues[7]  = Math.round(mid      * MAX_RAW * (0.5 + Math.random()*0.15));
-    sensorValues[8]  = Math.round(heelStrike*MAX_RAW * (0.85+ Math.random()*0.15));
-    sensorValues[9]  = Math.round(heelStrike*MAX_RAW * (0.9 + Math.random()*0.1));
-    sensorValues[10] = Math.round(heelStrike*MAX_RAW * (0.88+ Math.random()*0.12));
-    sensorValues[11] = Math.round(heelStrike*MAX_RAW * (0.8 + Math.random()*0.2));
-
+    const heel   = Math.max(0, Math.sin(t)       * 0.9  + Math.random() * 0.12);
+    const toe    = Math.max(0, Math.sin(t + 1.2) * 0.85 + Math.random() * 0.12);
+    const mid    = Math.max(0, Math.sin(t + 0.6) * 0.50 + Math.random() * 0.08);
+    sensorValues[0]  = Math.round(toe  * MAX_RAW * (0.70 + Math.random() * 0.30));
+    sensorValues[1]  = Math.round(toe  * MAX_RAW * (0.80 + Math.random() * 0.20));
+    sensorValues[2]  = Math.round(toe  * MAX_RAW * (0.75 + Math.random() * 0.25));
+    sensorValues[3]  = Math.round(toe  * MAX_RAW * (0.65 + Math.random() * 0.35));
+    sensorValues[4]  = Math.round(mid  * MAX_RAW * (0.60 + Math.random() * 0.20));
+    sensorValues[5]  = Math.round(mid  * MAX_RAW * (0.55 + Math.random() * 0.20));
+    sensorValues[6]  = Math.round(mid  * MAX_RAW * (0.50 + Math.random() * 0.15));
+    sensorValues[7]  = Math.round(mid  * MAX_RAW * (0.50 + Math.random() * 0.15));
+    sensorValues[8]  = Math.round(heel * MAX_RAW * (0.85 + Math.random() * 0.15));
+    sensorValues[9]  = Math.round(heel * MAX_RAW * (0.90 + Math.random() * 0.10));
+    sensorValues[10] = Math.round(heel * MAX_RAW * (0.88 + Math.random() * 0.12));
+    sensorValues[11] = Math.round(heel * MAX_RAW * (0.80 + Math.random() * 0.20));
     sensorValues = sensorValues.map(v => Math.max(0, Math.min(MAX_RAW, Math.round(v))));
-
     updateUI();
-
-    if (isRecording) {
-      recordingData.push({
-        t: (Date.now() - recordingStart) / 1000,
-        vals: [...sensorValues]
-      });
-    }
-  }, 20); // 50 Hz demo
-
-  console.log('Demo mode ON — press D again to disable');
+    if (isRecording) recordingData.push({ t: (Date.now() - recordingStart) / 1000, vals: [...sensorValues] });
+  }, 20);
 }
 
 // ═══════════════════════════════════════════════════════════
-// INIT CHECKS
+// INIT
 // ═══════════════════════════════════════════════════════════
 if (!navigator.bluetooth) {
   connectBtn.disabled = true;
   connectBtn.textContent = 'Web Bluetooth Not Supported (use Chrome)';
-  // Still allow demo mode
 }
 
-// Initial render (shows zeroed foot)
+// Draw zeroed heatmap on load so the insole shape is visible
 updateUI();
 </script>
-
 </body>
 </html>
