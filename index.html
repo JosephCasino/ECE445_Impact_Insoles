@@ -276,15 +276,27 @@
 
     <!-- Debug / Raw Values -->
     <div class="debug-panel" id="debugPanel">
-      <div class="panel-label">Raw Sensor Values</div>
+      <div class="panel-label">Sensor Values</div>
       <table class="sensor-table">
         <thead>
-          <tr><th>#</th><th>ZONE</th><th>VAL</th><th>LEVEL</th></tr>
+          <tr><th>#</th><th>ZONE</th><th>ADC</th><th>FORCE</th><th>LEVEL</th></tr>
         </thead>
         <tbody id="sensorTableBody"></tbody>
       </table>
     </div>
 
+  </div>
+
+  <!-- Force summary row -->
+  <div class="packet-row" id="forceRow" style="display:none;">
+    <div>
+      <div class="pkt-label">TOTAL FORCE</div>
+      <div class="pkt-val good" id="totalForce">0.00 N</div>
+    </div>
+    <div class="pkt-stats" style="text-align:right;">
+      FORE: <span id="foreForce">0.00 N</span><br>
+      MID: <span id="midForce">0.00 N</span> &nbsp; HEEL: <span id="heelForce">0.00 N</span>
+    </div>
   </div>
 
   <!-- Recording controls -->
@@ -374,6 +386,34 @@ const SERVICE_UUID        = '12345678-1234-1234-1234-123456789abc';
 const CHARACTERISTIC_UUID = 'abcd1234-ab12-ab12-ab12-abcdef123456';
 const NUM_SENSORS = 12;
 const MAX_RAW     = 4095;
+
+// ─── FSR402 force conversion ───────────────────────────────
+// Circuit: V+ → FSR402 → node → R_M → GND  (V_OUT at node)
+// Change R_M to match the resistor in your actual voltage divider.
+const V_SUPPLY = 3.3;   // ESP32 ADC reference voltage (V)
+const R_M      = 10000; // Measuring resistor (Ω) — adjust to match your circuit
+
+// Returns force in Newtons for a single FSR402 given a raw 12-bit ADC value.
+// Based on FSR402 datasheet Fig 1 log-log curve: R_FSR ≈ 1e6 / F(grams)
+function adcToForceN(adc) {
+  if (adc <= 0) return 0;
+  if (adc >= MAX_RAW) return null; // saturated — reading unreliable
+  const vOut = (adc / MAX_RAW) * V_SUPPLY;
+  if (vOut <= 0) return 0;
+  // Voltage divider → FSR resistance
+  const rFsr = R_M * (V_SUPPLY - vOut) / vOut;
+  if (rFsr <= 0) return null;
+  // Datasheet curve fit: F(g) ≈ 1,000,000 / R_FSR (Ω)
+  const forceG = 1e6 / rFsr;
+  return forceG / 101.97; // grams → Newtons
+}
+
+// Format a Newton value for display  (e.g. "0.32 N" or "4.10 N")
+function fmtN(n) {
+  if (n === null) return 'SAT';
+  if (n < 0.01)  return '— N';
+  return n.toFixed(2) + ' N';
+}
 
 // ═══════════════════════════════════════════════════════════
 // INSOLE SHAPE
@@ -631,6 +671,7 @@ const heatCanvas    = document.getElementById('heatCanvas');
       <td class="region-col" style="font-family:'DM Mono',monospace;font-size:11px;color:#5a6278;">${s.label}</td>
       <td class="region-col">${s.zone}</td>
       <td class="val-col" id="dbgVal${s.id}">0</td>
+      <td class="val-col" id="dbgForce${s.id}" style="font-size:11px;">— N</td>
       <td class="bar-col">
         <div class="mini-bar-track"><div class="mini-bar-fill" id="dbgBar${s.id}"></div></div>
       </td>
@@ -651,16 +692,49 @@ function updateUI() {
   // Redraw canvas heatmap
   drawHeatmap(heatCanvas, sensorValues);
 
+  // Compute per-sensor forces and zone totals
+  const forces = sensorValues.map(adcToForceN);
+  let totalF = 0, foreF = 0, midF = 0, heelF = 0;
+  forces.forEach((f, i) => {
+    const val = f ?? 0;
+    totalF += val;
+    if (ZONE_FORE.includes(i)) foreF += val;
+    if (ZONE_MID.includes(i))  midF  += val;
+    if (ZONE_HEEL.includes(i)) heelF += val;
+  });
+
+  // Update force summary row
+  const forceRow = document.getElementById('forceRow');
+  if (forceRow) forceRow.style.display = '';
+  const totalForceEl = document.getElementById('totalForce');
+  if (totalForceEl) {
+    totalForceEl.textContent = totalF.toFixed(2) + ' N';
+    totalForceEl.className = 'pkt-val ' + (totalF < 1 ? 'good' : totalF < 50 ? 'warn' : 'bad');
+  }
+  const fe = document.getElementById('foreForce');
+  const me = document.getElementById('midForce');
+  const he = document.getElementById('heelForce');
+  if (fe) fe.textContent = foreF.toFixed(2) + ' N';
+  if (me) me.textContent = midF.toFixed(2)  + ' N';
+  if (he) he.textContent = heelF.toFixed(2) + ' N';
+
   // Update debug table
   SENSORS.forEach(s => {
     const v    = sensorValues[s.id];
     const norm = v / MAX_RAW;
     const col  = normToHex(norm);
 
-    const valEl = document.getElementById(`dbgVal${s.id}`);
-    const barEl = document.getElementById(`dbgBar${s.id}`);
-    if (valEl) { valEl.textContent = v; valEl.style.color = v > 80 ? col : '#5a6278'; }
-    if (barEl) { barEl.style.width = ((v / MAX_RAW) * 100).toFixed(1) + '%'; barEl.style.background = col; }
+    const valEl   = document.getElementById(`dbgVal${s.id}`);
+    const forceEl = document.getElementById(`dbgForce${s.id}`);
+    const barEl   = document.getElementById(`dbgBar${s.id}`);
+
+    if (valEl)   { valEl.textContent = v; valEl.style.color = v > 80 ? col : '#5a6278'; }
+    if (forceEl) {
+      const fn = forces[s.id];
+      forceEl.textContent = fmtN(fn);
+      forceEl.style.color = (fn === null) ? '#ff4444' : (fn > 0.05 ? col : '#5a6278');
+    }
+    if (barEl)   { barEl.style.width = ((v / MAX_RAW) * 100).toFixed(1) + '%'; barEl.style.background = col; }
 
     const row = document.getElementById(`row${s.id}`);
     if (row) row.classList.toggle('active-row', v > 200);
