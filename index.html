@@ -213,6 +213,17 @@
     .chart-wrap .chart-canvas-container { position: relative; height: 240px; }
     .chart-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--muted); margin-bottom: 12px; }
 
+    /* ─── IMU Placeholder Styles ─── */
+    .imu-divider { height: 1px; background: var(--border); margin: 10px 0 0; }
+    .imu-card { opacity: 0.65; }
+    .imu-coming-soon { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--dim); letter-spacing: 2px; text-align: center; margin-top: 8px; padding: 5px; border: 1px dashed rgba(28,110,191,0.2); border-radius: 4px; }
+    .imu-raw-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,.03); }
+    .imu-axis { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 700; width: 14px; }
+    .imu-x { color: #ff6b6b; }
+    .imu-y { color: #51cf66; }
+    .imu-z { color: #339af0; }
+    .imu-raw-val { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--dim); }
+
     /* Sensor Test tab */
     .sensor-test-content { display: flex; flex-direction: column; gap: 16px; }
 
@@ -256,7 +267,7 @@
 
   <!-- Connect / Demo -->
   <div class="btn-row">
-    <button class="connect-btn" id="connectBtn" onclick="toggleConnection()">⬡ Connect ESP32</button>
+    <button class="connect-btn" id="connectBtn" onclick="toggleConnection()">⬡ Connect Device via Bluetooth</button>
     <button class="demo-btn"    id="demoBtn"    onclick="toggleDemo()">◈ Demo Mode</button>
   </div>
 
@@ -317,6 +328,32 @@
             <span class="gait-metric-val" id="gaitLoadRate">—</span>
           </div>
         </div>
+        <!-- IMU Data Placeholder -->
+        <div class="imu-divider"></div>
+        <div class="panel-label" style="margin-top:10px;margin-bottom:8px;">IMU Metrics</div>
+        <div class="gait-stats-grid">
+          <div class="gait-stat-card imu-card">
+            <div class="gait-stat-label">IMPACT G</div>
+            <div class="gait-stat-val" id="imuImpactG">—</div>
+            <div class="gait-stat-unit" style="font-size:8px;color:var(--dim);">peak vertical accel</div>
+          </div>
+          <div class="gait-stat-card imu-card">
+            <div class="gait-stat-label">PRONATION</div>
+            <div class="gait-stat-val" id="imuPronation">—</div>
+            <div class="gait-stat-unit" style="font-size:8px;color:var(--dim);">roll at stance</div>
+          </div>
+        </div>
+        <div class="gait-metrics-row" style="margin-top:5px;">
+          <div class="gait-metric-pill imu-card">
+            <span class="gait-metric-label">FOOT ANGLE</span>
+            <span class="gait-metric-val" id="imuFootAngle">—</span>
+          </div>
+          <div class="gait-metric-pill imu-card">
+            <span class="gait-metric-label">VERT. OSC.</span>
+            <span class="gait-metric-val" id="imuVertOsc">—</span>
+          </div>
+        </div>
+        <div class="imu-coming-soon">LSM6DSOX · IMU data coming soon</div>
       </div>
     </div><!-- /main-grid -->
 
@@ -389,6 +426,26 @@
           <thead><tr><th>#</th><th>ZONE</th><th>ADC</th><th>FORCE</th><th>LEVEL</th></tr></thead>
           <tbody id="sensorTableBody"></tbody>
         </table>
+      </div>
+
+      <!-- IMU Raw Data Placeholder -->
+      <div class="debug-panel" id="imuPanel">
+        <div class="panel-label" style="margin-bottom:12px;">IMU Raw Data <span style="font-size:8px;color:var(--dim);letter-spacing:1px;font-weight:400;">· LSM6DSOX via I²C</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:6px;">ACCELEROMETER (g)</div>
+            <div class="imu-raw-row"><span class="imu-axis imu-x">X</span><span class="imu-raw-val" id="imuAccX">—</span></div>
+            <div class="imu-raw-row"><span class="imu-axis imu-y">Y</span><span class="imu-raw-val" id="imuAccY">—</span></div>
+            <div class="imu-raw-row"><span class="imu-axis imu-z">Z</span><span class="imu-raw-val" id="imuAccZ">—</span></div>
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:6px;">GYROSCOPE (°/s)</div>
+            <div class="imu-raw-row"><span class="imu-axis imu-x">X</span><span class="imu-raw-val" id="imuGyrX">—</span></div>
+            <div class="imu-raw-row"><span class="imu-axis imu-y">Y</span><span class="imu-raw-val" id="imuGyrY">—</span></div>
+            <div class="imu-raw-row"><span class="imu-axis imu-z">Z</span><span class="imu-raw-val" id="imuGyrZ">—</span></div>
+          </div>
+        </div>
+        <div class="imu-coming-soon" style="margin-top:12px;">IMU data coming soon — LSM6DSOX at 100 Hz over I²C</div>
       </div>
 
     </div>
@@ -664,6 +721,10 @@ function detectGait() {
   const midRatio  = totalRaw > 0 ? midRaw/totalRaw  : 0;
   const inContact = totalRaw >= CAL.totalContactLoad;
   const phaseDur  = now - gait.phaseStart;
+
+  // Freeze state machine when paused — metrics stay at last values
+  if (isPaused) { updateGaitUI(); return; }
+
   const dt = now - gait.prevTime;
   if (dt > 5 && gait.prevTime > 0) { const lr=(totalF-gait.prevForce)/(dt/1000); if(lr>gait.curLoadRate) gait.curLoadRate=lr; }
   gait.prevForce = totalF; gait.prevTime = now;
@@ -796,8 +857,11 @@ function setConnectedState(connected) {
     hp.classList.add('visible'); gp.classList.add('visible'); rr.classList.add('visible'); pr.classList.add('visible');
   } else {
     sp.classList.remove('connected'); sd.className='dot'; st.textContent='OFFLINE';
-    cb.textContent='⬡ Scan & Connect via Bluetooth'; cb.className='connect-btn';
+    cb.textContent='⬡ Connect Device via Bluetooth'; cb.className='connect-btn';
     hp.classList.remove('visible'); gp.classList.remove('visible'); rr.classList.remove('visible'); pr.classList.remove('visible');
+    // Reset all sensor readings to zero so displays don't stay frozen on last values
+    sensorValues = new Array(NUM_SENSORS).fill(0);
+    updateUI();
   }
 }
 
@@ -1118,7 +1182,6 @@ function toggleDemo() {
 // INIT
 // ═══════════════════════════════════════════════════════════
 if(!navigator.bluetooth){ const cb=document.getElementById('connectBtn'); cb.disabled=true; cb.textContent='⚠ BLE Not Supported (use Chrome)'; }
-toggleDemo();
 </script>
 </body>
 </html>
