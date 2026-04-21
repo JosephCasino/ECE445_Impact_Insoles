@@ -121,17 +121,26 @@
     /* ─── Recording Controls ─── */
     .recording-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; opacity: 0; transform: translateY(12px); transition: all .45s ease .1s; }
     .recording-row.visible { opacity: 1; transform: translateY(0); }
-    .rec-btn { padding: 13px 8px; border-radius: 8px; border: none; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .25s ease; }
+    .rec-btn { padding: 13px 8px; border-radius: 8px; border: none; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .2s ease; }
+
+    /* Start button */
     .start-btn { background: var(--blue); color: #fff; box-shadow: 0 4px 20px var(--blue-dim); }
-    .start-btn:hover:not(:disabled):not(.is-active) { background: #2481d6; box-shadow: 0 6px 24px var(--blue-glow); }
+    .start-btn:hover:not(:disabled):not(.is-active) { background: #2481d6; box-shadow: 0 6px 24px var(--blue-glow); transform: translateY(-1px); }
+    .start-btn:active:not(:disabled):not(.is-active) { transform: translateY(0); }
     .start-btn.is-active { background: var(--bg-panel); color: var(--muted); cursor: default; border: 1px solid var(--border); }
-    .pause-btn { background: transparent; border: 2px solid var(--muted); color: var(--muted); }
-    .pause-btn:hover:not(:disabled) { border-color: var(--yellow); color: var(--yellow); background: rgba(244,196,48,0.1); }
-    .pause-btn.is-paused { border-color: var(--yellow); color: var(--yellow); background: rgba(244,196,48,0.12); }
-    .pause-btn:disabled { opacity: .3; cursor: not-allowed; }
-    .stop-btn { background: transparent; border: 2px solid var(--muted); color: var(--muted); }
-    .stop-btn:hover:not(:disabled) { border-color: var(--orange); color: var(--orange); background: var(--orange-dim); }
-    .stop-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+    /* Pause button — always yellow */
+    .pause-btn { background: transparent; border: 2px solid var(--yellow); color: var(--yellow); }
+    .pause-btn:hover:not(:disabled) { background: rgba(244,196,48,0.15); box-shadow: 0 4px 20px rgba(244,196,48,0.3); transform: translateY(-1px); }
+    .pause-btn:active:not(:disabled) { background: rgba(244,196,48,0.28); transform: translateY(0); }
+    .pause-btn.is-paused { background: rgba(244,196,48,0.15); }
+    .pause-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* Stop button — always red/orange */
+    .stop-btn { background: transparent; border: 2px solid var(--orange); color: var(--orange); }
+    .stop-btn:hover:not(:disabled) { background: var(--orange-dim); box-shadow: 0 4px 20px var(--orange-glow); transform: translateY(-1px); }
+    .stop-btn:active:not(:disabled) { background: rgba(232,74,0,0.28); transform: translateY(0); }
+    .stop-btn:disabled { opacity: .4; cursor: not-allowed; }
 
     .rec-indicator { display: none; align-items: center; gap: 10px; padding: 10px 16px; border: 1px solid var(--orange); background: var(--orange-dim); border-radius: 8px; margin-bottom: 16px; transition: border-color .3s, background .3s; }
     .rec-indicator.active { display: flex; }
@@ -152,15 +161,26 @@
     .pkt-val.bad  { color: #ff3838; }
     .pkt-stats { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
 
-    /* ─── Session Results ─── */
-    .session-section { background: var(--bg-card); border: 1px solid var(--blue); border-radius: 12px; padding: 20px; margin-bottom: 20px; display: none; }
+    /* ─── Session Results — Accordion ─── */
+    .session-section { background: var(--bg-card); border: 1px solid var(--blue); border-radius: 12px; margin-bottom: 12px; display: none; overflow: hidden; }
     .session-section.visible { display: block; animation: slide-up .5s cubic-bezier(.16,1,.3,1); }
     @keyframes slide-up { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
-    .session-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+
+    .session-header { display: flex; align-items: center; gap: 10px; padding: 16px 20px; cursor: pointer; border-bottom: 1px solid transparent; transition: background 0.2s, border-color 0.2s; user-select: none; }
+    .session-section.expanded .session-header { border-bottom-color: var(--border); }
+    .session-header:hover { background: rgba(255,255,255,0.03); }
     .session-title { font-size: 16px; font-weight: 700; letter-spacing: 2px; color: var(--text); }
-    .session-date { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-left: auto; }
-    .download-pdf-btn { padding: 5px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-panel); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; }
+    .session-date { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text); margin-left: auto; }
+    .session-toggle { font-size: 11px; color: var(--muted); transition: transform 0.3s ease; flex-shrink: 0; }
+    .session-section.expanded .session-toggle { transform: rotate(180deg); }
+
+    .download-pdf-btn { padding: 5px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-panel); color: var(--text); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
     .download-pdf-btn:hover { border-color: var(--blue); color: var(--blue); }
+
+    .session-body { max-height: 0; overflow: hidden; transition: max-height 0.45s cubic-bezier(.16,1,.3,1); }
+    .session-section.expanded .session-body { max-height: 4000px; }
+    .session-body-inner { padding: 20px; }
+
     .session-stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
     .stat-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px 8px; text-align: center; }
     .stat-card-label { font-size: 8px; letter-spacing: 2px; color: var(--muted); margin-bottom: 5px; }
@@ -181,8 +201,16 @@
     .zone-bar-fill-orange { height: 100%; border-radius: 3px; background: var(--orange); transition: width 1s cubic-bezier(.16,1,.3,1); }
     .zone-bar-fill-blue   { height: 100%; border-radius: 3px; background: var(--blue);   transition: width 1s cubic-bezier(.16,1,.3,1); }
     .zone-bar-fill-green  { height: 100%; border-radius: 3px; background: #00d98b;        transition: width 1s cubic-bezier(.16,1,.3,1); }
-    .chart-wrap { border-radius: 8px; overflow: hidden; background: var(--bg-panel); padding: 14px; }
-    .chart-wrap .chart-canvas-container { position: relative; height: 180px; }
+
+    /* AI Summary placeholder */
+    .ai-summary-section { margin-top: 14px; }
+    .ai-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 22px 16px; background: var(--bg-panel); border: 1px dashed rgba(28,110,191,0.35); border-radius: 8px; text-align: center; }
+    .ai-placeholder-icon { font-size: 22px; color: var(--blue); opacity: 0.6; }
+    .ai-placeholder-text { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+    .ai-placeholder-sub { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--dim); line-height: 1.5; max-width: 240px; }
+
+    .chart-wrap { border-radius: 8px; overflow: hidden; background: var(--bg-panel); padding: 14px; margin-top: 18px; }
+    .chart-wrap .chart-canvas-container { position: relative; height: 240px; }
     .chart-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--muted); margin-bottom: 12px; }
 
     /* Sensor Test tab */
@@ -198,14 +226,16 @@
       #packetRow, .main-grid, #tab-sensor-test, .footer { display: none !important; }
       .session-section { display: none !important; border: 1px solid #ccc !important; background: #fff !important; }
       .session-section.print-target { display: block !important; }
+      .session-section.print-target .session-body { max-height: none !important; }
       .download-pdf-btn { display: none !important; }
+      .session-toggle { display: none !important; }
       .stat-card { background: #f5f5f5 !important; border: 1px solid #ddd !important; }
       .stat-card-val { color: #1C6EBF !important; }
       .gait-stat-card-orange .stat-card-val { color: #E84A00 !important; }
       .gait-stat-card-green  .stat-card-val { color: #007a4f !important; }
       .stat-card-label, .session-gait-label, .session-heatmap-label, .chart-label,
       .zone-name, .session-date, .session-title, .pkt-label, .pkt-stats { color: #333 !important; }
-      .chart-wrap, .zone-bar-track { background: #f0f0f0 !important; }
+      .chart-wrap, .zone-bar-track, .ai-placeholder { background: #f0f0f0 !important; }
     }
   </style>
 </head>
@@ -262,7 +292,7 @@
         <div class="gait-stats-grid">
           <div class="gait-stat-card">
             <div class="gait-stat-label">STEPS</div>
-            <div class="gait-stat-val" id="gaitSteps">0</div>
+            <div class="gait-stat-val" id="gaitSteps">—</div>
           </div>
           <div class="gait-stat-card">
             <div class="gait-stat-label">CADENCE</div>
@@ -270,11 +300,11 @@
           </div>
           <div class="gait-stat-card">
             <div class="gait-stat-label">CONTACT TIME</div>
-            <div class="gait-stat-val"><span id="gaitContactTime">—</span><span class="gait-stat-unit"> ms</span></div>
+            <div class="gait-stat-val"><span id="gaitContactTime">—</span><span class="gait-stat-unit" id="gaitContactUnit"></span></div>
           </div>
           <div class="gait-stat-card">
             <div class="gait-stat-label">STRIDE TIME</div>
-            <div class="gait-stat-val"><span id="gaitStrideTime">—</span><span class="gait-stat-unit"> s</span></div>
+            <div class="gait-stat-val"><span id="gaitStrideTime">—</span><span class="gait-stat-unit" id="gaitStrideUnit"></span></div>
           </div>
         </div>
         <div class="gait-metrics-row">
@@ -568,26 +598,6 @@ function drawHeatmap(canvasEl, vals) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// CHART.JS VERTICAL LINES PLUGIN  (heel strike markers)
-// ═══════════════════════════════════════════════════════════
-Chart.register({
-  id: 'verticalLines',
-  beforeDraw(chart, _, options) {
-    if (!options.xValues?.length) return;
-    const { ctx, chartArea: { top, bottom }, scales: { x } } = chart;
-    options.xValues.forEach(xVal => {
-      const xPos = x.getPixelForValue(xVal);
-      if (xPos < x.left || xPos > x.right) return;
-      ctx.save();
-      ctx.strokeStyle = options.color || 'rgba(232,74,0,0.5)';
-      ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
-      ctx.beginPath(); ctx.moveTo(xPos, top); ctx.lineTo(xPos, bottom); ctx.stroke();
-      ctx.restore();
-    });
-  }
-});
-
-// ═══════════════════════════════════════════════════════════
 // TAB SWITCHING
 // ═══════════════════════════════════════════════════════════
 function switchTab(tabName) {
@@ -687,19 +697,33 @@ function detectGait() {
 }
 
 function updateGaitUI() {
-  document.getElementById('gaitSteps').textContent = gait.stepCount;
-  const now = Date.now();
-  const recent = gait.stepTimestamps.filter(t => now-t < CAL.cadenceWindowMs);
-  let cad = '—';
-  if (recent.length >= 2) {
-    const span = recent[recent.length-1] - recent[0];
-    cad = Math.round((recent.length-1) / (span/60000));
+  // Steps & cadence: only meaningful when recording
+  if (isRecording) {
+    document.getElementById('gaitSteps').textContent = gait.stepCount;
+    const now = Date.now();
+    const recent = gait.stepTimestamps.filter(t => now-t < CAL.cadenceWindowMs);
+    let cad = '—';
+    if (recent.length >= 2) {
+      const span = recent[recent.length-1] - recent[0];
+      cad = Math.round((recent.length-1) / (span/60000));
+    }
+    document.getElementById('gaitCadence').textContent = cad;
+  } else {
+    document.getElementById('gaitSteps').textContent = '—';
+    document.getElementById('gaitCadence').textContent = '—';
   }
-  document.getElementById('gaitCadence').textContent = cad;
-  document.getElementById('gaitContactTime').textContent = gait.gcts.length
-    ? Math.round(gait.gcts.reduce((a,v)=>a+v,0)/gait.gcts.length) : '—';
-  document.getElementById('gaitStrideTime').textContent = gait.strideTimes.length
-    ? (gait.strideTimes.reduce((a,v)=>a+v,0)/gait.strideTimes.length/1000).toFixed(2) : '—';
+
+  // Contact time & stride time: only update when recording (freeze when not)
+  if (isRecording) {
+    document.getElementById('gaitContactTime').textContent = gait.gcts.length
+      ? Math.round(gait.gcts.reduce((a,v)=>a+v,0)/gait.gcts.length) : '—';
+    document.getElementById('gaitContactUnit').textContent = gait.gcts.length ? ' ms' : '';
+    document.getElementById('gaitStrideTime').textContent = gait.strideTimes.length
+      ? (gait.strideTimes.reduce((a,v)=>a+v,0)/gait.strideTimes.length/1000).toFixed(2) : '—';
+    document.getElementById('gaitStrideUnit').textContent = gait.strideTimes.length ? ' s' : '';
+  }
+
+  // Peak force & load rate: always live
   document.getElementById('gaitPeakForce').textContent = gait.peakForce > 0 ? gait.peakForce.toFixed(1)+'N' : '—';
   document.getElementById('gaitLoadRate').textContent = gait.loadRates.length
     ? Math.round(gait.loadRates[gait.loadRates.length-1])+' N/s' : '—';
@@ -838,6 +862,9 @@ function stopRecording() {
   pb.disabled=true; pb.classList.remove('is-paused'); pb.textContent='⏸ Pause';
   eb.disabled=true; ri.classList.remove('active','paused');
   sd.className='dot on'; st.textContent='CONNECTED';
+  // Reset recording-gated gait UI back to dashes
+  document.getElementById('gaitSteps').textContent = '—';
+  document.getElementById('gaitCadence').textContent = '—';
   if(!recordingData.length) { alert('No data recorded.'); return; }
   const sessData = {
     idx: sessionsStore.length, date: new Date(),
@@ -848,6 +875,18 @@ function stopRecording() {
   };
   sessionsStore.push(sessData);
   renderSessionResults(sessData);
+}
+
+// ═══════════════════════════════════════════════════════════
+// SESSION ACCORDION
+// ═══════════════════════════════════════════════════════════
+function toggleSession(idx) {
+  const el = document.getElementById(`sess-${idx}`);
+  const isExpanded = el.classList.contains('expanded');
+  // collapse all
+  document.querySelectorAll('.session-section').forEach(s => s.classList.remove('expanded'));
+  // toggle this one
+  if (!isExpanded) el.classList.add('expanded');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -873,48 +912,64 @@ function renderSessionResults(sd) {
   const avgGCT=gcts.length?Math.round(gcts.reduce((a,v)=>a+v,0)/gcts.length)+'ms':'—';
   const avgStride=strideTimes.length?(strideTimes.reduce((a,v)=>a+v,0)/strideTimes.length/1000).toFixed(2)+'s':'—';
 
+  // Collapse all existing sessions before adding new one
+  document.querySelectorAll('.session-section').forEach(s => s.classList.remove('expanded'));
+
   const el=document.createElement('div');
-  el.className='session-section visible'; el.id=`sess-${idx}`;
+  el.className='session-section visible expanded'; el.id=`sess-${idx}`;
   el.innerHTML=`
-    <div class="session-header">
+    <div class="session-header" onclick="toggleSession(${idx})">
       <div class="session-title">SESSION ${idx+1}</div>
       <div class="session-date">${date.toLocaleString()}</div>
-      <button class="download-pdf-btn" onclick="downloadSessionPDF(${idx})">↓ PDF</button>
+      <button class="download-pdf-btn" onclick="event.stopPropagation(); downloadSessionPDF(${idx})">↓ PDF</button>
+      <div class="session-toggle">▼</div>
     </div>
-    <div class="session-stat-grid">
-      <div class="stat-card"><div class="stat-card-label">DURATION</div><div class="stat-card-val">${Math.round(duration)}s</div></div>
-      <div class="stat-card"><div class="stat-card-label">SAMPLES</div><div class="stat-card-val">${n}</div></div>
-      <div class="stat-card"><div class="stat-card-label">AVG LOAD</div><div class="stat-card-val">${Math.round(globalAvg)}</div></div>
-    </div>
-    <div class="session-gait-label">Gait Summary</div>
-    <div class="session-gait-grid">
-      <div class="stat-card gait-stat-card-orange"><div class="stat-card-label">STEPS</div><div class="stat-card-val">${sessSteps}</div></div>
-      <div class="stat-card gait-stat-card-orange"><div class="stat-card-label">AVG CADENCE</div><div class="stat-card-val">${sessCadence}</div></div>
-      <div class="stat-card gait-stat-card-green"><div class="stat-card-label">AVG GCT</div><div class="stat-card-val">${avgGCT}</div></div>
-      <div class="stat-card gait-stat-card-green"><div class="stat-card-label">AVG STRIDE</div><div class="stat-card-val">${avgStride}</div></div>
-    </div>
-    <div class="session-heatmap-row">
-      <div>
-        <div class="session-heatmap-label">AVG PRESSURE MAP</div>
-        <div class="session-canvas-wrap">
-          <canvas id="sessMap-${idx}" width="130" height="260"></canvas>
-          <svg class="insole-overlay" viewBox="0 0 160 320" xmlns="http://www.w3.org/2000/svg">
-            <path d="${INSOLE_PATH_D}" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linejoin="round"/>
-          </svg>
+    <div class="session-body">
+      <div class="session-body-inner">
+        <div class="session-stat-grid">
+          <div class="stat-card"><div class="stat-card-label">DURATION</div><div class="stat-card-val">${Math.round(duration)}s</div></div>
+          <div class="stat-card"><div class="stat-card-label">SAMPLES</div><div class="stat-card-val">${n}</div></div>
+          <div class="stat-card"><div class="stat-card-label">AVG LOAD</div><div class="stat-card-val">${Math.round(globalAvg)}</div></div>
+        </div>
+        <div class="session-gait-label">Gait Summary</div>
+        <div class="session-gait-grid">
+          <div class="stat-card gait-stat-card-orange"><div class="stat-card-label">STEPS</div><div class="stat-card-val">${sessSteps}</div></div>
+          <div class="stat-card gait-stat-card-orange"><div class="stat-card-label">AVG CADENCE</div><div class="stat-card-val">${sessCadence}</div></div>
+          <div class="stat-card gait-stat-card-green"><div class="stat-card-label">AVG GCT</div><div class="stat-card-val">${avgGCT}</div></div>
+          <div class="stat-card gait-stat-card-green"><div class="stat-card-label">AVG STRIDE</div><div class="stat-card-val">${avgStride}</div></div>
+        </div>
+        <div class="session-heatmap-row">
+          <div>
+            <div class="session-heatmap-label">AVG PRESSURE MAP</div>
+            <div class="session-canvas-wrap">
+              <canvas id="sessMap-${idx}" width="130" height="260"></canvas>
+              <svg class="insole-overlay" viewBox="0 0 160 320" xmlns="http://www.w3.org/2000/svg">
+                <path d="${INSOLE_PATH_D}" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <div>
+            <div class="session-heatmap-label">ZONE BREAKDOWN</div>
+            <div class="zone-bars">
+              <div class="zone-bar-item"><div class="zone-name"><span>FOREFOOT</span><span>${forePct}%</span></div><div class="zone-bar-track"><div class="zone-bar-fill-orange" id="zF-${idx}" style="width:0%"></div></div></div>
+              <div class="zone-bar-item"><div class="zone-name"><span>MID-FOOT</span><span>${midPct}%</span></div><div class="zone-bar-track"><div class="zone-bar-fill-green"  id="zM-${idx}" style="width:0%"></div></div></div>
+              <div class="zone-bar-item"><div class="zone-name"><span>HEEL</span><span>${heelPct}%</span></div><div class="zone-bar-track"><div class="zone-bar-fill-blue"   id="zH-${idx}" style="width:0%"></div></div></div>
+            </div>
+            <div class="ai-summary-section">
+              <div class="session-heatmap-label" style="margin-top:14px;">AI ANALYSIS</div>
+              <div class="ai-placeholder">
+                <div class="ai-placeholder-icon">✦</div>
+                <div class="ai-placeholder-text">Coming Soon</div>
+                <div class="ai-placeholder-sub">AI-powered gait analysis will provide injury risk assessment, efficiency metrics, and personalized recommendations.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-label">PER-STEP PEAK FORCE (N)</div>
+          <div class="chart-canvas-container"><canvas id="sessChart-${idx}"></canvas></div>
         </div>
       </div>
-      <div>
-        <div class="session-heatmap-label">ZONE BREAKDOWN</div>
-        <div class="zone-bars">
-          <div class="zone-bar-item"><div class="zone-name"><span>FOREFOOT</span><span>${forePct}%</span></div><div class="zone-bar-track"><div class="zone-bar-fill-orange" id="zF-${idx}" style="width:0%"></div></div></div>
-          <div class="zone-bar-item"><div class="zone-name"><span>MID-FOOT</span><span>${midPct}%</span></div><div class="zone-bar-track"><div class="zone-bar-fill-green"  id="zM-${idx}" style="width:0%"></div></div></div>
-          <div class="zone-bar-item"><div class="zone-name"><span>HEEL</span><span>${heelPct}%</span></div><div class="zone-bar-track"><div class="zone-bar-fill-blue"   id="zH-${idx}" style="width:0%"></div></div></div>
-        </div>
-      </div>
-    </div>
-    <div class="chart-wrap">
-      <div class="chart-label">FORCE OVER TIME (N) · HEEL STRIKES MARKED ▏</div>
-      <div class="chart-canvas-container"><canvas id="sessChart-${idx}"></canvas></div>
     </div>
   `;
 
@@ -930,47 +985,77 @@ function renderSessionResults(sd) {
   setTimeout(() => el.scrollIntoView({behavior:'smooth',block:'start'}), 200);
 }
 
+// ═══════════════════════════════════════════════════════════
+// SESSION CHART — per-step peak force bar chart
+// ═══════════════════════════════════════════════════════════
 function renderSessionChart(sd) {
   const { idx, recordingData: rawData, recordingStart: rStart, stepTimestamps } = sd;
-  let pts = rawData;
-  if (pts.length > 500) { const step=Math.ceil(pts.length/500); pts=pts.filter((_,i)=>i%step===0); }
 
-  const toF = (vals, zone) => zone.reduce((a,i) => a+(adcToForceN(vals[i])??0), 0);
-  const labels    = pts.map(d => d.t.toFixed(2));
-  const totalFD   = pts.map(d => +d.vals.reduce((a,v)=>a+(adcToForceN(v)??0),0).toFixed(2));
-  const foreFD    = pts.map(d => +toF(d.vals, ZONE_FORE).toFixed(2));
-  const midFD     = pts.map(d => +toF(d.vals, ZONE_MID).toFixed(2));
-  const heelFD    = pts.map(d => +toF(d.vals, ZONE_HEEL).toFixed(2));
+  if (!stepTimestamps.length) return;
 
-  // Convert step timestamps to chart x values (relative to session start)
-  const stepXVals = stepTimestamps.map(ts => +((ts - rStart) / 1000).toFixed(2));
+  // Compute peak total force for each step (heel-strike to next heel-strike)
+  const stepPeaks = [];
+  for (let i = 0; i < stepTimestamps.length; i++) {
+    const tStart = (stepTimestamps[i] - rStart) / 1000;
+    const tEnd   = i < stepTimestamps.length - 1
+      ? (stepTimestamps[i+1] - rStart) / 1000
+      : tStart + 2.0;
+    let peak = 0;
+    rawData.forEach(d => {
+      if (d.t >= tStart && d.t < tEnd) {
+        const f = d.vals.reduce((a,v) => a+(adcToForceN(v)??0), 0);
+        if (f > peak) peak = f;
+      }
+    });
+    stepPeaks.push(+peak.toFixed(2));
+  }
+
+  const labels = stepPeaks.map((_,i) => String(i+1));
+
+  // Color bars: blue below average, orange above average
+  const avg = stepPeaks.reduce((a,v)=>a+v,0) / stepPeaks.length;
+  const bgColors  = stepPeaks.map(f => f >= avg ? 'rgba(232,74,0,0.72)' : 'rgba(28,110,191,0.72)');
+  const brdColors = stepPeaks.map(f => f >= avg ? '#E84A00' : '#1C6EBF');
 
   const canvas = document.getElementById(`sessChart-${idx}`);
   canvas.removeAttribute('style'); canvas.removeAttribute('width'); canvas.removeAttribute('height');
 
   if (sd._chart) { sd._chart.destroy(); }
   sd._chart = new Chart(canvas.getContext('2d'), {
-    type: 'line',
+    type: 'bar',
     data: {
       labels,
-      datasets: [
-        { label:'Total', data:totalFD, borderColor:'#e8ecf4', backgroundColor:'rgba(232,236,244,0.06)', borderWidth:2, tension:0.3, fill:true, pointRadius:0, pointHoverRadius:3 },
-        { label:'Heel',  data:heelFD,  borderColor:'#1C6EBF', backgroundColor:'rgba(28,110,191,0.08)',  borderWidth:1.5, tension:0.3, fill:false, pointRadius:0 },
-        { label:'Mid',   data:midFD,   borderColor:'#00d98b', backgroundColor:'rgba(0,217,139,0.08)',   borderWidth:1.5, tension:0.3, fill:false, pointRadius:0 },
-        { label:'Fore',  data:foreFD,  borderColor:'#E84A00', backgroundColor:'rgba(232,74,0,0.08)',    borderWidth:1.5, tension:0.3, fill:false, pointRadius:0 },
-      ]
+      datasets: [{
+        label: 'Peak Force (N)',
+        data: stepPeaks,
+        backgroundColor: bgColors,
+        borderColor: brdColors,
+        borderWidth: 1,
+        borderRadius: 3,
+      }]
     },
     options: {
-      responsive:true, maintainAspectRatio:false,
-      interaction:{ mode:'index', intersect:false },
+      responsive: true, maintainAspectRatio: false,
       plugins: {
-        legend:{ display:true, labels:{ color:'#5a6278', font:{size:10,family:"'DM Mono',monospace"}, boxWidth:12 } },
-        tooltip:{ backgroundColor:'#0e1118', titleColor:'#e8ecf4', bodyColor:'#5a6278', borderColor:'#1C6EBF', borderWidth:1, padding:10 },
-        verticalLines:{ xValues: stepXVals, color:'rgba(232,74,0,0.55)' },
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0e1118', titleColor: '#e8ecf4', bodyColor: '#5a6278',
+          borderColor: '#1C6EBF', borderWidth: 1, padding: 10,
+          callbacks: { label: ctx => `${ctx.parsed.y.toFixed(1)} N` }
+        },
       },
-      scales:{
-        x:{ title:{display:true,text:'Time (s)',color:'#5a6278',font:{size:10}}, ticks:{color:'#5a6278',maxTicksLimit:8,font:{family:"'DM Mono',monospace",size:9}}, grid:{color:'rgba(255,255,255,0.04)'} },
-        y:{ title:{display:true,text:'Force (N)',color:'#5a6278',font:{size:10}}, min:0, ticks:{color:'#5a6278',font:{family:"'DM Mono',monospace",size:9}}, grid:{color:'rgba(255,255,255,0.04)'} }
+      scales: {
+        x: {
+          title: { display: true, text: 'Step #', color: '#5a6278', font: { size: 10 } },
+          ticks: { color: '#5a6278', font: { family: "'DM Mono',monospace", size: 9 }, maxTicksLimit: 20 },
+          grid: { color: 'rgba(255,255,255,0.04)' }
+        },
+        y: {
+          title: { display: true, text: 'Force (N)', color: '#5a6278', font: { size: 10 } },
+          min: 0,
+          ticks: { color: '#5a6278', font: { family: "'DM Mono',monospace", size: 9 } },
+          grid: { color: 'rgba(255,255,255,0.04)' }
+        }
       }
     }
   });
