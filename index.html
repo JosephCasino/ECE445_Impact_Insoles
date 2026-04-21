@@ -4,7 +4,7 @@
   <link rel="manifest" href="manifest.json" />
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ImpactInsoles • Pressure Monitor</title>
+  <title>ImpactInsoles • Gait Monitor</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
@@ -17,6 +17,10 @@
       --blue:        #1C6EBF;
       --blue-dim:    rgba(28,110,191,0.18);
       --blue-glow:   rgba(28,110,191,0.35);
+      --green:       #00d98b;
+      --green-dim:   rgba(0,217,139,0.15);
+      --green-glow:  rgba(0,217,139,0.35);
+      --yellow:      #f4c430;
       --bg:          #080a0f;
       --bg-card:     #0e1118;
       --bg-panel:    #121620;
@@ -68,7 +72,7 @@
     @keyframes blink-dot { 0%,100%{opacity:1} 50%{opacity:.25} }
 
     /* ─── Connect / Demo Buttons ─── */
-    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
     .connect-btn {
       padding: 15px 20px;
       background: transparent; border: 2px solid var(--orange); border-radius: 8px;
@@ -93,6 +97,25 @@
     .demo-btn:hover { background: rgba(0,200,150,0.12); box-shadow: 0 4px 24px rgba(0,200,150,0.3); }
     .demo-btn.is-active { background: rgba(0,200,150,0.15); color: #00ffba; border-color: #00ffba; box-shadow: 0 0 18px rgba(0,200,150,0.4); }
 
+    /* ─── Tab Navigation ─── */
+    .tab-nav {
+      display: flex; gap: 4px; margin-bottom: 20px;
+      background: var(--bg-panel); border: 1px solid var(--border);
+      border-radius: 10px; padding: 4px;
+    }
+    .tab-btn {
+      flex: 1; padding: 10px 8px; border: none; border-radius: 7px;
+      background: transparent; color: var(--muted);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s ease;
+    }
+    .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .tab-btn.active {
+      background: var(--bg-card); color: var(--text);
+      border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    }
+
     /* ─── Main Grid ─── */
     .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
     @media(max-width: 520px) { .main-grid { grid-template-columns: 1fr; } }
@@ -106,24 +129,10 @@
     .heatmap-panel.visible { opacity: 1; transform: translateY(0); }
     .panel-label { font-size: 10px; font-weight: 700; letter-spacing: 3px; color: var(--muted); margin-bottom: 14px; text-transform: uppercase; align-self: flex-start; }
 
-    /* Canvas heatmap wrapper — canvas is clipped to insole shape */
-    .heatmap-canvas-wrap {
-      position: relative;
-      width: 160px;
-      height: 320px;
-    }
-    /* SVG insole outline sits on top of canvas for visual border */
-    .heatmap-canvas-wrap canvas {
-      position: absolute; top: 0; left: 0;
-      width: 100%; height: 100%;
-    }
-    .insole-overlay {
-      position: absolute; top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-    }
+    .heatmap-canvas-wrap { position: relative; width: 160px; height: 320px; }
+    .heatmap-canvas-wrap canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    .insole-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
 
-    /* Heatmap Legend */
     .heatmap-legend { margin-top: 14px; width: 100%; display: flex; align-items: center; gap: 6px; }
     .legend-bar {
       flex: 1; height: 6px; border-radius: 3px;
@@ -131,13 +140,81 @@
     }
     .legend-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); }
 
-    /* ─── Debug Panel ─── */
+    /* ─── Gait Events Panel ─── */
+    .gait-panel {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px; display: flex; flex-direction: column;
+      opacity: 0; transform: translateY(16px); transition: all 0.5s cubic-bezier(.16,1,.3,1) 0.08s;
+    }
+    .gait-panel.visible { opacity: 1; transform: translateY(0); }
+
+    .gait-phase-wrap { margin-bottom: 10px; }
+    .gait-phase-sublabel { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--muted); margin-bottom: 5px; }
+    .gait-phase-badge {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 9px 10px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--bg-panel);
+      font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); transition: all 0.25s ease; text-align: center;
+    }
+    .gait-phase-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+    .gait-phase-badge.swing        { color: var(--blue);   border-color: var(--blue);   background: var(--blue-dim);   box-shadow: 0 0 10px var(--blue-glow); }
+    .gait-phase-badge.heel-strike  { color: var(--orange); border-color: var(--orange); background: var(--orange-dim); box-shadow: 0 0 12px var(--orange-glow); }
+    .gait-phase-badge.loading      { color: var(--yellow); border-color: var(--yellow); background: rgba(244,196,48,0.12); }
+    .gait-phase-badge.mid-stance   { color: var(--green);  border-color: var(--green);  background: var(--green-dim);  box-shadow: 0 0 10px var(--green-glow); }
+    .gait-phase-badge.terminal     { color: #ff8c42;       border-color: #ff8c42;       background: rgba(255,140,66,0.13); }
+    .gait-phase-badge.toe-off      { color: var(--orange); border-color: var(--orange); background: var(--orange-dim); box-shadow: 0 0 12px var(--orange-glow); }
+
+    /* Gait stats */
+    .gait-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 8px; }
+    .gait-stat-card {
+      background: var(--bg-panel); border: 1px solid var(--border);
+      border-radius: 6px; padding: 7px 8px;
+    }
+    .gait-stat-label { font-size: 8px; font-weight: 700; letter-spacing: 2px; color: var(--muted); margin-bottom: 2px; text-transform: uppercase; }
+    .gait-stat-val { font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; color: var(--text); line-height: 1; }
+    .gait-stat-unit { font-size: 9px; color: var(--muted); }
+
+    /* Extra metric pills */
+    .gait-metrics-row { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 8px; }
+    .gait-metric-pill {
+      background: var(--bg-panel); border: 1px solid var(--border);
+      border-radius: 6px; padding: 5px 8px;
+      display: flex; align-items: baseline; justify-content: space-between;
+    }
+    .gait-metric-label { font-size: 8px; font-weight: 700; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; }
+    .gait-metric-val { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); }
+
+    /* Event log */
+    .gait-log-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; }
+    .gait-event-log { max-height: 130px; overflow-y: auto; }
+    .gait-event-log::-webkit-scrollbar { width: 3px; }
+    .gait-event-log::-webkit-scrollbar-track { background: transparent; }
+    .gait-event-log::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
+    .gait-event-item {
+      display: grid; grid-template-columns: 38px 1fr auto;
+      align-items: center; gap: 5px;
+      padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-family: 'DM Mono', monospace; font-size: 9px;
+    }
+    .gait-event-item:last-child { border-bottom: none; }
+    .gait-event-time { color: var(--muted); }
+    .gait-event-type { font-weight: 500; font-size: 9px; letter-spacing: 1px; }
+    .gait-event-detail { color: var(--muted); font-size: 8px; text-align: right; }
+
+    .gait-event-type.swing        { color: var(--blue); }
+    .gait-event-type.heel-strike  { color: var(--orange); }
+    .gait-event-type.loading      { color: var(--yellow); }
+    .gait-event-type.mid-stance   { color: var(--green); }
+    .gait-event-type.terminal     { color: #ff8c42; }
+    .gait-event-type.toe-off      { color: var(--orange); }
+    .gait-empty-log { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); padding: 8px 0; text-align: center; }
+
+    /* ─── Debug Panel (Sensor Test tab) ─── */
     .debug-panel {
       background: var(--bg-card); border: 1px solid var(--border);
       border-radius: 12px; padding: 18px;
-      opacity: 0; transform: translateY(16px); transition: all 0.5s cubic-bezier(.16,1,.3,1) 0.08s;
     }
-    .debug-panel.visible { opacity: 1; transform: translateY(0); }
 
     .sensor-table { width: 100%; border-collapse: collapse; }
     .sensor-table th { font-size: 9px; letter-spacing: 2px; color: var(--muted); font-weight: 700; text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--border); }
@@ -170,6 +247,7 @@
     .rec-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--orange); }
     .rec-timer { font-family: 'DM Mono', monospace; font-size: 15px; color: var(--orange); margin-left: auto; }
 
+    /* ─── Packet / Force Row ─── */
     .packet-row {
       display: flex; align-items: center; justify-content: space-between;
       background: var(--bg-card); border: 1px solid var(--border);
@@ -177,6 +255,7 @@
       opacity: 0; transition: opacity .45s ease .15s;
     }
     .packet-row.visible { opacity: 1; }
+    .packet-row.always-visible { opacity: 1; }
     .pkt-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--muted); }
     .pkt-val { font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; }
     .pkt-val.good { color: #00d98b; }
@@ -198,18 +277,18 @@
     .stat-card-label { font-size: 8px; letter-spacing: 2px; color: var(--muted); margin-bottom: 5px; }
     .stat-card-val { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--blue); }
 
+    /* Gait summary in session results */
+    .session-gait-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px; }
+    .session-gait-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; }
+    .gait-stat-card-orange .stat-card-val { color: var(--orange); }
+    .gait-stat-card-green  .stat-card-val { color: var(--green); }
+
     .session-heatmap-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; align-items: start; }
     .session-heatmap-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; }
 
-    .session-canvas-wrap {
-      position: relative; width: 130px; height: 260px; margin: 0 auto;
-    }
-    .session-canvas-wrap canvas {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    }
-    .session-canvas-wrap .insole-overlay {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;
-    }
+    .session-canvas-wrap { position: relative; width: 130px; height: 260px; margin: 0 auto; }
+    .session-canvas-wrap canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    .session-canvas-wrap .insole-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
 
     .zone-bars { display: flex; flex-direction: column; gap: 8px; }
     .zone-bar-item { display: flex; flex-direction: column; gap: 3px; }
@@ -223,6 +302,9 @@
     .chart-wrap .chart-canvas-container { position: relative; height: 180px; }
     .chart-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--muted); margin-bottom: 12px; }
 
+    /* Sensor Test tab */
+    .sensor-test-content { display: flex; flex-direction: column; gap: 16px; }
+
     .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); }
     .footer-text { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--dim); letter-spacing: 2px; }
   </style>
@@ -234,7 +316,7 @@
   <div class="header">
     <div class="brand-block">
       <div class="brand">IMPACT<span class="o"> IN</span><span class="b">SOLES</span></div>
-      <div class="tagline">ECE445 · GROUP 68 · 12-SENSOR FSR MONITOR</div>
+      <div class="tagline">ECE445 · GROUP 68 · 12-SENSOR FSR GAIT MONITOR</div>
     </div>
     <div class="status-pill" id="statusPill">
       <div class="dot" id="statusDot"></div>
@@ -252,128 +334,200 @@
     </button>
   </div>
 
-  <!-- Main sensor panels -->
-  <div class="main-grid">
-
-    <!-- Heatmap -->
-    <div class="heatmap-panel" id="heatmapPanel">
-      <div class="panel-label">Live Pressure Map</div>
-
-      <div class="heatmap-canvas-wrap" id="heatmapWrap">
-        <!-- canvas drawn by JS -->
-        <canvas id="heatCanvas" width="160" height="320"></canvas>
-        <!-- SVG insole outline rendered on top -->
-        <svg class="insole-overlay" id="insoleSvg" viewBox="0 0 160 320" xmlns="http://www.w3.org/2000/svg">
-          <path id="insolePath" d="" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linejoin="round"/>
-        </svg>
-      </div>
-
-      <div class="heatmap-legend">
-        <span class="legend-label">0</span>
-        <div class="legend-bar"></div>
-        <span class="legend-label">MAX</span>
-      </div>
-    </div>
-
-    <!-- Debug / Raw Values -->
-    <div class="debug-panel" id="debugPanel">
-      <div class="panel-label">Sensor Values</div>
-      <table class="sensor-table">
-        <thead>
-          <tr><th>#</th><th>ZONE</th><th>ADC</th><th>FORCE</th><th>LEVEL</th></tr>
-        </thead>
-        <tbody id="sensorTableBody"></tbody>
-      </table>
-    </div>
-
+  <!-- Tab Navigation -->
+  <div class="tab-nav">
+    <button class="tab-btn active" id="tabDashboard" onclick="switchTab('dashboard')">Dashboard</button>
+    <button class="tab-btn"        id="tabSensorTest" onclick="switchTab('sensorTest')">Sensor Test</button>
   </div>
 
-  <!-- Force summary row -->
-  <div class="packet-row" id="forceRow" style="display:none;">
-    <div>
-      <div class="pkt-label">TOTAL FORCE</div>
-      <div class="pkt-val good" id="totalForce">0.00 N</div>
-    </div>
-    <div class="pkt-stats" style="text-align:right;">
-      FORE: <span id="foreForce">0.00 N</span><br>
-      MID: <span id="midForce">0.00 N</span> &nbsp; HEEL: <span id="heelForce">0.00 N</span>
-    </div>
-  </div>
+  <!-- ═══ DASHBOARD TAB ═══ -->
+  <div id="tab-dashboard">
 
-  <!-- Recording controls -->
-  <div class="recording-row" id="recordingRow">
-    <button class="rec-btn start-btn" id="startBtn" onclick="startRecording()">▶ Start Session</button>
-    <button class="rec-btn stop-btn"  id="stopBtn"  onclick="stopRecording()"  disabled>⏹ End Session</button>
-  </div>
+    <div class="main-grid">
 
-  <!-- Recording indicator -->
-  <div class="rec-indicator" id="recIndicator">
-    <div class="dot rec"></div>
-    <span class="rec-label">RECORDING</span>
-    <span class="rec-timer" id="recTimer">00:00</span>
-  </div>
-
-  <!-- Packet loss -->
-  <div class="packet-row" id="packetRow">
-    <div>
-      <div class="pkt-label">PACKET LOSS</div>
-      <div class="pkt-val good" id="pktLoss">0.00%</div>
-    </div>
-    <div class="pkt-stats">
-      RX: <span id="pktRx">0</span> &nbsp; LOST: <span id="pktLost">0</span>
-    </div>
-  </div>
-
-  <!-- Session results -->
-  <div class="session-section" id="sessionSection">
-    <div class="session-header">
-      <div class="session-title">SESSION RESULTS</div>
-      <div class="session-date" id="sessionDate">—</div>
-    </div>
-
-    <div class="session-stat-grid">
-      <div class="stat-card"><div class="stat-card-label">DURATION</div><div class="stat-card-val" id="sessDuration">0s</div></div>
-      <div class="stat-card"><div class="stat-card-label">SAMPLES</div><div class="stat-card-val"  id="sessSamples">0</div></div>
-      <div class="stat-card"><div class="stat-card-label">PEAK ADC</div><div class="stat-card-val" id="sessPeak">0</div></div>
-      <div class="stat-card"><div class="stat-card-label">AVG LOAD</div><div class="stat-card-val" id="sessAvg">0</div></div>
-    </div>
-
-    <div class="session-heatmap-row">
-      <div>
-        <div class="session-heatmap-label">AVG PRESSURE MAP</div>
-        <div class="session-canvas-wrap" id="sessCanvasWrap">
-          <canvas id="sessCanvas" width="130" height="260"></canvas>
-          <svg class="insole-overlay" viewBox="0 0 160 320" xmlns="http://www.w3.org/2000/svg">
-            <path id="sessInsolePath" d="" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linejoin="round"/>
+      <!-- Heatmap -->
+      <div class="heatmap-panel" id="heatmapPanel">
+        <div class="panel-label">Live Pressure Map</div>
+        <div class="heatmap-canvas-wrap" id="heatmapWrap">
+          <canvas id="heatCanvas" width="160" height="320"></canvas>
+          <svg class="insole-overlay" id="insoleSvg" viewBox="0 0 160 320" xmlns="http://www.w3.org/2000/svg">
+            <path id="insolePath" d="" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linejoin="round"/>
           </svg>
         </div>
+        <div class="heatmap-legend">
+          <span class="legend-label">0</span>
+          <div class="legend-bar"></div>
+          <span class="legend-label">MAX</span>
+        </div>
       </div>
+
+      <!-- Gait Events Panel -->
+      <div class="gait-panel" id="gaitPanel">
+        <div class="panel-label">Gait Events</div>
+
+        <!-- Current phase badge -->
+        <div class="gait-phase-wrap">
+          <div class="gait-phase-sublabel">CURRENT PHASE</div>
+          <div class="gait-phase-badge swing" id="gaitPhaseBadge">SWING</div>
+        </div>
+
+        <!-- 4 primary stats -->
+        <div class="gait-stats-grid">
+          <div class="gait-stat-card">
+            <div class="gait-stat-label">STEPS</div>
+            <div class="gait-stat-val" id="gaitSteps">0</div>
+          </div>
+          <div class="gait-stat-card">
+            <div class="gait-stat-label">CADENCE</div>
+            <div class="gait-stat-val"><span id="gaitCadence">—</span><span class="gait-stat-unit"> /min</span></div>
+          </div>
+          <div class="gait-stat-card">
+            <div class="gait-stat-label">CONTACT TIME</div>
+            <div class="gait-stat-val"><span id="gaitContactTime">—</span><span class="gait-stat-unit" id="gaitContactUnit"> ms</span></div>
+          </div>
+          <div class="gait-stat-card">
+            <div class="gait-stat-label">STRIDE TIME</div>
+            <div class="gait-stat-val"><span id="gaitStrideTime">—</span><span class="gait-stat-unit"> s</span></div>
+          </div>
+        </div>
+
+        <!-- Extra metrics -->
+        <div class="gait-metrics-row">
+          <div class="gait-metric-pill">
+            <span class="gait-metric-label">PEAK FORCE</span>
+            <span class="gait-metric-val" id="gaitPeakForce">—</span>
+          </div>
+          <div class="gait-metric-pill">
+            <span class="gait-metric-label">LOAD RATE</span>
+            <span class="gait-metric-val" id="gaitLoadRate">—</span>
+          </div>
+        </div>
+
+        <!-- Event log -->
+        <div class="gait-log-label">EVENT LOG</div>
+        <div class="gait-event-log" id="gaitEventLog">
+          <div class="gait-empty-log">Waiting for events…</div>
+        </div>
+      </div>
+
+    </div><!-- /main-grid -->
+
+    <!-- Recording controls -->
+    <div class="recording-row" id="recordingRow">
+      <button class="rec-btn start-btn" id="startBtn" onclick="startRecording()">▶ Start Session</button>
+      <button class="rec-btn stop-btn"  id="stopBtn"  onclick="stopRecording()"  disabled>⏹ End Session</button>
+    </div>
+
+    <!-- Recording indicator -->
+    <div class="rec-indicator" id="recIndicator">
+      <div class="dot rec"></div>
+      <span class="rec-label">RECORDING</span>
+      <span class="rec-timer" id="recTimer">00:00</span>
+    </div>
+
+    <!-- Packet loss -->
+    <div class="packet-row" id="packetRow">
       <div>
-        <div class="session-heatmap-label">ZONE BREAKDOWN</div>
-        <div class="zone-bars">
-          <div class="zone-bar-item">
-            <div class="zone-name"><span>FOREFOOT</span><span id="zoneForePct">0%</span></div>
-            <div class="zone-bar-track"><div class="zone-bar-fill-orange" id="zoneForeFill" style="width:0%"></div></div>
+        <div class="pkt-label">PACKET LOSS</div>
+        <div class="pkt-val good" id="pktLoss">0.00%</div>
+      </div>
+      <div class="pkt-stats">
+        RX: <span id="pktRx">0</span> &nbsp; LOST: <span id="pktLost">0</span>
+      </div>
+    </div>
+
+    <!-- Session results -->
+    <div class="session-section" id="sessionSection">
+      <div class="session-header">
+        <div class="session-title">SESSION RESULTS</div>
+        <div class="session-date" id="sessionDate">—</div>
+      </div>
+
+      <!-- Pressure stats -->
+      <div class="session-stat-grid">
+        <div class="stat-card"><div class="stat-card-label">DURATION</div><div class="stat-card-val" id="sessDuration">0s</div></div>
+        <div class="stat-card"><div class="stat-card-label">SAMPLES</div><div class="stat-card-val"  id="sessSamples">0</div></div>
+        <div class="stat-card"><div class="stat-card-label">PEAK ADC</div><div class="stat-card-val" id="sessPeak">0</div></div>
+        <div class="stat-card"><div class="stat-card-label">AVG LOAD</div><div class="stat-card-val" id="sessAvg">0</div></div>
+      </div>
+
+      <!-- Gait summary -->
+      <div class="session-gait-label">Gait Summary</div>
+      <div class="session-gait-grid">
+        <div class="stat-card gait-stat-card-orange"><div class="stat-card-label">STEPS</div><div class="stat-card-val" id="sessSteps">0</div></div>
+        <div class="stat-card gait-stat-card-orange"><div class="stat-card-label">AVG CADENCE</div><div class="stat-card-val" id="sessCadence">—</div></div>
+        <div class="stat-card gait-stat-card-green"><div class="stat-card-label">AVG GCT</div><div class="stat-card-val" id="sessGCT">—</div></div>
+        <div class="stat-card gait-stat-card-green"><div class="stat-card-label">AVG STRIDE</div><div class="stat-card-val" id="sessStride">—</div></div>
+      </div>
+
+      <div class="session-heatmap-row">
+        <div>
+          <div class="session-heatmap-label">AVG PRESSURE MAP</div>
+          <div class="session-canvas-wrap" id="sessCanvasWrap">
+            <canvas id="sessCanvas" width="130" height="260"></canvas>
+            <svg class="insole-overlay" viewBox="0 0 160 320" xmlns="http://www.w3.org/2000/svg">
+              <path id="sessInsolePath" d="" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
           </div>
-          <div class="zone-bar-item">
-            <div class="zone-name"><span>MID-FOOT</span><span id="zoneMidPct">0%</span></div>
-            <div class="zone-bar-track"><div class="zone-bar-fill-green" id="zoneMidFill" style="width:0%"></div></div>
+        </div>
+        <div>
+          <div class="session-heatmap-label">ZONE BREAKDOWN</div>
+          <div class="zone-bars">
+            <div class="zone-bar-item">
+              <div class="zone-name"><span>FOREFOOT</span><span id="zoneForePct">0%</span></div>
+              <div class="zone-bar-track"><div class="zone-bar-fill-orange" id="zoneForeFill" style="width:0%"></div></div>
+            </div>
+            <div class="zone-bar-item">
+              <div class="zone-name"><span>MID-FOOT</span><span id="zoneMidPct">0%</span></div>
+              <div class="zone-bar-track"><div class="zone-bar-fill-green" id="zoneMidFill" style="width:0%"></div></div>
+            </div>
+            <div class="zone-bar-item">
+              <div class="zone-name"><span>HEEL</span><span id="zoneHeelPct">0%</span></div>
+              <div class="zone-bar-track"><div class="zone-bar-fill-blue" id="zoneHeelFill" style="width:0%"></div></div>
+            </div>
           </div>
-          <div class="zone-bar-item">
-            <div class="zone-name"><span>HEEL</span><span id="zoneHeelPct">0%</span></div>
-            <div class="zone-bar-track"><div class="zone-bar-fill-blue" id="zoneHeelFill" style="width:0%"></div></div>
-          </div>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-label">SENSOR VALUES OVER TIME</div>
+        <div class="chart-canvas-container">
+          <canvas id="sessionChart"></canvas>
         </div>
       </div>
     </div>
 
-    <div class="chart-wrap">
-      <div class="chart-label">SENSOR VALUES OVER TIME</div>
-      <div class="chart-canvas-container">
-        <canvas id="sessionChart"></canvas>
+  </div><!-- /tab-dashboard -->
+
+  <!-- ═══ SENSOR TEST TAB ═══ -->
+  <div id="tab-sensor-test" style="display:none;">
+    <div class="sensor-test-content">
+
+      <!-- Force summary -->
+      <div class="packet-row always-visible" id="forceRow">
+        <div>
+          <div class="pkt-label">TOTAL FORCE</div>
+          <div class="pkt-val good" id="totalForce">0.00 N</div>
+        </div>
+        <div class="pkt-stats" style="text-align:right;">
+          FORE: <span id="foreForce">0.00 N</span><br>
+          MID: <span id="midForce">0.00 N</span> &nbsp; HEEL: <span id="heelForce">0.00 N</span>
+        </div>
       </div>
+
+      <!-- Sensor table -->
+      <div class="debug-panel" id="debugPanel">
+        <div class="panel-label">Raw Sensor Values</div>
+        <table class="sensor-table">
+          <thead>
+            <tr><th>#</th><th>ZONE</th><th>ADC</th><th>FORCE</th><th>LEVEL</th></tr>
+          </thead>
+          <tbody id="sensorTableBody"></tbody>
+        </table>
+      </div>
+
     </div>
-  </div>
+  </div><!-- /tab-sensor-test -->
 
   <div class="footer">
     <div class="footer-text">ECE445 · GROUP 68 · CASINO · SIVANESAN · WENG &nbsp;·&nbsp; UIUC 2025</div>
@@ -382,36 +536,80 @@
 </div><!-- /app -->
 
 <script>
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  SENSOR CALIBRATION  ←  EDIT THESE VALUES DURING HARDWARE TEST  ║
+// ╚══════════════════════════════════════════════════════════════════╝
+//
+// All detection thresholds live here. Adjust while testing with your
+// actual FSR hardware — no hunting through the rest of the code.
+//
+const CAL = {
+  // ── Contact Detection ────────────────────────────────────────────
+  // Sum of all 12 raw ADC readings (0–4095 each) required to detect
+  // foot contact (enter STANCE). Raise if you get phantom steps;
+  // lower if real contacts are missed.
+  totalContactLoad:  800,
+
+  // Hysteresis floor: total sum must fall below this to return to SWING.
+  // Keep at 50–70% of totalContactLoad.
+  totalSwingLoad:    500,
+
+  // ── Zone Dominance Ratios ─────────────────────────────────────────
+  // (zone ADC sum) / (total ADC sum) thresholds for phase detection.
+
+  // Heel zone must contribute this fraction of total load to trigger
+  // HEEL STRIKE on initial contact.
+  heelDominanceRatio: 0.45,
+
+  // Fore zone must contribute this fraction of total load (with heel
+  // falling) to trigger TERMINAL STANCE.
+  foreDominanceRatio: 0.40,
+
+  // ── Phase Timing Filters ─────────────────────────────────────────
+  // Ignore stance phases shorter than this (ms) — rejects vibration
+  // artifacts and very brief partial contacts.
+  minStanceMs: 150,
+
+  // Minimum time (ms) between consecutive HEEL STRIKE detections.
+  // Prevents double-counting on noisy signals.
+  minStepIntervalMs: 300,
+
+  // ── Metrics Window ───────────────────────────────────────────────
+  // Rolling window for cadence and average calculations (ms).
+  cadenceWindowMs: 8000,
+
+  // Entries kept in the live event log.
+  maxEventLog: 15,
+
+  // ── Force Conversion ─────────────────────────────────────────────
+  // Circuit: V+ → FSR402 → node → R_M → GND  (V_OUT at node)
+  // Adjust R_M to match the resistor in your voltage divider.
+  V_SUPPLY: 3.3,    // ESP32 ADC reference voltage (V)
+  R_M:      10000,  // Measuring resistor (Ω)
+};
+
 // ═══════════════════════════════════════════════════════════
-// CONFIG
+// BLE CONFIG
 // ═══════════════════════════════════════════════════════════
 const SERVICE_UUID        = '12345678-1234-1234-1234-123456789abc';
 const CHARACTERISTIC_UUID = 'abcd1234-ab12-ab12-ab12-abcdef123456';
 const NUM_SENSORS = 12;
 const MAX_RAW     = 4095;
 
-// ─── FSR402 force conversion ───────────────────────────────
-// Circuit: V+ → FSR402 → node → R_M → GND  (V_OUT at node)
-// Change R_M to match the resistor in your actual voltage divider.
-const V_SUPPLY = 3.3;   // ESP32 ADC reference voltage (V)
-const R_M      = 10000; // Measuring resistor (Ω) — adjust to match your circuit
-
-// Returns force in Newtons for a single FSR402 given a raw 12-bit ADC value.
-// Based on FSR402 datasheet Fig 1 log-log curve: R_FSR ≈ 1e6 / F(grams)
+// ═══════════════════════════════════════════════════════════
+// FORCE CONVERSION
+// ═══════════════════════════════════════════════════════════
 function adcToForceN(adc) {
   if (adc <= 0) return 0;
-  if (adc >= MAX_RAW) return null; // saturated — reading unreliable
-  const vOut = (adc / MAX_RAW) * V_SUPPLY;
+  if (adc >= MAX_RAW) return null;
+  const vOut = (adc / MAX_RAW) * CAL.V_SUPPLY;
   if (vOut <= 0) return 0;
-  // Voltage divider → FSR resistance
-  const rFsr = R_M * (V_SUPPLY - vOut) / vOut;
+  const rFsr = CAL.R_M * (CAL.V_SUPPLY - vOut) / vOut;
   if (rFsr <= 0) return null;
-  // Datasheet curve fit: F(g) ≈ 1,000,000 / R_FSR (Ω)
   const forceG = 1e6 / rFsr;
-  return forceG / 101.97; // grams → Newtons
+  return forceG / 101.97;
 }
 
-// Format a Newton value for display  (e.g. "0.32 N" or "4.10 N")
 function fmtN(n) {
   if (n === null) return 'SAT';
   if (n < 0.01)  return '— N';
@@ -421,9 +619,6 @@ function fmtN(n) {
 // ═══════════════════════════════════════════════════════════
 // INSOLE SHAPE
 // ═══════════════════════════════════════════════════════════
-// Insole shape matching reference photo: wide rounded toe box at top,
-// sides gently narrowing toward arch, wider rounded heel at bottom.
-// Viewbox 160×320. Toe at top, heel at bottom.
 const INSOLE_PATH_D = `
   M 80 14
   C 100 14, 128 22, 140 44
@@ -444,21 +639,15 @@ const INSOLE_PATH_D = `
   Z
 `;
 
-// Sensor positions verified to be inside the insole shape above.
-// Forefoot (top) → Upper-mid → Lower-mid → Heel (bottom).
 const SENSORS = [
-  // Forefoot — spread across the wide toe box
   { id:0,  label:'S0',  zone:'Fore',  cx: 52,  cy: 52  },
   { id:1,  label:'S1',  zone:'Fore',  cx: 72,  cy: 40  },
   { id:2,  label:'S2',  zone:'Fore',  cx: 96,  cy: 40  },
   { id:3,  label:'S3',  zone:'Fore',  cx: 116, cy: 54  },
-  // Upper-mid — narrower arch region
   { id:4,  label:'S4',  zone:'U-Mid', cx: 60,  cy: 108 },
   { id:5,  label:'S5',  zone:'U-Mid', cx: 96,  cy: 106 },
-  // Lower-mid
   { id:6,  label:'S6',  zone:'L-Mid', cx: 58,  cy: 158 },
   { id:7,  label:'S7',  zone:'L-Mid', cx: 90,  cy: 156 },
-  // Heel — spread across the wider heel
   { id:8,  label:'S8',  zone:'Heel',  cx: 54,  cy: 232 },
   { id:9,  label:'S9',  zone:'Heel',  cx: 72,  cy: 258 },
   { id:10, label:'S10', zone:'Heel',  cx: 96,  cy: 258 },
@@ -470,7 +659,40 @@ const ZONE_MID  = [4,5,6,7];
 const ZONE_HEEL = [8,9,10,11];
 
 // ═══════════════════════════════════════════════════════════
-// STATE
+// GAIT PHASE DEFINITIONS
+// ═══════════════════════════════════════════════════════════
+const GAIT_PHASES = {
+  SWING:       { label: 'SWING',           css: 'swing',       order: 0 },
+  HEEL_STRIKE: { label: 'HEEL STRIKE',     css: 'heel-strike', order: 1 },
+  LOADING:     { label: 'LOADING',         css: 'loading',     order: 2 },
+  MID_STANCE:  { label: 'MID-STANCE',      css: 'mid-stance',  order: 3 },
+  TERMINAL:    { label: 'TERMINAL STANCE', css: 'terminal',    order: 4 },
+  TOE_OFF:     { label: 'TOE-OFF',         css: 'toe-off',     order: 5 },
+};
+
+// ═══════════════════════════════════════════════════════════
+// GAIT STATE
+// ═══════════════════════════════════════════════════════════
+const gait = {
+  phase:          'SWING',
+  phaseStart:     0,
+  stepCount:      0,
+  stepTimestamps: [],   // ms timestamps of heel strikes
+  stanceStart:    0,   // ms timestamp when last stance began
+  gcts:           [],  // recent ground contact times (ms)
+  strideTimes:    [],  // recent stride times (ms)
+  peakForce:      0,   // peak force (N) in current stance
+  heelForce:      0,   // force at heel strike (N)
+  prevForce:      0,
+  prevTime:       0,
+  loadRates:      [],  // recent peak loading rates (N/s)
+  curLoadRate:    0,
+  events:         [],  // log entries
+  sessionStart:   0,   // set when recording starts
+};
+
+// ═══════════════════════════════════════════════════════════
+// APP STATE
 // ═══════════════════════════════════════════════════════════
 let bleDevice = null, bleChar = null;
 let sensorValues = new Array(NUM_SENSORS).fill(0);
@@ -482,37 +704,26 @@ let chart = null;
 let lastPacketId = -1, rxCount = 0, lostCount = 0;
 
 // ═══════════════════════════════════════════════════════════
-// INSOLE PATH — set on both SVG overlays
+// INSOLE PATHS
 // ═══════════════════════════════════════════════════════════
 document.getElementById('insolePath').setAttribute('d', INSOLE_PATH_D);
 document.getElementById('sessInsolePath').setAttribute('d', INSOLE_PATH_D);
 
 // ═══════════════════════════════════════════════════════════
 // HEATMAP RENDERER
-// Using a canvas and inverse-distance weighting (IDW) to
-// compute a smooth pressure field at every pixel, then masking
-// it to the insole shape — identical technique to clinical
-// plantar pressure imaging systems.
 // ═══════════════════════════════════════════════════════════
-
-// Build the insole clip mask from the SVG path on an offscreen canvas
 function buildMask(W, H) {
   const mc = document.createElement('canvas');
   mc.width = W; mc.height = H;
   const mx = mc.getContext('2d');
-  // Scale path from viewBox 160×320 to canvas W×H
   const sx = W / 160, sy = H / 320;
-  mx.save();
-  mx.scale(sx, sy);
-  const p = new Path2D(INSOLE_PATH_D);
+  mx.save(); mx.scale(sx, sy);
   mx.fillStyle = '#fff';
-  mx.fill(p);
+  mx.fill(new Path2D(INSOLE_PATH_D));
   mx.restore();
   return mx.getImageData(0, 0, W, H);
 }
 
-// Map a normalized value 0–1 → [R,G,B] thermal color
-// Cool (low) = dark blue → blue → cyan → green → yellow → orange → dark red (high)
 function normToRGB(n) {
   const stops = [
     [0.00, [ 10,  20,  80]],
@@ -535,135 +746,71 @@ function normToRGB(n) {
   ];
 }
 
-// Draw heatmap onto a canvas element given an array of 12 sensor values
-// canvasEl : HTMLCanvasElement
-// vals     : Float array length 12, values 0–MAX_RAW
 function drawHeatmap(canvasEl, vals) {
-  const W = canvasEl.width;
-  const H = canvasEl.height;
+  const W = canvasEl.width, H = canvasEl.height;
   const ctx = canvasEl.getContext('2d');
-
-  // Scale sensor positions from 160×320 space to canvas space
   const sx = W / 160, sy = H / 320;
-
-  // Normalise values
   const norm = vals.map(v => Math.max(0, Math.min(1, v / MAX_RAW)));
-
-  // IDW power parameter — higher = sharper transitions between sensors
   const POWER = 2.5;
-  // Influence radius (in canvas pixels, before scaling). Beyond this a sensor
-  // has very little weight. This makes the heatmap look like distinct pressure
-  // zones rather than a uniform blur.
   const RADIUS = 110 * Math.min(sx, sy);
 
-  // Build or reuse mask
   if (!drawHeatmap._mask || drawHeatmap._maskW !== W || drawHeatmap._maskH !== H) {
     drawHeatmap._mask  = buildMask(W, H);
-    drawHeatmap._maskW = W;
-    drawHeatmap._maskH = H;
+    drawHeatmap._maskW = W; drawHeatmap._maskH = H;
   }
   const mask = drawHeatmap._mask;
-
-  // Prepare sensor pixel coordinates
   const sensorPx = SENSORS.map(s => ({ x: s.cx * sx, y: s.cy * sy }));
-
-  // Fill pixel buffer
   const imgData = ctx.createImageData(W, H);
   const buf = imgData.data;
-
-  // Step size — draw every Nth pixel for performance, then scale up
   const STEP = 3;
 
   for (let py = 0; py < H; py += STEP) {
     for (let px = 0; px < W; px += STEP) {
-      // Check mask — skip if outside insole
       const mi = (py * W + px) * 4;
       if (mask.data[mi] < 128) continue;
-
-      // IDW interpolation
-      let weightSum = 0;
-      let valueSum  = 0;
-      let onSensor  = false;
-
+      let weightSum = 0, valueSum = 0, onSensor = false;
       for (let s = 0; s < NUM_SENSORS; s++) {
-        const dx = px - sensorPx[s].x;
-        const dy = py - sensorPx[s].y;
+        const dx = px - sensorPx[s].x, dy = py - sensorPx[s].y;
         const dist2 = dx * dx + dy * dy;
-
-        if (dist2 < 1) {
-          // Pixel is exactly on a sensor — use its value directly
-          valueSum  = norm[s];
-          weightSum = 1;
-          onSensor  = true;
-          break;
-        }
-
+        if (dist2 < 1) { valueSum = norm[s]; weightSum = 1; onSensor = true; break; }
         const dist = Math.sqrt(dist2);
-        if (dist > RADIUS) continue;  // Beyond influence radius
-
-        // Smooth falloff: blend IDW with Gaussian envelope
+        if (dist > RADIUS) continue;
         const w = Math.pow(1 / dist2, POWER / 2) * Math.exp(-dist2 / (2 * RADIUS * RADIUS * 0.25));
-        weightSum += w;
-        valueSum  += w * norm[s];
+        weightSum += w; valueSum += w * norm[s];
       }
-
-      let n = weightSum > 0 ? valueSum / weightSum : 0;
-
-      // Outside all sensor influence → show cold floor (not black)
-      if (weightSum === 0) n = 0;
-
+      const n = weightSum > 0 ? valueSum / weightSum : 0;
       const [r, g, b] = normToRGB(n);
-      // Alpha: make low-pressure areas translucent so the dark card shows subtly through
       const alpha = weightSum === 0 ? 60 : Math.round(180 + n * 75);
-
-      // Paint a STEP×STEP block
       for (let dy2 = 0; dy2 < STEP && py + dy2 < H; dy2++) {
         for (let dx2 = 0; dx2 < STEP && px + dx2 < W; dx2++) {
           const idx = ((py + dy2) * W + (px + dx2)) * 4;
           if (mask.data[idx] < 128) continue;
-          buf[idx]     = r;
-          buf[idx + 1] = g;
-          buf[idx + 2] = b;
-          buf[idx + 3] = alpha;
+          buf[idx] = r; buf[idx+1] = g; buf[idx+2] = b; buf[idx+3] = alpha;
         }
       }
     }
   }
-
   ctx.clearRect(0, 0, W, H);
   ctx.putImageData(imgData, 0, 0);
-
-  // Draw subtle sensor dot markers on top so you can see where sensors are
   for (let s = 0; s < NUM_SENSORS; s++) {
     const { x, y } = sensorPx[s];
-    ctx.beginPath();
-    ctx.arc(x, y, 3.5, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-    ctx.lineWidth = 1.2;
-    ctx.stroke();
+    ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 1.2; ctx.stroke();
   }
 }
 
 // ═══════════════════════════════════════════════════════════
-// DOM REFS
+// TAB SWITCHING
 // ═══════════════════════════════════════════════════════════
-const connectBtn    = document.getElementById('connectBtn');
-const statusPill    = document.getElementById('statusPill');
-const statusDot     = document.getElementById('statusDot');
-const statusText    = document.getElementById('statusText');
-const heatmapPanel  = document.getElementById('heatmapPanel');
-const debugPanel    = document.getElementById('debugPanel');
-const recordingRow  = document.getElementById('recordingRow');
-const packetRow     = document.getElementById('packetRow');
-const startBtn      = document.getElementById('startBtn');
-const stopBtn       = document.getElementById('stopBtn');
-const recIndicator  = document.getElementById('recIndicator');
-const recTimer      = document.getElementById('recTimer');
-const sessionSection= document.getElementById('sessionSection');
-const heatCanvas    = document.getElementById('heatCanvas');
+function switchTab(tabName) {
+  document.getElementById('tab-dashboard').style.display  = tabName === 'dashboard'  ? '' : 'none';
+  document.getElementById('tab-sensor-test').style.display = tabName === 'sensorTest' ? '' : 'none';
+  document.getElementById('tabDashboard').classList.toggle('active',  tabName === 'dashboard');
+  document.getElementById('tabSensorTest').classList.toggle('active', tabName === 'sensorTest');
+}
 
 // ═══════════════════════════════════════════════════════════
-// BUILD DEBUG TABLE
+// BUILD SENSOR TABLE
 // ═══════════════════════════════════════════════════════════
 (function buildTable() {
   const tbody = document.getElementById('sensorTableBody');
@@ -684,7 +831,204 @@ const heatCanvas    = document.getElementById('heatCanvas');
 })();
 
 // ═══════════════════════════════════════════════════════════
-// UPDATE LIVE UI
+// GAIT DETECTION
+// ═══════════════════════════════════════════════════════════
+function setGaitPhase(newPhase, now, totalForce) {
+  const prevPhase = gait.phase;
+  const phaseDur  = now - gait.phaseStart;
+
+  if (newPhase === 'HEEL_STRIKE') {
+    const lastStrike = gait.stepTimestamps[gait.stepTimestamps.length - 1] || 0;
+    if (now - lastStrike < CAL.minStepIntervalMs) return; // debounce
+    gait.stepCount++;
+    gait.heelForce = totalForce;
+    gait.peakForce = totalForce;
+    gait.curLoadRate = 0;
+    if (lastStrike > 0) {
+      const st = now - lastStrike;
+      gait.strideTimes.push(st);
+      if (gait.strideTimes.length > 20) gait.strideTimes.shift();
+    }
+    gait.stepTimestamps.push(now);
+    if (gait.stepTimestamps.length > 50) gait.stepTimestamps.shift();
+    gait.stanceStart = now;
+  }
+
+  if (newPhase === 'TOE_OFF' && gait.stanceStart > 0) {
+    const gct = now - gait.stanceStart;
+    if (gct >= CAL.minStanceMs) {
+      gait.gcts.push(gct);
+      if (gait.gcts.length > 20) gait.gcts.shift();
+    }
+    if (gait.peakForce > 0) {
+      gait.loadRates.push(gait.curLoadRate);
+      if (gait.loadRates.length > 20) gait.loadRates.shift();
+    }
+    gait.stanceStart = 0;
+  }
+
+  if (newPhase === 'SWING') {
+    gait.peakForce = 0;
+  }
+
+  // Log event
+  const phaseInfo = GAIT_PHASES[newPhase];
+  gait.events.unshift({
+    phase: newPhase,
+    css:   phaseInfo.css,
+    label: phaseInfo.label,
+    time:  now,
+    force: totalForce,
+    dur:   phaseDur,
+  });
+  if (gait.events.length > CAL.maxEventLog) gait.events.pop();
+
+  gait.phase      = newPhase;
+  gait.phaseStart = now;
+}
+
+function detectGait() {
+  const now       = Date.now();
+  const totalRaw  = sensorValues.reduce((a, v) => a + v, 0);
+  const heelRaw   = ZONE_HEEL.reduce((a, i) => a + sensorValues[i], 0);
+  const midRaw    = ZONE_MID.reduce((a, i) => a + sensorValues[i], 0);
+  const foreRaw   = ZONE_FORE.reduce((a, i) => a + sensorValues[i], 0);
+  const totalF    = sensorValues.reduce((a, v) => a + (adcToForceN(v) ?? 0), 0);
+
+  const heelRatio = totalRaw > 0 ? heelRaw / totalRaw : 0;
+  const foreRatio = totalRaw > 0 ? foreRaw / totalRaw : 0;
+  const midRatio  = totalRaw > 0 ? midRaw  / totalRaw : 0;
+  const inContact = totalRaw >= CAL.totalContactLoad;
+  const phaseDur  = now - gait.phaseStart;
+
+  // Loading rate
+  const dt = now - gait.prevTime;
+  if (dt > 5 && gait.prevTime > 0) {
+    const lr = (totalF - gait.prevForce) / (dt / 1000);
+    if (lr > gait.curLoadRate) gait.curLoadRate = lr;
+  }
+  gait.prevForce = totalF;
+  gait.prevTime  = now;
+
+  if (inContact && totalF > gait.peakForce) gait.peakForce = totalF;
+
+  // ── State machine ────────────────────────────────────────
+  switch (gait.phase) {
+
+    case 'SWING':
+      if (inContact) {
+        if (heelRatio >= CAL.heelDominanceRatio) setGaitPhase('HEEL_STRIKE', now, totalF);
+        else                                      setGaitPhase('LOADING',     now, totalF);
+      }
+      break;
+
+    case 'HEEL_STRIKE':
+      if (!inContact) {
+        if (phaseDur >= CAL.minStanceMs) setGaitPhase('TOE_OFF', now, totalF);
+        else                             setGaitPhase('SWING',   now, totalF);
+      } else if (phaseDur > 80 && (midRatio > 0.15 || foreRatio > 0.1)) {
+        setGaitPhase('LOADING', now, totalF);
+      }
+      break;
+
+    case 'LOADING':
+      if (!inContact) {
+        setGaitPhase(phaseDur >= CAL.minStanceMs ? 'TOE_OFF' : 'SWING', now, totalF);
+      } else if (phaseDur > 120 && heelRatio > 0.15 && midRatio > 0.1) {
+        setGaitPhase('MID_STANCE', now, totalF);
+      }
+      break;
+
+    case 'MID_STANCE':
+      if (!inContact) {
+        setGaitPhase('TOE_OFF', now, totalF);
+      } else if (phaseDur > 100 && heelRatio < 0.28 && foreRatio >= CAL.foreDominanceRatio) {
+        setGaitPhase('TERMINAL', now, totalF);
+      }
+      break;
+
+    case 'TERMINAL':
+      if (!inContact) setGaitPhase('TOE_OFF', now, totalF);
+      break;
+
+    case 'TOE_OFF':
+      if (inContact)               setGaitPhase('HEEL_STRIKE', now, totalF);
+      else if (phaseDur > 40)      setGaitPhase('SWING',       now, totalF);
+      break;
+  }
+
+  updateGaitUI();
+}
+
+function updateGaitUI() {
+  const phaseInfo = GAIT_PHASES[gait.phase];
+
+  // Phase badge
+  const badge = document.getElementById('gaitPhaseBadge');
+  badge.textContent = phaseInfo.label;
+  badge.className   = 'gait-phase-badge ' + phaseInfo.css;
+
+  // Steps
+  document.getElementById('gaitSteps').textContent = gait.stepCount;
+
+  // Cadence — steps/min over rolling window
+  const now = Date.now();
+  const recentSteps = gait.stepTimestamps.filter(t => now - t < CAL.cadenceWindowMs);
+  let cadence = '—';
+  if (recentSteps.length >= 2) {
+    const spanMs = recentSteps[recentSteps.length - 1] - recentSteps[0];
+    cadence = Math.round((recentSteps.length - 1) / (spanMs / 60000));
+  }
+  document.getElementById('gaitCadence').textContent = cadence;
+
+  // Average ground contact time
+  let avgGCT = '—';
+  if (gait.gcts.length) {
+    const ms = Math.round(gait.gcts.reduce((a, v) => a + v, 0) / gait.gcts.length);
+    avgGCT = ms;
+  }
+  document.getElementById('gaitContactTime').textContent = avgGCT;
+
+  // Average stride time
+  let avgStride = '—';
+  if (gait.strideTimes.length) {
+    avgStride = (gait.strideTimes.reduce((a, v) => a + v, 0) / gait.strideTimes.length / 1000).toFixed(2);
+  }
+  document.getElementById('gaitStrideTime').textContent = avgStride;
+
+  // Peak force (this stance or last)
+  const pf = gait.peakForce > 0 ? gait.peakForce.toFixed(1) + 'N' : '—';
+  document.getElementById('gaitPeakForce').textContent = pf;
+
+  // Loading rate
+  const lr = gait.loadRates.length
+    ? Math.round(gait.loadRates[gait.loadRates.length - 1]) + ' N/s'
+    : '—';
+  document.getElementById('gaitLoadRate').textContent = lr;
+
+  // Event log
+  const log = document.getElementById('gaitEventLog');
+  if (!gait.events.length) {
+    log.innerHTML = '<div class="gait-empty-log">Waiting for events…</div>';
+    return;
+  }
+  const sessionRef = isRecording ? recordingStart : (gait.events[gait.events.length - 1]?.time || now);
+  log.innerHTML = '';
+  gait.events.forEach(e => {
+    const elapsed = ((e.time - sessionRef) / 1000).toFixed(1);
+    const timeStr = isRecording ? `+${elapsed}s` : `${Math.round((now - e.time) / 1000)}s`;
+    const div = document.createElement('div');
+    div.className = 'gait-event-item';
+    div.innerHTML =
+      `<span class="gait-event-time">${timeStr}</span>` +
+      `<span class="gait-event-type ${e.css}">${e.label}</span>` +
+      `<span class="gait-event-detail">${e.force.toFixed(1)}N · ${Math.round(e.dur)}ms</span>`;
+    log.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// UPDATE UI  (called on every new data frame)
 // ═══════════════════════════════════════════════════════════
 function normToHex(n) {
   const [r, g, b] = normToRGB(n);
@@ -692,53 +1036,46 @@ function normToHex(n) {
 }
 
 function updateUI() {
-  // Redraw canvas heatmap
-  drawHeatmap(heatCanvas, sensorValues);
+  drawHeatmap(document.getElementById('heatCanvas'), sensorValues);
+  detectGait();
 
-  // Compute per-sensor forces and zone totals
+  // Force summary (Sensor Test tab)
   const forces = sensorValues.map(adcToForceN);
   let totalF = 0, foreF = 0, midF = 0, heelF = 0;
   forces.forEach((f, i) => {
-    const val = f ?? 0;
-    totalF += val;
-    if (ZONE_FORE.includes(i)) foreF += val;
-    if (ZONE_MID.includes(i))  midF  += val;
-    if (ZONE_HEEL.includes(i)) heelF += val;
+    const v = f ?? 0;
+    totalF += v;
+    if (ZONE_FORE.includes(i)) foreF += v;
+    if (ZONE_MID.includes(i))  midF  += v;
+    if (ZONE_HEEL.includes(i)) heelF += v;
   });
-
-  // Update force summary row
-  const forceRow = document.getElementById('forceRow');
-  if (forceRow) forceRow.style.display = '';
-  const totalForceEl = document.getElementById('totalForce');
-  if (totalForceEl) {
-    totalForceEl.textContent = totalF.toFixed(2) + ' N';
-    totalForceEl.className = 'pkt-val ' + (totalF < 1 ? 'good' : totalF < 50 ? 'warn' : 'bad');
+  const tfEl = document.getElementById('totalForce');
+  if (tfEl) {
+    tfEl.textContent = totalF.toFixed(2) + ' N';
+    tfEl.className = 'pkt-val ' + (totalF < 1 ? 'good' : totalF < 50 ? 'warn' : 'bad');
   }
-  const fe = document.getElementById('foreForce');
-  const me = document.getElementById('midForce');
-  const he = document.getElementById('heelForce');
-  if (fe) fe.textContent = foreF.toFixed(2) + ' N';
-  if (me) me.textContent = midF.toFixed(2)  + ' N';
-  if (he) he.textContent = heelF.toFixed(2) + ' N';
+  const feEl = document.getElementById('foreForce');
+  const meEl = document.getElementById('midForce');
+  const heEl = document.getElementById('heelForce');
+  if (feEl) feEl.textContent = foreF.toFixed(2) + ' N';
+  if (meEl) meEl.textContent = midF.toFixed(2) + ' N';
+  if (heEl) heEl.textContent = heelF.toFixed(2) + ' N';
 
-  // Update debug table
+  // Sensor table (Sensor Test tab)
   SENSORS.forEach(s => {
     const v    = sensorValues[s.id];
     const norm = v / MAX_RAW;
     const col  = normToHex(norm);
-
     const valEl   = document.getElementById(`dbgVal${s.id}`);
     const forceEl = document.getElementById(`dbgForce${s.id}`);
     const barEl   = document.getElementById(`dbgBar${s.id}`);
-
     if (valEl)   { valEl.textContent = v; valEl.style.color = v > 80 ? col : '#5a6278'; }
     if (forceEl) {
       const fn = forces[s.id];
       forceEl.textContent = fmtN(fn);
       forceEl.style.color = (fn === null) ? '#ff4444' : (fn > 0.05 ? col : '#5a6278');
     }
-    if (barEl)   { barEl.style.width = ((v / MAX_RAW) * 100).toFixed(1) + '%'; barEl.style.background = col; }
-
+    if (barEl) { barEl.style.width = ((v / MAX_RAW) * 100).toFixed(1) + '%'; barEl.style.background = col; }
     const row = document.getElementById(`row${s.id}`);
     if (row) row.classList.toggle('active-row', v > 200);
   });
@@ -753,15 +1090,14 @@ async function toggleConnection() {
 }
 
 async function connect() {
-  // Stop demo mode if active before connecting live hardware
   if (demoMode) {
     demoMode = false; clearInterval(demoHandle);
     const btn = document.getElementById('demoBtn');
     btn.textContent = '◈ Demo Mode'; btn.classList.remove('is-active');
   }
   try {
-    connectBtn.disabled = true;
-    connectBtn.textContent = '◌ Scanning...';
+    const connectBtn = document.getElementById('connectBtn');
+    connectBtn.disabled = true; connectBtn.textContent = '◌ Scanning...';
     bleDevice = await navigator.bluetooth.requestDevice({
       filters: [{ name: 'ImpactInsoles' }],
       optionalServices: [SERVICE_UUID]
@@ -779,7 +1115,7 @@ async function connect() {
     alert('Connection failed: ' + err.message);
     setConnectedState(false);
   } finally {
-    connectBtn.disabled = false;
+    document.getElementById('connectBtn').disabled = false;
   }
 }
 
@@ -787,24 +1123,33 @@ function disconnect() { if (bleDevice) bleDevice.gatt.disconnect(); }
 function onDisconnect() { setConnectedState(false); if (isRecording) stopRecording(); }
 
 function setConnectedState(connected) {
+  const connectBtn   = document.getElementById('connectBtn');
+  const statusPill   = document.getElementById('statusPill');
+  const statusDot    = document.getElementById('statusDot');
+  const statusText   = document.getElementById('statusText');
+  const heatmapPanel = document.getElementById('heatmapPanel');
+  const gaitPanel    = document.getElementById('gaitPanel');
+  const recordingRow = document.getElementById('recordingRow');
+  const packetRow    = document.getElementById('packetRow');
+
   if (connected) {
     statusPill.classList.add('connected');
-    statusDot.className = 'dot on';
+    statusDot.className  = 'dot on';
     statusText.textContent = 'CONNECTED';
     connectBtn.textContent = '⬡ Disconnect';
-    connectBtn.className = 'connect-btn is-connected';
+    connectBtn.className   = 'connect-btn is-connected';
     heatmapPanel.classList.add('visible');
-    debugPanel.classList.add('visible');
+    gaitPanel.classList.add('visible');
     recordingRow.classList.add('visible');
     packetRow.classList.add('visible');
   } else {
     statusPill.classList.remove('connected');
-    statusDot.className = 'dot';
+    statusDot.className  = 'dot';
     statusText.textContent = 'OFFLINE';
     connectBtn.textContent = '⬡ Scan & Connect via Bluetooth';
-    connectBtn.className = 'connect-btn';
+    connectBtn.className   = 'connect-btn';
     heatmapPanel.classList.remove('visible');
-    debugPanel.classList.remove('visible');
+    gaitPanel.classList.remove('visible');
     recordingRow.classList.remove('visible');
     packetRow.classList.remove('visible');
   }
@@ -829,7 +1174,6 @@ function handleBleData(event) {
   document.getElementById('pktLost').textContent = lostCount;
 
   updateUI();
-
   if (isRecording) recordingData.push({ t: (Date.now() - recordingStart) / 1000, vals: [...sensorValues] });
 }
 
@@ -838,23 +1182,37 @@ function handleBleData(event) {
 // ═══════════════════════════════════════════════════════════
 function startRecording() {
   isRecording = true; recordingData = []; recordingStart = Date.now();
+  gait.sessionStart = recordingStart;
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn  = document.getElementById('stopBtn');
+  const recIndicator = document.getElementById('recIndicator');
+  const statusDot    = document.getElementById('statusDot');
+  const statusText   = document.getElementById('statusText');
   startBtn.classList.add('is-active'); startBtn.textContent = '● Recording';
   stopBtn.disabled = false;
   recIndicator.classList.add('active');
-  statusDot.className = 'dot rec'; statusText.textContent = 'RECORDING';
-  sessionSection.classList.remove('visible');
+  statusDot.className  = 'dot rec';
+  statusText.textContent = 'RECORDING';
+  document.getElementById('sessionSection').classList.remove('visible');
   timerHandle = setInterval(() => {
     const s = Math.floor((Date.now() - recordingStart) / 1000);
-    recTimer.textContent = `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+    document.getElementById('recTimer').textContent =
+      `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
   }, 500);
 }
 
 function stopRecording() {
   isRecording = false; clearInterval(timerHandle);
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn  = document.getElementById('stopBtn');
+  const recIndicator = document.getElementById('recIndicator');
+  const statusDot    = document.getElementById('statusDot');
+  const statusText   = document.getElementById('statusText');
   startBtn.classList.remove('is-active'); startBtn.textContent = '▶ Start Session';
   stopBtn.disabled = true;
   recIndicator.classList.remove('active');
-  statusDot.className = 'dot on'; statusText.textContent = 'CONNECTED';
+  statusDot.className  = 'dot on';
+  statusText.textContent = 'CONNECTED';
   renderSessionResults();
 }
 
@@ -883,6 +1241,30 @@ function renderSessionResults() {
   document.getElementById('sessAvg').textContent      = Math.round(globalAvg);
   document.getElementById('sessionDate').textContent  = new Date().toLocaleString();
 
+  // Gait summary from events during the recording
+  const sessionEvents = gait.events.filter(e => e.time >= recordingStart);
+  const sessionStrikes = gait.stepTimestamps.filter(t => t >= recordingStart);
+  const sessSteps = sessionStrikes.length;
+  document.getElementById('sessSteps').textContent = sessSteps;
+
+  let sessCadence = '—';
+  if (sessionStrikes.length >= 2) {
+    const spanMs = sessionStrikes[sessionStrikes.length - 1] - sessionStrikes[0];
+    sessCadence  = Math.round((sessionStrikes.length - 1) / (spanMs / 60000)) + '/m';
+  }
+  document.getElementById('sessCadence').textContent = sessCadence;
+
+  const sessGCTs = gait.gcts.filter((_, i) => i >= gait.gcts.length - sessSteps);
+  document.getElementById('sessGCT').textContent = sessGCTs.length
+    ? Math.round(sessGCTs.reduce((a,v)=>a+v,0)/sessGCTs.length) + 'ms'
+    : '—';
+
+  const sessStrides = gait.strideTimes.filter((_, i) => i >= gait.strideTimes.length - sessSteps);
+  document.getElementById('sessStride').textContent = sessStrides.length
+    ? (sessStrides.reduce((a,v)=>a+v,0)/sessStrides.length/1000).toFixed(2) + 's'
+    : '—';
+
+  // Zone breakdown
   const foreSum   = ZONE_FORE.reduce((a, i) => a + avgVals[i], 0);
   const midSum    = ZONE_MID.reduce((a, i)  => a + avgVals[i], 0);
   const heelSum   = ZONE_HEEL.reduce((a, i) => a + avgVals[i], 0);
@@ -900,13 +1282,10 @@ function renderSessionResults() {
     document.getElementById('zoneHeelFill').style.width = heelPct + '%';
   });
 
-  // Draw session average heatmap
-  const sessCanvas = document.getElementById('sessCanvas');
-  drawHeatmap(sessCanvas, avgVals);
-
+  drawHeatmap(document.getElementById('sessCanvas'), avgVals);
   renderChart(recordingData);
-  sessionSection.classList.add('visible');
-  setTimeout(() => sessionSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+  document.getElementById('sessionSection').classList.add('visible');
+  setTimeout(() => document.getElementById('sessionSection').scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
 }
 
 function renderChart(data) {
@@ -920,14 +1299,11 @@ function renderChart(data) {
   const datasets = zoneGroups.map((grp, gi) => ({
     label: zoneNames[gi],
     data: pts.map(d => Math.round(grp.reduce((a, i) => a + d.vals[i], 0) / grp.length)),
-    borderColor: zoneColors[gi],
-    backgroundColor: zoneColors[gi] + '14',
-    borderWidth: 2, tension: 0.4, fill: true,
-    pointRadius: 0, pointHoverRadius: 4,
+    borderColor: zoneColors[gi], backgroundColor: zoneColors[gi] + '14',
+    borderWidth: 2, tension: 0.4, fill: true, pointRadius: 0, pointHoverRadius: 4,
   }));
 
   if (chart) { chart.destroy(); chart = null; }
-  // Reset canvas so Chart.js doesn't inherit a previously-grown size
   const chartCanvas = document.getElementById('sessionChart');
   chartCanvas.removeAttribute('style');
   chartCanvas.removeAttribute('width');
@@ -951,10 +1327,26 @@ function renderChart(data) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// DEMO MODE  — button or press D to toggle
+// DEMO MODE
+// Simulates a realistic gait cycle so gait detection fires
+// through all 6 phases: swing → heel strike → loading →
+// mid-stance → terminal stance → toe-off → swing
 // ═══════════════════════════════════════════════════════════
 let demoMode = false, demoHandle = null;
 document.addEventListener('keydown', e => { if (e.key === 'd' || e.key === 'D') toggleDemo(); });
+
+// Each entry: [heel, mid, fore] normalised (0–1), duration ms
+const DEMO_CYCLE = [
+  { h: 0.00, m: 0.00, f: 0.00, ms: 420 },  // 0: SWING
+  { h: 0.72, m: 0.05, f: 0.02, ms:  90 },  // 1: HEEL STRIKE
+  { h: 0.78, m: 0.38, f: 0.12, ms: 130 },  // 2: LOADING
+  { h: 0.55, m: 0.58, f: 0.48, ms: 280 },  // 3: MID-STANCE
+  { h: 0.14, m: 0.32, f: 0.78, ms: 120 },  // 4: TERMINAL STANCE
+  { h: 0.04, m: 0.10, f: 0.58, ms:  80 },  // 5: TOE-OFF
+];
+
+let demoPhase = 0, demoPhaseMs = DEMO_CYCLE[0].ms;
+const DEMO_TICK = 20;
 
 function toggleDemo() {
   const btn = document.getElementById('demoBtn');
@@ -964,39 +1356,49 @@ function toggleDemo() {
   }
   demoMode = true; setConnectedState(true);
   btn.textContent = '◈ Exit Demo'; btn.classList.add('is-active');
-  let t = 0;
+  demoPhase = 0; demoPhaseMs = DEMO_CYCLE[0].ms;
+
   demoHandle = setInterval(() => {
-    t += 0.08;
-    const heel   = Math.max(0, Math.sin(t)       * 0.9  + Math.random() * 0.12);
-    const toe    = Math.max(0, Math.sin(t + 1.2) * 0.85 + Math.random() * 0.12);
-    const mid    = Math.max(0, Math.sin(t + 0.6) * 0.50 + Math.random() * 0.08);
-    sensorValues[0]  = Math.round(toe  * MAX_RAW * (0.70 + Math.random() * 0.30));
-    sensorValues[1]  = Math.round(toe  * MAX_RAW * (0.80 + Math.random() * 0.20));
-    sensorValues[2]  = Math.round(toe  * MAX_RAW * (0.75 + Math.random() * 0.25));
-    sensorValues[3]  = Math.round(toe  * MAX_RAW * (0.65 + Math.random() * 0.35));
-    sensorValues[4]  = Math.round(mid  * MAX_RAW * (0.60 + Math.random() * 0.20));
-    sensorValues[5]  = Math.round(mid  * MAX_RAW * (0.55 + Math.random() * 0.20));
-    sensorValues[6]  = Math.round(mid  * MAX_RAW * (0.50 + Math.random() * 0.15));
-    sensorValues[7]  = Math.round(mid  * MAX_RAW * (0.50 + Math.random() * 0.15));
-    sensorValues[8]  = Math.round(heel * MAX_RAW * (0.85 + Math.random() * 0.15));
-    sensorValues[9]  = Math.round(heel * MAX_RAW * (0.90 + Math.random() * 0.10));
-    sensorValues[10] = Math.round(heel * MAX_RAW * (0.88 + Math.random() * 0.12));
-    sensorValues[11] = Math.round(heel * MAX_RAW * (0.80 + Math.random() * 0.20));
-    sensorValues = sensorValues.map(v => Math.max(0, Math.min(MAX_RAW, Math.round(v))));
+    demoPhaseMs -= DEMO_TICK;
+    if (demoPhaseMs <= 0) {
+      demoPhase = (demoPhase + 1) % DEMO_CYCLE.length;
+      demoPhaseMs = DEMO_CYCLE[demoPhase].ms;
+    }
+
+    const c = DEMO_CYCLE[demoPhase];
+    const noise = () => (Math.random() - 0.5) * 0.06;
+
+    const h = Math.max(0, c.h + noise());
+    const m = Math.max(0, c.m + noise());
+    const f = Math.max(0, c.f + noise());
+
+    sensorValues[0]  = Math.round(Math.min(MAX_RAW, f * MAX_RAW * (0.80 + Math.random()*0.20)));
+    sensorValues[1]  = Math.round(Math.min(MAX_RAW, f * MAX_RAW * (0.90 + Math.random()*0.10)));
+    sensorValues[2]  = Math.round(Math.min(MAX_RAW, f * MAX_RAW * (0.85 + Math.random()*0.15)));
+    sensorValues[3]  = Math.round(Math.min(MAX_RAW, f * MAX_RAW * (0.75 + Math.random()*0.25)));
+    sensorValues[4]  = Math.round(Math.min(MAX_RAW, m * MAX_RAW * (0.85 + Math.random()*0.15)));
+    sensorValues[5]  = Math.round(Math.min(MAX_RAW, m * MAX_RAW * (0.80 + Math.random()*0.20)));
+    sensorValues[6]  = Math.round(Math.min(MAX_RAW, m * MAX_RAW * (0.75 + Math.random()*0.25)));
+    sensorValues[7]  = Math.round(Math.min(MAX_RAW, m * MAX_RAW * (0.78 + Math.random()*0.22)));
+    sensorValues[8]  = Math.round(Math.min(MAX_RAW, h * MAX_RAW * (0.90 + Math.random()*0.10)));
+    sensorValues[9]  = Math.round(Math.min(MAX_RAW, h * MAX_RAW * (0.95 + Math.random()*0.05)));
+    sensorValues[10] = Math.round(Math.min(MAX_RAW, h * MAX_RAW * (0.92 + Math.random()*0.08)));
+    sensorValues[11] = Math.round(Math.min(MAX_RAW, h * MAX_RAW * (0.88 + Math.random()*0.12)));
+
     updateUI();
     if (isRecording) recordingData.push({ t: (Date.now() - recordingStart) / 1000, vals: [...sensorValues] });
-  }, 20);
+  }, DEMO_TICK);
 }
 
 // ═══════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════
 if (!navigator.bluetooth) {
-  connectBtn.disabled = true;
-  connectBtn.textContent = '⚠ BLE Not Supported (use Chrome)';
+  const cb = document.getElementById('connectBtn');
+  cb.disabled = true;
+  cb.textContent = '⚠ BLE Not Supported (use Chrome)';
 }
 
-// Auto-start demo mode so the UI is visible without needing an ESP32
 toggleDemo();
 </script>
 </body>
