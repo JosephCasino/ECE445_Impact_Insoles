@@ -32,17 +32,10 @@
 
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
-    body {
-      font-family: 'Barlow Condensed', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+    body { font-family: 'Barlow Condensed', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
     body::before {
-      content: '';
-      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
       background:
         radial-gradient(ellipse 60% 40% at 15% 20%, rgba(28,110,191,0.08) 0%, transparent 70%),
         radial-gradient(ellipse 50% 35% at 85% 75%, rgba(232,74,0,0.07) 0%, transparent 70%);
@@ -53,169 +46,67 @@
     /* ─── Header ─── */
     .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
     .brand { font-size: 34px; font-weight: 900; letter-spacing: 3px; line-height: 1; color: var(--text); }
-    .brand span.o { color: var(--orange); }
     .brand span.b { color: var(--blue); }
+    .brand span.o { color: var(--orange); }
     .tagline { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 3px; margin-top: 5px; }
 
-    .status-pill {
-      display: flex; align-items: center; gap: 8px;
-      background: var(--bg-panel); border: 1px solid var(--border);
-      border-radius: 20px; padding: 8px 14px;
-      font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted);
-      transition: all 0.4s ease;
-    }
+    .status-pill { display: flex; align-items: center; gap: 8px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 20px; padding: 8px 14px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); transition: all 0.4s ease; }
     .status-pill.connected { border-color: var(--blue); color: var(--text); box-shadow: 0 0 18px var(--blue-glow); }
     .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); transition: all 0.4s ease; }
     .dot.on  { background: var(--blue);   box-shadow: 0 0 10px var(--blue);   animation: pulse-dot 2.2s ease-in-out infinite; }
     .dot.rec { background: var(--orange); box-shadow: 0 0 10px var(--orange); animation: blink-dot 1s ease-in-out infinite; }
+    .dot.pau { background: var(--yellow); box-shadow: 0 0 10px var(--yellow); }
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
     @keyframes blink-dot { 0%,100%{opacity:1} 50%{opacity:.25} }
 
     /* ─── Connect / Demo Buttons ─── */
     .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-    .connect-btn {
-      padding: 15px 20px;
-      background: transparent; border: 2px solid var(--orange); border-radius: 8px;
-      color: var(--orange);
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 14px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
-      cursor: pointer; transition: all 0.25s ease;
-    }
+    .connect-btn { padding: 15px 20px; background: transparent; border: 2px solid var(--orange); border-radius: 8px; color: var(--orange); font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; cursor: pointer; transition: all 0.25s ease; }
     .connect-btn:hover:not(:disabled) { background: var(--orange); color: #fff; box-shadow: 0 4px 24px var(--orange-glow); }
     .connect-btn.is-connected { border-color: var(--muted); color: var(--muted); }
     .connect-btn.is-connected:hover { background: #1e0000; border-color: #ff4444; color: #ff4444; }
     .connect-btn:disabled { opacity: .35; cursor: not-allowed; }
-
-    .demo-btn {
-      padding: 15px 20px;
-      background: transparent; border: 2px solid #00c896; border-radius: 8px;
-      color: #00c896;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 14px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
-      cursor: pointer; transition: all 0.25s ease;
-    }
+    .demo-btn { padding: 15px 20px; background: transparent; border: 2px solid #00c896; border-radius: 8px; color: #00c896; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; cursor: pointer; transition: all 0.25s ease; }
     .demo-btn:hover { background: rgba(0,200,150,0.12); box-shadow: 0 4px 24px rgba(0,200,150,0.3); }
     .demo-btn.is-active { background: rgba(0,200,150,0.15); color: #00ffba; border-color: #00ffba; box-shadow: 0 0 18px rgba(0,200,150,0.4); }
 
     /* ─── Tab Navigation ─── */
-    .tab-nav {
-      display: flex; gap: 4px; margin-bottom: 20px;
-      background: var(--bg-panel); border: 1px solid var(--border);
-      border-radius: 10px; padding: 4px;
-    }
-    .tab-btn {
-      flex: 1; padding: 10px 8px; border: none; border-radius: 7px;
-      background: transparent; color: var(--muted);
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 13px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
-      cursor: pointer; transition: all 0.2s ease;
-    }
+    .tab-nav { display: flex; gap: 4px; margin-bottom: 20px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 4px; }
+    .tab-btn { flex: 1; padding: 10px 8px; border: none; border-radius: 7px; background: transparent; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: all 0.2s ease; }
     .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.04); }
-    .tab-btn.active {
-      background: var(--bg-card); color: var(--text);
-      border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.35);
-    }
+    .tab-btn.active { background: var(--bg-card); color: var(--text); border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.35); }
 
     /* ─── Main Grid ─── */
     .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
     @media(max-width: 520px) { .main-grid { grid-template-columns: 1fr; } }
 
     /* ─── Heatmap Panel ─── */
-    .heatmap-panel {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 18px; display: flex; flex-direction: column; align-items: center;
-      opacity: 0; transform: translateY(16px); transition: all 0.5s cubic-bezier(.16,1,.3,1);
-    }
+    .heatmap-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; align-items: center; opacity: 0; transform: translateY(16px); transition: all 0.5s cubic-bezier(.16,1,.3,1); }
     .heatmap-panel.visible { opacity: 1; transform: translateY(0); }
+    .heatmap-panel.always-visible { opacity: 1; transform: none; }
     .panel-label { font-size: 10px; font-weight: 700; letter-spacing: 3px; color: var(--muted); margin-bottom: 14px; text-transform: uppercase; align-self: flex-start; }
-
     .heatmap-canvas-wrap { position: relative; width: 160px; height: 320px; }
     .heatmap-canvas-wrap canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
     .insole-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-
     .heatmap-legend { margin-top: 14px; width: 100%; display: flex; align-items: center; gap: 6px; }
-    .legend-bar {
-      flex: 1; height: 6px; border-radius: 3px;
-      background: linear-gradient(to right, #0a1a5c, #1c5fa8, #00b4d8, #80ed99, #f4c430, #e84a00, #7f0000);
-    }
+    .legend-bar { flex: 1; height: 6px; border-radius: 3px; background: linear-gradient(to right, #0a1a5c, #1c5fa8, #00b4d8, #80ed99, #f4c430, #e84a00, #7f0000); }
     .legend-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); }
 
     /* ─── Gait Events Panel ─── */
-    .gait-panel {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 18px; display: flex; flex-direction: column;
-      opacity: 0; transform: translateY(16px); transition: all 0.5s cubic-bezier(.16,1,.3,1) 0.08s;
-    }
+    .gait-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; opacity: 0; transform: translateY(16px); transition: all 0.5s cubic-bezier(.16,1,.3,1) 0.08s; }
     .gait-panel.visible { opacity: 1; transform: translateY(0); }
-
-    .gait-phase-wrap { margin-bottom: 10px; }
-    .gait-phase-sublabel { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--muted); margin-bottom: 5px; }
-    .gait-phase-badge {
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-      padding: 9px 10px; border-radius: 8px; border: 1px solid var(--border);
-      background: var(--bg-panel);
-      font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
-      color: var(--muted); transition: all 0.25s ease; text-align: center;
-    }
-    .gait-phase-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
-    .gait-phase-badge.swing        { color: var(--blue);   border-color: var(--blue);   background: var(--blue-dim);   box-shadow: 0 0 10px var(--blue-glow); }
-    .gait-phase-badge.heel-strike  { color: var(--orange); border-color: var(--orange); background: var(--orange-dim); box-shadow: 0 0 12px var(--orange-glow); }
-    .gait-phase-badge.loading      { color: var(--yellow); border-color: var(--yellow); background: rgba(244,196,48,0.12); }
-    .gait-phase-badge.mid-stance   { color: var(--green);  border-color: var(--green);  background: var(--green-dim);  box-shadow: 0 0 10px var(--green-glow); }
-    .gait-phase-badge.terminal     { color: #ff8c42;       border-color: #ff8c42;       background: rgba(255,140,66,0.13); }
-    .gait-phase-badge.toe-off      { color: var(--orange); border-color: var(--orange); background: var(--orange-dim); box-shadow: 0 0 12px var(--orange-glow); }
-
-    /* Gait stats */
     .gait-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 8px; }
-    .gait-stat-card {
-      background: var(--bg-panel); border: 1px solid var(--border);
-      border-radius: 6px; padding: 7px 8px;
-    }
+    .gait-stat-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 6px; padding: 7px 8px; }
     .gait-stat-label { font-size: 8px; font-weight: 700; letter-spacing: 2px; color: var(--muted); margin-bottom: 2px; text-transform: uppercase; }
     .gait-stat-val { font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; color: var(--text); line-height: 1; }
     .gait-stat-unit { font-size: 9px; color: var(--muted); }
-
-    /* Extra metric pills */
-    .gait-metrics-row { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 8px; }
-    .gait-metric-pill {
-      background: var(--bg-panel); border: 1px solid var(--border);
-      border-radius: 6px; padding: 5px 8px;
-      display: flex; align-items: baseline; justify-content: space-between;
-    }
+    .gait-metrics-row { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .gait-metric-pill { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px; display: flex; align-items: baseline; justify-content: space-between; }
     .gait-metric-label { font-size: 8px; font-weight: 700; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; }
     .gait-metric-val { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); }
 
-    /* Event log */
-    .gait-log-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; }
-    .gait-event-log { max-height: 130px; overflow-y: auto; }
-    .gait-event-log::-webkit-scrollbar { width: 3px; }
-    .gait-event-log::-webkit-scrollbar-track { background: transparent; }
-    .gait-event-log::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
-    .gait-event-item {
-      display: grid; grid-template-columns: 38px 1fr auto;
-      align-items: center; gap: 5px;
-      padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
-      font-family: 'DM Mono', monospace; font-size: 9px;
-    }
-    .gait-event-item:last-child { border-bottom: none; }
-    .gait-event-time { color: var(--muted); }
-    .gait-event-type { font-weight: 500; font-size: 9px; letter-spacing: 1px; }
-    .gait-event-detail { color: var(--muted); font-size: 8px; text-align: right; }
-
-    .gait-event-type.swing        { color: var(--blue); }
-    .gait-event-type.heel-strike  { color: var(--orange); }
-    .gait-event-type.loading      { color: var(--yellow); }
-    .gait-event-type.mid-stance   { color: var(--green); }
-    .gait-event-type.terminal     { color: #ff8c42; }
-    .gait-event-type.toe-off      { color: var(--orange); }
-    .gait-empty-log { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); padding: 8px 0; text-align: center; }
-
-    /* ─── Debug Panel (Sensor Test tab) ─── */
-    .debug-panel {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 18px;
-    }
-
+    /* ─── Debug Panel ─── */
+    .debug-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
     .sensor-table { width: 100%; border-collapse: collapse; }
     .sensor-table th { font-size: 9px; letter-spacing: 2px; color: var(--muted); font-weight: 700; text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--border); }
     .sensor-table td { font-family: 'DM Mono', monospace; font-size: 12px; padding: 5px 6px; border-bottom: 1px solid rgba(255,255,255,.04); transition: background 0.15s; }
@@ -228,32 +119,30 @@
     .sensor-table tr.active-row td { background: rgba(232,74,0,.06); }
 
     /* ─── Recording Controls ─── */
-    .recording-row {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;
-      opacity: 0; transform: translateY(12px); transition: all .45s ease .1s;
-    }
+    .recording-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; opacity: 0; transform: translateY(12px); transition: all .45s ease .1s; }
     .recording-row.visible { opacity: 1; transform: translateY(0); }
-
-    .rec-btn { padding: 14px; border-radius: 8px; border: none; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: all .25s ease; }
+    .rec-btn { padding: 13px 8px; border-radius: 8px; border: none; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .25s ease; }
     .start-btn { background: var(--blue); color: #fff; box-shadow: 0 4px 20px var(--blue-dim); }
     .start-btn:hover:not(:disabled):not(.is-active) { background: #2481d6; box-shadow: 0 6px 24px var(--blue-glow); }
     .start-btn.is-active { background: var(--bg-panel); color: var(--muted); cursor: default; border: 1px solid var(--border); }
+    .pause-btn { background: transparent; border: 2px solid var(--muted); color: var(--muted); }
+    .pause-btn:hover:not(:disabled) { border-color: var(--yellow); color: var(--yellow); background: rgba(244,196,48,0.1); }
+    .pause-btn.is-paused { border-color: var(--yellow); color: var(--yellow); background: rgba(244,196,48,0.12); }
+    .pause-btn:disabled { opacity: .3; cursor: not-allowed; }
     .stop-btn { background: transparent; border: 2px solid var(--muted); color: var(--muted); }
     .stop-btn:hover:not(:disabled) { border-color: var(--orange); color: var(--orange); background: var(--orange-dim); }
     .stop-btn:disabled { opacity: .3; cursor: not-allowed; }
 
-    .rec-indicator { display: none; align-items: center; gap: 10px; padding: 10px 16px; border: 1px solid var(--orange); background: var(--orange-dim); border-radius: 8px; margin-bottom: 16px; }
+    .rec-indicator { display: none; align-items: center; gap: 10px; padding: 10px 16px; border: 1px solid var(--orange); background: var(--orange-dim); border-radius: 8px; margin-bottom: 16px; transition: border-color .3s, background .3s; }
     .rec-indicator.active { display: flex; }
+    .rec-indicator.paused { border-color: var(--yellow); background: rgba(244,196,48,0.1); }
+    .rec-indicator.paused .rec-label { color: var(--yellow); }
+    .rec-indicator.paused .rec-timer { color: var(--yellow); }
     .rec-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--orange); }
     .rec-timer { font-family: 'DM Mono', monospace; font-size: 15px; color: var(--orange); margin-left: auto; }
 
     /* ─── Packet / Force Row ─── */
-    .packet-row {
-      display: flex; align-items: center; justify-content: space-between;
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 8px; padding: 10px 14px; margin-bottom: 20px;
-      opacity: 0; transition: opacity .45s ease .15s;
-    }
+    .packet-row { display: flex; align-items: center; justify-content: space-between; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 20px; opacity: 0; transition: opacity .45s ease .15s; }
     .packet-row.visible { opacity: 1; }
     .packet-row.always-visible { opacity: 1; }
     .pkt-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--muted); }
@@ -267,29 +156,24 @@
     .session-section { background: var(--bg-card); border: 1px solid var(--blue); border-radius: 12px; padding: 20px; margin-bottom: 20px; display: none; }
     .session-section.visible { display: block; animation: slide-up .5s cubic-bezier(.16,1,.3,1); }
     @keyframes slide-up { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
-
-    .session-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+    .session-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
     .session-title { font-size: 16px; font-weight: 700; letter-spacing: 2px; color: var(--text); }
     .session-date { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-left: auto; }
-
-    .session-stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px; }
+    .download-pdf-btn { padding: 5px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-panel); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; }
+    .download-pdf-btn:hover { border-color: var(--blue); color: var(--blue); }
+    .session-stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
     .stat-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px 8px; text-align: center; }
     .stat-card-label { font-size: 8px; letter-spacing: 2px; color: var(--muted); margin-bottom: 5px; }
     .stat-card-val { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--blue); }
-
-    /* Gait summary in session results */
     .session-gait-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px; }
     .session-gait-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; }
     .gait-stat-card-orange .stat-card-val { color: var(--orange); }
     .gait-stat-card-green  .stat-card-val { color: var(--green); }
-
     .session-heatmap-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; align-items: start; }
     .session-heatmap-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; }
-
     .session-canvas-wrap { position: relative; width: 130px; height: 260px; margin: 0 auto; }
     .session-canvas-wrap canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
     .session-canvas-wrap .insole-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-
     .zone-bars { display: flex; flex-direction: column; gap: 8px; }
     .zone-bar-item { display: flex; flex-direction: column; gap: 3px; }
     .zone-bar-item .zone-name { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--muted); display: flex; justify-content: space-between; }
@@ -297,7 +181,6 @@
     .zone-bar-fill-orange { height: 100%; border-radius: 3px; background: var(--orange); transition: width 1s cubic-bezier(.16,1,.3,1); }
     .zone-bar-fill-blue   { height: 100%; border-radius: 3px; background: var(--blue);   transition: width 1s cubic-bezier(.16,1,.3,1); }
     .zone-bar-fill-green  { height: 100%; border-radius: 3px; background: #00d98b;        transition: width 1s cubic-bezier(.16,1,.3,1); }
-
     .chart-wrap { border-radius: 8px; overflow: hidden; background: var(--bg-panel); padding: 14px; }
     .chart-wrap .chart-canvas-container { position: relative; height: 180px; }
     .chart-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--muted); margin-bottom: 12px; }
@@ -307,6 +190,23 @@
 
     .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); }
     .footer-text { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--dim); letter-spacing: 2px; }
+
+    /* ─── Print / PDF ─── */
+    @media print {
+      body { background: #fff !important; color: #111 !important; }
+      .header, .btn-row, .tab-nav, .recording-row, .rec-indicator,
+      #packetRow, .main-grid, #tab-sensor-test, .footer { display: none !important; }
+      .session-section { display: none !important; border: 1px solid #ccc !important; background: #fff !important; }
+      .session-section.print-target { display: block !important; }
+      .download-pdf-btn { display: none !important; }
+      .stat-card { background: #f5f5f5 !important; border: 1px solid #ddd !important; }
+      .stat-card-val { color: #1C6EBF !important; }
+      .gait-stat-card-orange .stat-card-val { color: #E84A00 !important; }
+      .gait-stat-card-green  .stat-card-val { color: #007a4f !important; }
+      .stat-card-label, .session-gait-label, .session-heatmap-label, .chart-label,
+      .zone-name, .session-date, .session-title, .pkt-label, .pkt-stats { color: #333 !important; }
+      .chart-wrap, .zone-bar-track { background: #f0f0f0 !important; }
+    }
   </style>
 </head>
 <body>
@@ -315,8 +215,8 @@
   <!-- Header -->
   <div class="header">
     <div class="brand-block">
-      <div class="brand">IMPACT<span class="o"> IN</span><span class="b">SOLES</span></div>
-      <div class="tagline">ECE445 · GROUP 68 · 12-SENSOR FSR GAIT MONITOR</div>
+      <div class="brand"><span class="b">IMPACT</span><span class="o"> INSOLES</span></div>
+      <div class="tagline">PRESSURE SENSOR FOOT MONITOR</div>
     </div>
     <div class="status-pill" id="statusPill">
       <div class="dot" id="statusDot"></div>
@@ -326,17 +226,13 @@
 
   <!-- Connect / Demo -->
   <div class="btn-row">
-    <button class="connect-btn" id="connectBtn" onclick="toggleConnection()">
-      ⬡ Connect ESP32
-    </button>
-    <button class="demo-btn" id="demoBtn" onclick="toggleDemo()">
-      ◈ Demo Mode
-    </button>
+    <button class="connect-btn" id="connectBtn" onclick="toggleConnection()">⬡ Connect ESP32</button>
+    <button class="demo-btn"    id="demoBtn"    onclick="toggleDemo()">◈ Demo Mode</button>
   </div>
 
   <!-- Tab Navigation -->
   <div class="tab-nav">
-    <button class="tab-btn active" id="tabDashboard" onclick="switchTab('dashboard')">Dashboard</button>
+    <button class="tab-btn active" id="tabDashboard"  onclick="switchTab('dashboard')">Dashboard</button>
     <button class="tab-btn"        id="tabSensorTest" onclick="switchTab('sensorTest')">Sensor Test</button>
   </div>
 
@@ -344,13 +240,12 @@
   <div id="tab-dashboard">
 
     <div class="main-grid">
-
       <!-- Heatmap -->
       <div class="heatmap-panel" id="heatmapPanel">
         <div class="panel-label">Live Pressure Map</div>
-        <div class="heatmap-canvas-wrap" id="heatmapWrap">
+        <div class="heatmap-canvas-wrap">
           <canvas id="heatCanvas" width="160" height="320"></canvas>
-          <svg class="insole-overlay" id="insoleSvg" viewBox="0 0 160 320" xmlns="http://www.w3.org/2000/svg">
+          <svg class="insole-overlay" viewBox="0 0 160 320" xmlns="http://www.w3.org/2000/svg">
             <path id="insolePath" d="" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linejoin="round"/>
           </svg>
         </div>
@@ -364,14 +259,6 @@
       <!-- Gait Events Panel -->
       <div class="gait-panel" id="gaitPanel">
         <div class="panel-label">Gait Events</div>
-
-        <!-- Current phase badge -->
-        <div class="gait-phase-wrap">
-          <div class="gait-phase-sublabel">CURRENT PHASE</div>
-          <div class="gait-phase-badge swing" id="gaitPhaseBadge">SWING</div>
-        </div>
-
-        <!-- 4 primary stats -->
         <div class="gait-stats-grid">
           <div class="gait-stat-card">
             <div class="gait-stat-label">STEPS</div>
@@ -383,15 +270,13 @@
           </div>
           <div class="gait-stat-card">
             <div class="gait-stat-label">CONTACT TIME</div>
-            <div class="gait-stat-val"><span id="gaitContactTime">—</span><span class="gait-stat-unit" id="gaitContactUnit"> ms</span></div>
+            <div class="gait-stat-val"><span id="gaitContactTime">—</span><span class="gait-stat-unit"> ms</span></div>
           </div>
           <div class="gait-stat-card">
             <div class="gait-stat-label">STRIDE TIME</div>
             <div class="gait-stat-val"><span id="gaitStrideTime">—</span><span class="gait-stat-unit"> s</span></div>
           </div>
         </div>
-
-        <!-- Extra metrics -->
         <div class="gait-metrics-row">
           <div class="gait-metric-pill">
             <span class="gait-metric-label">PEAK FORCE</span>
@@ -402,30 +287,27 @@
             <span class="gait-metric-val" id="gaitLoadRate">—</span>
           </div>
         </div>
-
-        <!-- Event log -->
-        <div class="gait-log-label">EVENT LOG</div>
-        <div class="gait-event-log" id="gaitEventLog">
-          <div class="gait-empty-log">Waiting for events…</div>
-        </div>
       </div>
-
     </div><!-- /main-grid -->
 
-    <!-- Recording controls -->
+    <!-- Recording controls (3 buttons) -->
     <div class="recording-row" id="recordingRow">
-      <button class="rec-btn start-btn" id="startBtn" onclick="startRecording()">▶ Start Session</button>
-      <button class="rec-btn stop-btn"  id="stopBtn"  onclick="stopRecording()"  disabled>⏹ End Session</button>
+      <button class="rec-btn start-btn" id="startBtn" onclick="startRecording()">▶ Start</button>
+      <button class="rec-btn pause-btn" id="pauseBtn" onclick="pauseRecording()" disabled>⏸ Pause</button>
+      <button class="rec-btn stop-btn"  id="stopBtn"  onclick="stopRecording()"  disabled>⏹ End</button>
     </div>
 
     <!-- Recording indicator -->
     <div class="rec-indicator" id="recIndicator">
-      <div class="dot rec"></div>
-      <span class="rec-label">RECORDING</span>
+      <div class="dot rec" id="recDot"></div>
+      <span class="rec-label" id="recLabel">RECORDING</span>
       <span class="rec-timer" id="recTimer">00:00</span>
     </div>
 
-    <!-- Packet loss -->
+    <!-- Sessions container (filled dynamically) -->
+    <div id="sessionsContainer"></div>
+
+    <!-- Packet loss (below sessions) -->
     <div class="packet-row" id="packetRow">
       <div>
         <div class="pkt-label">PACKET LOSS</div>
@@ -436,72 +318,27 @@
       </div>
     </div>
 
-    <!-- Session results -->
-    <div class="session-section" id="sessionSection">
-      <div class="session-header">
-        <div class="session-title">SESSION RESULTS</div>
-        <div class="session-date" id="sessionDate">—</div>
-      </div>
-
-      <!-- Pressure stats -->
-      <div class="session-stat-grid">
-        <div class="stat-card"><div class="stat-card-label">DURATION</div><div class="stat-card-val" id="sessDuration">0s</div></div>
-        <div class="stat-card"><div class="stat-card-label">SAMPLES</div><div class="stat-card-val"  id="sessSamples">0</div></div>
-        <div class="stat-card"><div class="stat-card-label">PEAK ADC</div><div class="stat-card-val" id="sessPeak">0</div></div>
-        <div class="stat-card"><div class="stat-card-label">AVG LOAD</div><div class="stat-card-val" id="sessAvg">0</div></div>
-      </div>
-
-      <!-- Gait summary -->
-      <div class="session-gait-label">Gait Summary</div>
-      <div class="session-gait-grid">
-        <div class="stat-card gait-stat-card-orange"><div class="stat-card-label">STEPS</div><div class="stat-card-val" id="sessSteps">0</div></div>
-        <div class="stat-card gait-stat-card-orange"><div class="stat-card-label">AVG CADENCE</div><div class="stat-card-val" id="sessCadence">—</div></div>
-        <div class="stat-card gait-stat-card-green"><div class="stat-card-label">AVG GCT</div><div class="stat-card-val" id="sessGCT">—</div></div>
-        <div class="stat-card gait-stat-card-green"><div class="stat-card-label">AVG STRIDE</div><div class="stat-card-val" id="sessStride">—</div></div>
-      </div>
-
-      <div class="session-heatmap-row">
-        <div>
-          <div class="session-heatmap-label">AVG PRESSURE MAP</div>
-          <div class="session-canvas-wrap" id="sessCanvasWrap">
-            <canvas id="sessCanvas" width="130" height="260"></canvas>
-            <svg class="insole-overlay" viewBox="0 0 160 320" xmlns="http://www.w3.org/2000/svg">
-              <path id="sessInsolePath" d="" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linejoin="round"/>
-            </svg>
-          </div>
-        </div>
-        <div>
-          <div class="session-heatmap-label">ZONE BREAKDOWN</div>
-          <div class="zone-bars">
-            <div class="zone-bar-item">
-              <div class="zone-name"><span>FOREFOOT</span><span id="zoneForePct">0%</span></div>
-              <div class="zone-bar-track"><div class="zone-bar-fill-orange" id="zoneForeFill" style="width:0%"></div></div>
-            </div>
-            <div class="zone-bar-item">
-              <div class="zone-name"><span>MID-FOOT</span><span id="zoneMidPct">0%</span></div>
-              <div class="zone-bar-track"><div class="zone-bar-fill-green" id="zoneMidFill" style="width:0%"></div></div>
-            </div>
-            <div class="zone-bar-item">
-              <div class="zone-name"><span>HEEL</span><span id="zoneHeelPct">0%</span></div>
-              <div class="zone-bar-track"><div class="zone-bar-fill-blue" id="zoneHeelFill" style="width:0%"></div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="chart-wrap">
-        <div class="chart-label">SENSOR VALUES OVER TIME</div>
-        <div class="chart-canvas-container">
-          <canvas id="sessionChart"></canvas>
-        </div>
-      </div>
-    </div>
-
   </div><!-- /tab-dashboard -->
 
   <!-- ═══ SENSOR TEST TAB ═══ -->
   <div id="tab-sensor-test" style="display:none;">
     <div class="sensor-test-content">
+
+      <!-- Live heatmap (always visible in this tab) -->
+      <div class="heatmap-panel always-visible" id="heatmapPanelST">
+        <div class="panel-label">Live Pressure Map</div>
+        <div class="heatmap-canvas-wrap">
+          <canvas id="heatCanvasST" width="160" height="320"></canvas>
+          <svg class="insole-overlay" viewBox="0 0 160 320" xmlns="http://www.w3.org/2000/svg">
+            <path id="insolePathST" d="" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="heatmap-legend">
+          <span class="legend-label">0</span>
+          <div class="legend-bar"></div>
+          <span class="legend-label">MAX</span>
+        </div>
+      </div>
 
       <!-- Force summary -->
       <div class="packet-row always-visible" id="forceRow">
@@ -519,9 +356,7 @@
       <div class="debug-panel" id="debugPanel">
         <div class="panel-label">Raw Sensor Values</div>
         <table class="sensor-table">
-          <thead>
-            <tr><th>#</th><th>ZONE</th><th>ADC</th><th>FORCE</th><th>LEVEL</th></tr>
-          </thead>
+          <thead><tr><th>#</th><th>ZONE</th><th>ADC</th><th>FORCE</th><th>LEVEL</th></tr></thead>
           <tbody id="sensorTableBody"></tbody>
         </table>
       </div>
@@ -530,7 +365,7 @@
   </div><!-- /tab-sensor-test -->
 
   <div class="footer">
-    <div class="footer-text">ECE445 · GROUP 68 · CASINO · SIVANESAN · WENG &nbsp;·&nbsp; UIUC 2025</div>
+    <div class="footer-text">ECE445 · GROUP 68 · CASINO · SIVANESAN · WENG &nbsp;·&nbsp; UIUC 2026</div>
   </div>
 
 </div><!-- /app -->
@@ -539,52 +374,24 @@
 // ╔══════════════════════════════════════════════════════════════════╗
 // ║  SENSOR CALIBRATION  ←  EDIT THESE VALUES DURING HARDWARE TEST  ║
 // ╚══════════════════════════════════════════════════════════════════╝
-//
-// All detection thresholds live here. Adjust while testing with your
-// actual FSR hardware — no hunting through the rest of the code.
-//
 const CAL = {
-  // ── Contact Detection ────────────────────────────────────────────
-  // Sum of all 12 raw ADC readings (0–4095 each) required to detect
-  // foot contact (enter STANCE). Raise if you get phantom steps;
-  // lower if real contacts are missed.
+  // Sum of all 12 raw ADC readings that triggers "foot in contact".
+  // Raise if phantom steps; lower if real contacts are missed.
   totalContactLoad:  800,
-
-  // Hysteresis floor: total sum must fall below this to return to SWING.
-  // Keep at 50–70% of totalContactLoad.
+  // Hysteresis floor: below this → return to SWING.
   totalSwingLoad:    500,
-
-  // ── Zone Dominance Ratios ─────────────────────────────────────────
-  // (zone ADC sum) / (total ADC sum) thresholds for phase detection.
-
-  // Heel zone must contribute this fraction of total load to trigger
-  // HEEL STRIKE on initial contact.
+  // Heel zone / total ratio to trigger HEEL STRIKE on initial contact.
   heelDominanceRatio: 0.45,
-
-  // Fore zone must contribute this fraction of total load (with heel
-  // falling) to trigger TERMINAL STANCE.
+  // Fore zone / total ratio to trigger TERMINAL STANCE.
   foreDominanceRatio: 0.40,
-
-  // ── Phase Timing Filters ─────────────────────────────────────────
-  // Ignore stance phases shorter than this (ms) — rejects vibration
-  // artifacts and very brief partial contacts.
+  // Stance phases shorter than this (ms) are noise-rejected.
   minStanceMs: 150,
-
-  // Minimum time (ms) between consecutive HEEL STRIKE detections.
-  // Prevents double-counting on noisy signals.
+  // Minimum ms between consecutive HEEL STRIKE detections.
   minStepIntervalMs: 300,
-
-  // ── Metrics Window ───────────────────────────────────────────────
-  // Rolling window for cadence and average calculations (ms).
+  // Rolling window for cadence calculation (ms).
   cadenceWindowMs: 8000,
-
-  // Entries kept in the live event log.
-  maxEventLog: 15,
-
-  // ── Force Conversion ─────────────────────────────────────────────
-  // Circuit: V+ → FSR402 → node → R_M → GND  (V_OUT at node)
-  // Adjust R_M to match the resistor in your voltage divider.
-  V_SUPPLY: 3.3,    // ESP32 ADC reference voltage (V)
+  // Circuit: V+ → FSR402 → node → R_M → GND
+  V_SUPPLY: 3.3,    // ESP32 ADC reference (V)
   R_M:      10000,  // Measuring resistor (Ω)
 };
 
@@ -606,10 +413,8 @@ function adcToForceN(adc) {
   if (vOut <= 0) return 0;
   const rFsr = CAL.R_M * (CAL.V_SUPPLY - vOut) / vOut;
   if (rFsr <= 0) return null;
-  const forceG = 1e6 / rFsr;
-  return forceG / 101.97;
+  return (1e6 / rFsr) / 101.97;
 }
-
 function fmtN(n) {
   if (n === null) return 'SAT';
   if (n < 0.01)  return '— N';
@@ -619,25 +424,7 @@ function fmtN(n) {
 // ═══════════════════════════════════════════════════════════
 // INSOLE SHAPE
 // ═══════════════════════════════════════════════════════════
-const INSOLE_PATH_D = `
-  M 80 14
-  C 100 14, 128 22, 140 44
-  C 150 62, 148 88, 140 108
-  C 134 122, 126 130, 122 146
-  C 118 160, 118 174, 118 188
-  C 118 202, 120 218, 122 234
-  C 124 250, 122 266, 116 280
-  C 108 294, 96 306, 80 310
-  C 64 314, 50 306, 40 292
-  C 30 278, 28 262, 30 246
-  C 32 230, 36 214, 36 200
-  C 36 186, 36 172, 36 158
-  C 36 144, 34 130, 30 116
-  C 26 102, 20 90, 18 76
-  C 16 62, 18 44, 28 30
-  C 40 18, 62 14, 80 14
-  Z
-`;
+const INSOLE_PATH_D = `M 80 14 C 100 14, 128 22, 140 44 C 150 62, 148 88, 140 108 C 134 122, 126 130, 122 146 C 118 160, 118 174, 118 188 C 118 202, 120 218, 122 234 C 124 250, 122 266, 116 280 C 108 294, 96 306, 80 310 C 64 314, 50 306, 40 292 C 30 278, 28 262, 30 246 C 32 230, 36 214, 36 200 C 36 186, 36 172, 36 158 C 36 144, 34 130, 30 116 C 26 102, 20 90, 18 76 C 16 62, 18 44, 28 30 C 40 18, 62 14, 80 14 Z`;
 
 const SENSORS = [
   { id:0,  label:'S0',  zone:'Fore',  cx: 52,  cy: 52  },
@@ -653,13 +440,12 @@ const SENSORS = [
   { id:10, label:'S10', zone:'Heel',  cx: 96,  cy: 258 },
   { id:11, label:'S11', zone:'Heel',  cx: 110, cy: 234 },
 ];
-
 const ZONE_FORE = [0,1,2,3];
 const ZONE_MID  = [4,5,6,7];
 const ZONE_HEEL = [8,9,10,11];
 
 // ═══════════════════════════════════════════════════════════
-// GAIT PHASE DEFINITIONS
+// GAIT PHASES
 // ═══════════════════════════════════════════════════════════
 const GAIT_PHASES = {
   SWING:       { label: 'SWING',           css: 'swing',       order: 0 },
@@ -674,40 +460,37 @@ const GAIT_PHASES = {
 // GAIT STATE
 // ═══════════════════════════════════════════════════════════
 const gait = {
-  phase:          'SWING',
-  phaseStart:     0,
-  stepCount:      0,
-  stepTimestamps: [],   // ms timestamps of heel strikes
-  stanceStart:    0,   // ms timestamp when last stance began
-  gcts:           [],  // recent ground contact times (ms)
-  strideTimes:    [],  // recent stride times (ms)
-  peakForce:      0,   // peak force (N) in current stance
-  heelForce:      0,   // force at heel strike (N)
-  prevForce:      0,
-  prevTime:       0,
-  loadRates:      [],  // recent peak loading rates (N/s)
-  curLoadRate:    0,
-  events:         [],  // log entries
-  sessionStart:   0,   // set when recording starts
+  phase: 'SWING', phaseStart: 0,
+  stepCount: 0, stepTimestamps: [],
+  stanceStart: 0, gcts: [], strideTimes: [],
+  peakForce: 0, prevForce: 0, prevTime: 0,
+  loadRates: [], curLoadRate: 0, events: [],
 };
+
+function resetGaitCounters() {
+  gait.stepCount = 0; gait.stepTimestamps = [];
+  gait.stanceStart = 0; gait.gcts = []; gait.strideTimes = [];
+  gait.peakForce = 0; gait.loadRates = []; gait.curLoadRate = 0;
+  gait.events = [];
+}
 
 // ═══════════════════════════════════════════════════════════
 // APP STATE
 // ═══════════════════════════════════════════════════════════
 let bleDevice = null, bleChar = null;
 let sensorValues = new Array(NUM_SENSORS).fill(0);
-let isRecording = false;
-let recordingData = [];
-let recordingStart = 0;
+let isRecording = false, isPaused = false;
+let recordingData = [], recordingStart = 0;
+let pauseStart = 0, totalPausedMs = 0;
 let timerHandle = null;
-let chart = null;
 let lastPacketId = -1, rxCount = 0, lostCount = 0;
+const sessionsStore = [];
 
 // ═══════════════════════════════════════════════════════════
 // INSOLE PATHS
 // ═══════════════════════════════════════════════════════════
 document.getElementById('insolePath').setAttribute('d', INSOLE_PATH_D);
-document.getElementById('sessInsolePath').setAttribute('d', INSOLE_PATH_D);
+document.getElementById('insolePathST').setAttribute('d', INSOLE_PATH_D);
 
 // ═══════════════════════════════════════════════════════════
 // HEATMAP RENDERER
@@ -716,8 +499,7 @@ function buildMask(W, H) {
   const mc = document.createElement('canvas');
   mc.width = W; mc.height = H;
   const mx = mc.getContext('2d');
-  const sx = W / 160, sy = H / 320;
-  mx.save(); mx.scale(sx, sy);
+  mx.save(); mx.scale(W / 160, H / 320);
   mx.fillStyle = '#fff';
   mx.fill(new Path2D(INSOLE_PATH_D));
   mx.restore();
@@ -726,84 +508,90 @@ function buildMask(W, H) {
 
 function normToRGB(n) {
   const stops = [
-    [0.00, [ 10,  20,  80]],
-    [0.15, [ 15,  80, 160]],
-    [0.30, [  0, 160, 210]],
-    [0.50, [ 80, 220, 130]],
-    [0.65, [240, 210,  30]],
-    [0.80, [232,  80,  10]],
-    [1.00, [140,   0,   0]],
+    [0.00, [10,20,80]], [0.15,[15,80,160]], [0.30,[0,160,210]],
+    [0.50,[80,220,130]], [0.65,[240,210,30]], [0.80,[232,80,10]], [1.00,[140,0,0]],
   ];
-  let lo = stops[0], hi = stops[stops.length - 1];
-  for (let i = 0; i < stops.length - 1; i++) {
-    if (n <= stops[i + 1][0]) { lo = stops[i]; hi = stops[i + 1]; break; }
-  }
+  let lo = stops[0], hi = stops[stops.length-1];
+  for (let i = 0; i < stops.length-1; i++) { if (n <= stops[i+1][0]) { lo=stops[i]; hi=stops[i+1]; break; } }
   const t = (n - lo[0]) / (hi[0] - lo[0] + 1e-9);
   return [
-    Math.round(lo[1][0] + t * (hi[1][0] - lo[1][0])),
-    Math.round(lo[1][1] + t * (hi[1][1] - lo[1][1])),
-    Math.round(lo[1][2] + t * (hi[1][2] - lo[1][2])),
+    Math.round(lo[1][0] + t*(hi[1][0]-lo[1][0])),
+    Math.round(lo[1][1] + t*(hi[1][1]-lo[1][1])),
+    Math.round(lo[1][2] + t*(hi[1][2]-lo[1][2])),
   ];
 }
 
 function drawHeatmap(canvasEl, vals) {
   const W = canvasEl.width, H = canvasEl.height;
   const ctx = canvasEl.getContext('2d');
-  const sx = W / 160, sy = H / 320;
-  const norm = vals.map(v => Math.max(0, Math.min(1, v / MAX_RAW)));
-  const POWER = 2.5;
-  const RADIUS = 110 * Math.min(sx, sy);
-
-  if (!drawHeatmap._mask || drawHeatmap._maskW !== W || drawHeatmap._maskH !== H) {
-    drawHeatmap._mask  = buildMask(W, H);
-    drawHeatmap._maskW = W; drawHeatmap._maskH = H;
-  }
-  const mask = drawHeatmap._mask;
-  const sensorPx = SENSORS.map(s => ({ x: s.cx * sx, y: s.cy * sy }));
+  const sx = W/160, sy = H/320;
+  const norm = vals.map(v => Math.max(0, Math.min(1, v/MAX_RAW)));
+  const POWER = 2.5, RADIUS = 110 * Math.min(sx, sy);
+  const cacheKey = W + 'x' + H;
+  if (!drawHeatmap._masks) drawHeatmap._masks = {};
+  if (!drawHeatmap._masks[cacheKey]) drawHeatmap._masks[cacheKey] = buildMask(W, H);
+  const mask = drawHeatmap._masks[cacheKey];
+  const sensorPx = SENSORS.map(s => ({ x: s.cx*sx, y: s.cy*sy }));
   const imgData = ctx.createImageData(W, H);
   const buf = imgData.data;
   const STEP = 3;
-
   for (let py = 0; py < H; py += STEP) {
     for (let px = 0; px < W; px += STEP) {
-      const mi = (py * W + px) * 4;
-      if (mask.data[mi] < 128) continue;
-      let weightSum = 0, valueSum = 0, onSensor = false;
+      if (mask.data[(py*W+px)*4] < 128) continue;
+      let weightSum = 0, valueSum = 0;
       for (let s = 0; s < NUM_SENSORS; s++) {
-        const dx = px - sensorPx[s].x, dy = py - sensorPx[s].y;
-        const dist2 = dx * dx + dy * dy;
-        if (dist2 < 1) { valueSum = norm[s]; weightSum = 1; onSensor = true; break; }
+        const dx = px-sensorPx[s].x, dy = py-sensorPx[s].y, dist2 = dx*dx+dy*dy;
+        if (dist2 < 1) { valueSum = norm[s]; weightSum = 1; break; }
         const dist = Math.sqrt(dist2);
         if (dist > RADIUS) continue;
-        const w = Math.pow(1 / dist2, POWER / 2) * Math.exp(-dist2 / (2 * RADIUS * RADIUS * 0.25));
-        weightSum += w; valueSum += w * norm[s];
+        const w = Math.pow(1/dist2, POWER/2) * Math.exp(-dist2/(2*RADIUS*RADIUS*0.25));
+        weightSum += w; valueSum += w*norm[s];
       }
-      const n = weightSum > 0 ? valueSum / weightSum : 0;
-      const [r, g, b] = normToRGB(n);
-      const alpha = weightSum === 0 ? 60 : Math.round(180 + n * 75);
-      for (let dy2 = 0; dy2 < STEP && py + dy2 < H; dy2++) {
-        for (let dx2 = 0; dx2 < STEP && px + dx2 < W; dx2++) {
-          const idx = ((py + dy2) * W + (px + dx2)) * 4;
+      const n = weightSum > 0 ? valueSum/weightSum : 0;
+      const [r,g,b] = normToRGB(n);
+      const alpha = weightSum === 0 ? 60 : Math.round(180 + n*75);
+      for (let dy2 = 0; dy2 < STEP && py+dy2 < H; dy2++) {
+        for (let dx2 = 0; dx2 < STEP && px+dx2 < W; dx2++) {
+          const idx = ((py+dy2)*W+(px+dx2))*4;
           if (mask.data[idx] < 128) continue;
-          buf[idx] = r; buf[idx+1] = g; buf[idx+2] = b; buf[idx+3] = alpha;
+          buf[idx]=r; buf[idx+1]=g; buf[idx+2]=b; buf[idx+3]=alpha;
         }
       }
     }
   }
   ctx.clearRect(0, 0, W, H);
   ctx.putImageData(imgData, 0, 0);
-  for (let s = 0; s < NUM_SENSORS; s++) {
-    const { x, y } = sensorPx[s];
-    ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+  sensorPx.forEach(({x,y}) => {
+    ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI*2);
     ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 1.2; ctx.stroke();
-  }
+  });
 }
+
+// ═══════════════════════════════════════════════════════════
+// CHART.JS VERTICAL LINES PLUGIN  (heel strike markers)
+// ═══════════════════════════════════════════════════════════
+Chart.register({
+  id: 'verticalLines',
+  beforeDraw(chart, _, options) {
+    if (!options.xValues?.length) return;
+    const { ctx, chartArea: { top, bottom }, scales: { x } } = chart;
+    options.xValues.forEach(xVal => {
+      const xPos = x.getPixelForValue(xVal);
+      if (xPos < x.left || xPos > x.right) return;
+      ctx.save();
+      ctx.strokeStyle = options.color || 'rgba(232,74,0,0.5)';
+      ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
+      ctx.beginPath(); ctx.moveTo(xPos, top); ctx.lineTo(xPos, bottom); ctx.stroke();
+      ctx.restore();
+    });
+  }
+});
 
 // ═══════════════════════════════════════════════════════════
 // TAB SWITCHING
 // ═══════════════════════════════════════════════════════════
 function switchTab(tabName) {
-  document.getElementById('tab-dashboard').style.display  = tabName === 'dashboard'  ? '' : 'none';
+  document.getElementById('tab-dashboard').style.display   = tabName === 'dashboard'  ? '' : 'none';
   document.getElementById('tab-sensor-test').style.display = tabName === 'sensorTest' ? '' : 'none';
   document.getElementById('tabDashboard').classList.toggle('active',  tabName === 'dashboard');
   document.getElementById('tabSensorTest').classList.toggle('active', tabName === 'sensorTest');
@@ -822,9 +610,7 @@ function switchTab(tabName) {
       <td class="region-col">${s.zone}</td>
       <td class="val-col" id="dbgVal${s.id}">0</td>
       <td class="val-col" id="dbgForce${s.id}" style="font-size:11px;">— N</td>
-      <td class="bar-col">
-        <div class="mini-bar-track"><div class="mini-bar-fill" id="dbgBar${s.id}"></div></div>
-      </td>
+      <td class="bar-col"><div class="mini-bar-track"><div class="mini-bar-fill" id="dbgBar${s.id}"></div></div></td>
     `;
     tbody.appendChild(tr);
   });
@@ -834,250 +620,119 @@ function switchTab(tabName) {
 // GAIT DETECTION
 // ═══════════════════════════════════════════════════════════
 function setGaitPhase(newPhase, now, totalForce) {
-  const prevPhase = gait.phase;
-  const phaseDur  = now - gait.phaseStart;
-
+  const phaseDur = now - gait.phaseStart;
   if (newPhase === 'HEEL_STRIKE') {
-    const lastStrike = gait.stepTimestamps[gait.stepTimestamps.length - 1] || 0;
-    if (now - lastStrike < CAL.minStepIntervalMs) return; // debounce
+    const last = gait.stepTimestamps[gait.stepTimestamps.length-1] || 0;
+    if (now - last < CAL.minStepIntervalMs) return;
     gait.stepCount++;
-    gait.heelForce = totalForce;
-    gait.peakForce = totalForce;
-    gait.curLoadRate = 0;
-    if (lastStrike > 0) {
-      const st = now - lastStrike;
-      gait.strideTimes.push(st);
-      if (gait.strideTimes.length > 20) gait.strideTimes.shift();
-    }
-    gait.stepTimestamps.push(now);
-    if (gait.stepTimestamps.length > 50) gait.stepTimestamps.shift();
+    gait.peakForce = totalForce; gait.curLoadRate = 0;
+    if (last > 0) { gait.strideTimes.push(now-last); if (gait.strideTimes.length>20) gait.strideTimes.shift(); }
+    gait.stepTimestamps.push(now); if (gait.stepTimestamps.length>50) gait.stepTimestamps.shift();
     gait.stanceStart = now;
   }
-
   if (newPhase === 'TOE_OFF' && gait.stanceStart > 0) {
     const gct = now - gait.stanceStart;
-    if (gct >= CAL.minStanceMs) {
-      gait.gcts.push(gct);
-      if (gait.gcts.length > 20) gait.gcts.shift();
-    }
-    if (gait.peakForce > 0) {
-      gait.loadRates.push(gait.curLoadRate);
-      if (gait.loadRates.length > 20) gait.loadRates.shift();
-    }
+    if (gct >= CAL.minStanceMs) { gait.gcts.push(gct); if (gait.gcts.length>20) gait.gcts.shift(); }
+    if (gait.peakForce > 0) { gait.loadRates.push(gait.curLoadRate); if (gait.loadRates.length>20) gait.loadRates.shift(); }
     gait.stanceStart = 0;
   }
-
-  if (newPhase === 'SWING') {
-    gait.peakForce = 0;
-  }
-
-  // Log event
-  const phaseInfo = GAIT_PHASES[newPhase];
-  gait.events.unshift({
-    phase: newPhase,
-    css:   phaseInfo.css,
-    label: phaseInfo.label,
-    time:  now,
-    force: totalForce,
-    dur:   phaseDur,
-  });
-  if (gait.events.length > CAL.maxEventLog) gait.events.pop();
-
-  gait.phase      = newPhase;
-  gait.phaseStart = now;
+  if (newPhase === 'SWING') gait.peakForce = 0;
+  gait.events.unshift({ phase: newPhase, css: GAIT_PHASES[newPhase].css, label: GAIT_PHASES[newPhase].label, time: now, force: totalForce, dur: phaseDur });
+  if (gait.events.length > 30) gait.events.pop();
+  gait.phase = newPhase; gait.phaseStart = now;
 }
 
 function detectGait() {
-  const now       = Date.now();
-  const totalRaw  = sensorValues.reduce((a, v) => a + v, 0);
-  const heelRaw   = ZONE_HEEL.reduce((a, i) => a + sensorValues[i], 0);
-  const midRaw    = ZONE_MID.reduce((a, i) => a + sensorValues[i], 0);
-  const foreRaw   = ZONE_FORE.reduce((a, i) => a + sensorValues[i], 0);
-  const totalF    = sensorValues.reduce((a, v) => a + (adcToForceN(v) ?? 0), 0);
-
-  const heelRatio = totalRaw > 0 ? heelRaw / totalRaw : 0;
-  const foreRatio = totalRaw > 0 ? foreRaw / totalRaw : 0;
-  const midRatio  = totalRaw > 0 ? midRaw  / totalRaw : 0;
+  const now      = Date.now();
+  const totalRaw = sensorValues.reduce((a,v) => a+v, 0);
+  const heelRaw  = ZONE_HEEL.reduce((a,i) => a+sensorValues[i], 0);
+  const midRaw   = ZONE_MID.reduce((a,i)  => a+sensorValues[i], 0);
+  const foreRaw  = ZONE_FORE.reduce((a,i) => a+sensorValues[i], 0);
+  const totalF   = sensorValues.reduce((a,v) => a+(adcToForceN(v)??0), 0);
+  const heelRatio = totalRaw > 0 ? heelRaw/totalRaw : 0;
+  const foreRatio = totalRaw > 0 ? foreRaw/totalRaw : 0;
+  const midRatio  = totalRaw > 0 ? midRaw/totalRaw  : 0;
   const inContact = totalRaw >= CAL.totalContactLoad;
   const phaseDur  = now - gait.phaseStart;
-
-  // Loading rate
   const dt = now - gait.prevTime;
-  if (dt > 5 && gait.prevTime > 0) {
-    const lr = (totalF - gait.prevForce) / (dt / 1000);
-    if (lr > gait.curLoadRate) gait.curLoadRate = lr;
-  }
-  gait.prevForce = totalF;
-  gait.prevTime  = now;
-
+  if (dt > 5 && gait.prevTime > 0) { const lr=(totalF-gait.prevForce)/(dt/1000); if(lr>gait.curLoadRate) gait.curLoadRate=lr; }
+  gait.prevForce = totalF; gait.prevTime = now;
   if (inContact && totalF > gait.peakForce) gait.peakForce = totalF;
 
-  // ── State machine ────────────────────────────────────────
   switch (gait.phase) {
-
     case 'SWING':
-      if (inContact) {
-        if (heelRatio >= CAL.heelDominanceRatio) setGaitPhase('HEEL_STRIKE', now, totalF);
-        else                                      setGaitPhase('LOADING',     now, totalF);
-      }
+      if (inContact) setGaitPhase(heelRatio >= CAL.heelDominanceRatio ? 'HEEL_STRIKE' : 'LOADING', now, totalF);
       break;
-
     case 'HEEL_STRIKE':
-      if (!inContact) {
-        if (phaseDur >= CAL.minStanceMs) setGaitPhase('TOE_OFF', now, totalF);
-        else                             setGaitPhase('SWING',   now, totalF);
-      } else if (phaseDur > 80 && (midRatio > 0.15 || foreRatio > 0.1)) {
-        setGaitPhase('LOADING', now, totalF);
-      }
+      if (!inContact) setGaitPhase(phaseDur >= CAL.minStanceMs ? 'TOE_OFF' : 'SWING', now, totalF);
+      else if (phaseDur > 80 && (midRatio > 0.15 || foreRatio > 0.1)) setGaitPhase('LOADING', now, totalF);
       break;
-
     case 'LOADING':
-      if (!inContact) {
-        setGaitPhase(phaseDur >= CAL.minStanceMs ? 'TOE_OFF' : 'SWING', now, totalF);
-      } else if (phaseDur > 120 && heelRatio > 0.15 && midRatio > 0.1) {
-        setGaitPhase('MID_STANCE', now, totalF);
-      }
+      if (!inContact) setGaitPhase(phaseDur >= CAL.minStanceMs ? 'TOE_OFF' : 'SWING', now, totalF);
+      else if (phaseDur > 120 && heelRatio > 0.15 && midRatio > 0.1) setGaitPhase('MID_STANCE', now, totalF);
       break;
-
     case 'MID_STANCE':
-      if (!inContact) {
-        setGaitPhase('TOE_OFF', now, totalF);
-      } else if (phaseDur > 100 && heelRatio < 0.28 && foreRatio >= CAL.foreDominanceRatio) {
-        setGaitPhase('TERMINAL', now, totalF);
-      }
+      if (!inContact) setGaitPhase('TOE_OFF', now, totalF);
+      else if (phaseDur > 100 && heelRatio < 0.28 && foreRatio >= CAL.foreDominanceRatio) setGaitPhase('TERMINAL', now, totalF);
       break;
-
     case 'TERMINAL':
       if (!inContact) setGaitPhase('TOE_OFF', now, totalF);
       break;
-
     case 'TOE_OFF':
-      if (inContact)               setGaitPhase('HEEL_STRIKE', now, totalF);
-      else if (phaseDur > 40)      setGaitPhase('SWING',       now, totalF);
+      if (inContact) setGaitPhase('HEEL_STRIKE', now, totalF);
+      else if (phaseDur > 40) setGaitPhase('SWING', now, totalF);
       break;
   }
-
   updateGaitUI();
 }
 
 function updateGaitUI() {
-  const phaseInfo = GAIT_PHASES[gait.phase];
-
-  // Phase badge
-  const badge = document.getElementById('gaitPhaseBadge');
-  badge.textContent = phaseInfo.label;
-  badge.className   = 'gait-phase-badge ' + phaseInfo.css;
-
-  // Steps
   document.getElementById('gaitSteps').textContent = gait.stepCount;
-
-  // Cadence — steps/min over rolling window
   const now = Date.now();
-  const recentSteps = gait.stepTimestamps.filter(t => now - t < CAL.cadenceWindowMs);
-  let cadence = '—';
-  if (recentSteps.length >= 2) {
-    const spanMs = recentSteps[recentSteps.length - 1] - recentSteps[0];
-    cadence = Math.round((recentSteps.length - 1) / (spanMs / 60000));
+  const recent = gait.stepTimestamps.filter(t => now-t < CAL.cadenceWindowMs);
+  let cad = '—';
+  if (recent.length >= 2) {
+    const span = recent[recent.length-1] - recent[0];
+    cad = Math.round((recent.length-1) / (span/60000));
   }
-  document.getElementById('gaitCadence').textContent = cadence;
-
-  // Average ground contact time
-  let avgGCT = '—';
-  if (gait.gcts.length) {
-    const ms = Math.round(gait.gcts.reduce((a, v) => a + v, 0) / gait.gcts.length);
-    avgGCT = ms;
-  }
-  document.getElementById('gaitContactTime').textContent = avgGCT;
-
-  // Average stride time
-  let avgStride = '—';
-  if (gait.strideTimes.length) {
-    avgStride = (gait.strideTimes.reduce((a, v) => a + v, 0) / gait.strideTimes.length / 1000).toFixed(2);
-  }
-  document.getElementById('gaitStrideTime').textContent = avgStride;
-
-  // Peak force (this stance or last)
-  const pf = gait.peakForce > 0 ? gait.peakForce.toFixed(1) + 'N' : '—';
-  document.getElementById('gaitPeakForce').textContent = pf;
-
-  // Loading rate
-  const lr = gait.loadRates.length
-    ? Math.round(gait.loadRates[gait.loadRates.length - 1]) + ' N/s'
-    : '—';
-  document.getElementById('gaitLoadRate').textContent = lr;
-
-  // Event log
-  const log = document.getElementById('gaitEventLog');
-  if (!gait.events.length) {
-    log.innerHTML = '<div class="gait-empty-log">Waiting for events…</div>';
-    return;
-  }
-  const sessionRef = isRecording ? recordingStart : (gait.events[gait.events.length - 1]?.time || now);
-  log.innerHTML = '';
-  gait.events.forEach(e => {
-    const elapsed = ((e.time - sessionRef) / 1000).toFixed(1);
-    const timeStr = isRecording ? `+${elapsed}s` : `${Math.round((now - e.time) / 1000)}s`;
-    const div = document.createElement('div');
-    div.className = 'gait-event-item';
-    div.innerHTML =
-      `<span class="gait-event-time">${timeStr}</span>` +
-      `<span class="gait-event-type ${e.css}">${e.label}</span>` +
-      `<span class="gait-event-detail">${e.force.toFixed(1)}N · ${Math.round(e.dur)}ms</span>`;
-    log.appendChild(div);
-  });
+  document.getElementById('gaitCadence').textContent = cad;
+  document.getElementById('gaitContactTime').textContent = gait.gcts.length
+    ? Math.round(gait.gcts.reduce((a,v)=>a+v,0)/gait.gcts.length) : '—';
+  document.getElementById('gaitStrideTime').textContent = gait.strideTimes.length
+    ? (gait.strideTimes.reduce((a,v)=>a+v,0)/gait.strideTimes.length/1000).toFixed(2) : '—';
+  document.getElementById('gaitPeakForce').textContent = gait.peakForce > 0 ? gait.peakForce.toFixed(1)+'N' : '—';
+  document.getElementById('gaitLoadRate').textContent = gait.loadRates.length
+    ? Math.round(gait.loadRates[gait.loadRates.length-1])+' N/s' : '—';
 }
 
 // ═══════════════════════════════════════════════════════════
-// UPDATE UI  (called on every new data frame)
+// UPDATE UI
 // ═══════════════════════════════════════════════════════════
-function normToHex(n) {
-  const [r, g, b] = normToRGB(n);
-  return `rgb(${r},${g},${b})`;
-}
+function normToHex(n) { const [r,g,b]=normToRGB(n); return `rgb(${r},${g},${b})`; }
 
 function updateUI() {
   drawHeatmap(document.getElementById('heatCanvas'), sensorValues);
+  drawHeatmap(document.getElementById('heatCanvasST'), sensorValues);
   detectGait();
 
-  // Force summary (Sensor Test tab)
   const forces = sensorValues.map(adcToForceN);
-  let totalF = 0, foreF = 0, midF = 0, heelF = 0;
-  forces.forEach((f, i) => {
-    const v = f ?? 0;
-    totalF += v;
-    if (ZONE_FORE.includes(i)) foreF += v;
-    if (ZONE_MID.includes(i))  midF  += v;
-    if (ZONE_HEEL.includes(i)) heelF += v;
-  });
+  let totalF=0, foreF=0, midF=0, heelF=0;
+  forces.forEach((f,i) => { const v=f??0; totalF+=v; if(ZONE_FORE.includes(i))foreF+=v; if(ZONE_MID.includes(i))midF+=v; if(ZONE_HEEL.includes(i))heelF+=v; });
   const tfEl = document.getElementById('totalForce');
-  if (tfEl) {
-    tfEl.textContent = totalF.toFixed(2) + ' N';
-    tfEl.className = 'pkt-val ' + (totalF < 1 ? 'good' : totalF < 50 ? 'warn' : 'bad');
-  }
-  const feEl = document.getElementById('foreForce');
-  const meEl = document.getElementById('midForce');
-  const heEl = document.getElementById('heelForce');
-  if (feEl) feEl.textContent = foreF.toFixed(2) + ' N';
-  if (meEl) meEl.textContent = midF.toFixed(2) + ' N';
-  if (heEl) heEl.textContent = heelF.toFixed(2) + ' N';
+  if (tfEl) { tfEl.textContent = totalF.toFixed(2)+' N'; tfEl.className='pkt-val '+(totalF<1?'good':totalF<50?'warn':'bad'); }
+  const feEl=document.getElementById('foreForce'), meEl=document.getElementById('midForce'), heEl=document.getElementById('heelForce');
+  if(feEl)feEl.textContent=foreF.toFixed(2)+' N'; if(meEl)meEl.textContent=midF.toFixed(2)+' N'; if(heEl)heEl.textContent=heelF.toFixed(2)+' N';
 
-  // Sensor table (Sensor Test tab)
   SENSORS.forEach(s => {
-    const v    = sensorValues[s.id];
-    const norm = v / MAX_RAW;
-    const col  = normToHex(norm);
-    const valEl   = document.getElementById(`dbgVal${s.id}`);
-    const forceEl = document.getElementById(`dbgForce${s.id}`);
-    const barEl   = document.getElementById(`dbgBar${s.id}`);
-    if (valEl)   { valEl.textContent = v; valEl.style.color = v > 80 ? col : '#5a6278'; }
-    if (forceEl) {
-      const fn = forces[s.id];
-      forceEl.textContent = fmtN(fn);
-      forceEl.style.color = (fn === null) ? '#ff4444' : (fn > 0.05 ? col : '#5a6278');
-    }
-    if (barEl) { barEl.style.width = ((v / MAX_RAW) * 100).toFixed(1) + '%'; barEl.style.background = col; }
-    const row = document.getElementById(`row${s.id}`);
-    if (row) row.classList.toggle('active-row', v > 200);
+    const v=sensorValues[s.id], norm=v/MAX_RAW, col=normToHex(norm);
+    const valEl=document.getElementById(`dbgVal${s.id}`);
+    const forceEl=document.getElementById(`dbgForce${s.id}`);
+    const barEl=document.getElementById(`dbgBar${s.id}`);
+    if(valEl){ valEl.textContent=v; valEl.style.color=v>80?col:'#5a6278'; }
+    if(forceEl){ const fn=forces[s.id]; forceEl.textContent=fmtN(fn); forceEl.style.color=(fn===null)?'#ff4444':(fn>0.05?col:'#5a6278'); }
+    if(barEl){ barEl.style.width=((v/MAX_RAW)*100).toFixed(1)+'%'; barEl.style.background=col; }
+    const row=document.getElementById(`row${s.id}`);
+    if(row) row.classList.toggle('active-row', v>200);
   });
 }
 
@@ -1088,317 +743,296 @@ async function toggleConnection() {
   if (bleDevice && bleDevice.gatt.connected) disconnect();
   else await connect();
 }
-
 async function connect() {
-  if (demoMode) {
-    demoMode = false; clearInterval(demoHandle);
-    const btn = document.getElementById('demoBtn');
-    btn.textContent = '◈ Demo Mode'; btn.classList.remove('is-active');
-  }
+  if (demoMode) { demoMode=false; clearInterval(demoHandle); const b=document.getElementById('demoBtn'); b.textContent='◈ Demo Mode'; b.classList.remove('is-active'); }
   try {
-    const connectBtn = document.getElementById('connectBtn');
-    connectBtn.disabled = true; connectBtn.textContent = '◌ Scanning...';
-    bleDevice = await navigator.bluetooth.requestDevice({
-      filters: [{ name: 'ImpactInsoles' }],
-      optionalServices: [SERVICE_UUID]
-    });
-    connectBtn.textContent = '↻ Connecting...';
-    const server  = await bleDevice.gatt.connect();
-    const service = await server.getPrimaryService(SERVICE_UUID);
-    bleChar = await service.getCharacteristic(CHARACTERISTIC_UUID);
+    const cb=document.getElementById('connectBtn'); cb.disabled=true; cb.textContent='◌ Scanning...';
+    bleDevice = await navigator.bluetooth.requestDevice({ filters:[{name:'ImpactInsoles'}], optionalServices:[SERVICE_UUID] });
+    cb.textContent='↻ Connecting...';
+    const server=await bleDevice.gatt.connect(), service=await server.getPrimaryService(SERVICE_UUID);
+    bleChar=await service.getCharacteristic(CHARACTERISTIC_UUID);
     await bleChar.startNotifications();
     bleChar.addEventListener('characteristicvaluechanged', handleBleData);
     bleDevice.addEventListener('gattserverdisconnected', onDisconnect);
-    setConnectedState(true);
-    rxCount = 0; lostCount = 0; lastPacketId = -1;
-  } catch(err) {
-    alert('Connection failed: ' + err.message);
-    setConnectedState(false);
-  } finally {
-    document.getElementById('connectBtn').disabled = false;
-  }
+    setConnectedState(true); rxCount=0; lostCount=0; lastPacketId=-1;
+  } catch(err) { alert('Connection failed: '+err.message); setConnectedState(false); }
+  finally { document.getElementById('connectBtn').disabled=false; }
 }
-
-function disconnect() { if (bleDevice) bleDevice.gatt.disconnect(); }
-function onDisconnect() { setConnectedState(false); if (isRecording) stopRecording(); }
+function disconnect() { if(bleDevice) bleDevice.gatt.disconnect(); }
+function onDisconnect() { setConnectedState(false); if(isRecording) stopRecording(); }
 
 function setConnectedState(connected) {
-  const connectBtn   = document.getElementById('connectBtn');
-  const statusPill   = document.getElementById('statusPill');
-  const statusDot    = document.getElementById('statusDot');
-  const statusText   = document.getElementById('statusText');
-  const heatmapPanel = document.getElementById('heatmapPanel');
-  const gaitPanel    = document.getElementById('gaitPanel');
-  const recordingRow = document.getElementById('recordingRow');
-  const packetRow    = document.getElementById('packetRow');
-
+  const cb=document.getElementById('connectBtn'), sp=document.getElementById('statusPill'),
+        sd=document.getElementById('statusDot'),  st=document.getElementById('statusText'),
+        hp=document.getElementById('heatmapPanel'), gp=document.getElementById('gaitPanel'),
+        rr=document.getElementById('recordingRow'), pr=document.getElementById('packetRow');
   if (connected) {
-    statusPill.classList.add('connected');
-    statusDot.className  = 'dot on';
-    statusText.textContent = 'CONNECTED';
-    connectBtn.textContent = '⬡ Disconnect';
-    connectBtn.className   = 'connect-btn is-connected';
-    heatmapPanel.classList.add('visible');
-    gaitPanel.classList.add('visible');
-    recordingRow.classList.add('visible');
-    packetRow.classList.add('visible');
+    sp.classList.add('connected'); sd.className='dot on'; st.textContent='CONNECTED';
+    cb.textContent='⬡ Disconnect'; cb.className='connect-btn is-connected';
+    hp.classList.add('visible'); gp.classList.add('visible'); rr.classList.add('visible'); pr.classList.add('visible');
   } else {
-    statusPill.classList.remove('connected');
-    statusDot.className  = 'dot';
-    statusText.textContent = 'OFFLINE';
-    connectBtn.textContent = '⬡ Scan & Connect via Bluetooth';
-    connectBtn.className   = 'connect-btn';
-    heatmapPanel.classList.remove('visible');
-    gaitPanel.classList.remove('visible');
-    recordingRow.classList.remove('visible');
-    packetRow.classList.remove('visible');
+    sp.classList.remove('connected'); sd.className='dot'; st.textContent='OFFLINE';
+    cb.textContent='⬡ Scan & Connect via Bluetooth'; cb.className='connect-btn';
+    hp.classList.remove('visible'); gp.classList.remove('visible'); rr.classList.remove('visible'); pr.classList.remove('visible');
   }
 }
 
-// Packet format: bytes 0–23 = 12×2-byte sensor values, bytes 24–27 = counter
 function handleBleData(event) {
-  const data = new Uint8Array(event.target.value.buffer);
-  for (let i = 0; i < NUM_SENSORS; i++) {
-    sensorValues[i] = (data[i * 2] << 8) | data[i * 2 + 1];
-  }
-  const pktId = (data[24] << 24) | (data[25] << 16) | (data[26] << 8) | data[27];
-  rxCount++;
-  if (lastPacketId >= 0 && pktId !== lastPacketId + 1) lostCount += Math.abs(pktId - lastPacketId - 1);
-  lastPacketId = pktId;
-
-  const pct = (pktId + 1) > 0 ? (lostCount / (pktId + 1) * 100) : 0;
-  const pktLossEl = document.getElementById('pktLoss');
-  pktLossEl.textContent = pct.toFixed(2) + '%';
-  pktLossEl.className = 'pkt-val ' + (pct === 0 ? 'good' : pct < 5 ? 'warn' : 'bad');
-  document.getElementById('pktRx').textContent   = rxCount;
-  document.getElementById('pktLost').textContent = lostCount;
-
+  const data=new Uint8Array(event.target.value.buffer);
+  for(let i=0;i<NUM_SENSORS;i++) sensorValues[i]=(data[i*2]<<8)|data[i*2+1];
+  const pktId=(data[24]<<24)|(data[25]<<16)|(data[26]<<8)|data[27];
+  rxCount++; if(lastPacketId>=0&&pktId!==lastPacketId+1) lostCount+=Math.abs(pktId-lastPacketId-1); lastPacketId=pktId;
+  const pct=(pktId+1)>0?(lostCount/(pktId+1)*100):0;
+  const pl=document.getElementById('pktLoss'); pl.textContent=pct.toFixed(2)+'%'; pl.className='pkt-val '+(pct===0?'good':pct<5?'warn':'bad');
+  document.getElementById('pktRx').textContent=rxCount; document.getElementById('pktLost').textContent=lostCount;
   updateUI();
-  if (isRecording) recordingData.push({ t: (Date.now() - recordingStart) / 1000, vals: [...sensorValues] });
+  if(isRecording && !isPaused) recordingData.push({t:(Date.now()-recordingStart-totalPausedMs)/1000, vals:[...sensorValues]});
 }
 
 // ═══════════════════════════════════════════════════════════
-// RECORDING
+// RECORDING  (start / pause / stop)
 // ═══════════════════════════════════════════════════════════
 function startRecording() {
-  isRecording = true; recordingData = []; recordingStart = Date.now();
-  gait.sessionStart = recordingStart;
-  const startBtn = document.getElementById('startBtn');
-  const stopBtn  = document.getElementById('stopBtn');
-  const recIndicator = document.getElementById('recIndicator');
-  const statusDot    = document.getElementById('statusDot');
-  const statusText   = document.getElementById('statusText');
-  startBtn.classList.add('is-active'); startBtn.textContent = '● Recording';
-  stopBtn.disabled = false;
-  recIndicator.classList.add('active');
-  statusDot.className  = 'dot rec';
-  statusText.textContent = 'RECORDING';
-  document.getElementById('sessionSection').classList.remove('visible');
-  timerHandle = setInterval(() => {
-    const s = Math.floor((Date.now() - recordingStart) / 1000);
-    document.getElementById('recTimer').textContent =
-      `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+  isRecording=true; isPaused=false; recordingData=[]; recordingStart=Date.now(); totalPausedMs=0;
+  resetGaitCounters();
+  const sb=document.getElementById('startBtn'), pb=document.getElementById('pauseBtn'), eb=document.getElementById('stopBtn');
+  const ri=document.getElementById('recIndicator'), rd=document.getElementById('recDot'), rl=document.getElementById('recLabel');
+  const sd=document.getElementById('statusDot'), st=document.getElementById('statusText');
+  sb.classList.add('is-active'); sb.textContent='● Recording';
+  pb.disabled=false; pb.classList.remove('is-paused'); pb.textContent='⏸ Pause';
+  eb.disabled=false;
+  ri.classList.add('active'); ri.classList.remove('paused');
+  rd.className='dot rec'; rl.textContent='RECORDING'; rl.style.color='';
+  document.getElementById('recTimer').style.color='';
+  sd.className='dot rec'; st.textContent='RECORDING';
+  timerHandle=setInterval(() => {
+    if(isPaused) return;
+    const s=Math.floor((Date.now()-recordingStart-totalPausedMs)/1000);
+    document.getElementById('recTimer').textContent=`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
   }, 500);
 }
 
-function stopRecording() {
-  isRecording = false; clearInterval(timerHandle);
-  const startBtn = document.getElementById('startBtn');
-  const stopBtn  = document.getElementById('stopBtn');
-  const recIndicator = document.getElementById('recIndicator');
-  const statusDot    = document.getElementById('statusDot');
-  const statusText   = document.getElementById('statusText');
-  startBtn.classList.remove('is-active'); startBtn.textContent = '▶ Start Session';
-  stopBtn.disabled = true;
-  recIndicator.classList.remove('active');
-  statusDot.className  = 'dot on';
-  statusText.textContent = 'CONNECTED';
-  renderSessionResults();
-}
-
-// ═══════════════════════════════════════════════════════════
-// SESSION RESULTS
-// ═══════════════════════════════════════════════════════════
-function renderSessionResults() {
-  if (!recordingData.length) { alert('No data recorded.'); return; }
-
-  const n = recordingData.length;
-  const duration = recordingData[n - 1].t;
-
-  const avgVals = new Array(NUM_SENSORS).fill(0);
-  let globalPeak = 0, globalSum = 0;
-  recordingData.forEach(d => d.vals.forEach((v, i) => {
-    avgVals[i] += v;
-    if (v > globalPeak) globalPeak = v;
-    globalSum += v;
-  }));
-  avgVals.forEach((v, i) => avgVals[i] = v / n);
-  const globalAvg = globalSum / (n * NUM_SENSORS);
-
-  document.getElementById('sessDuration').textContent = `${Math.round(duration)}s`;
-  document.getElementById('sessSamples').textContent  = n;
-  document.getElementById('sessPeak').textContent     = globalPeak;
-  document.getElementById('sessAvg').textContent      = Math.round(globalAvg);
-  document.getElementById('sessionDate').textContent  = new Date().toLocaleString();
-
-  // Gait summary from events during the recording
-  const sessionEvents = gait.events.filter(e => e.time >= recordingStart);
-  const sessionStrikes = gait.stepTimestamps.filter(t => t >= recordingStart);
-  const sessSteps = sessionStrikes.length;
-  document.getElementById('sessSteps').textContent = sessSteps;
-
-  let sessCadence = '—';
-  if (sessionStrikes.length >= 2) {
-    const spanMs = sessionStrikes[sessionStrikes.length - 1] - sessionStrikes[0];
-    sessCadence  = Math.round((sessionStrikes.length - 1) / (spanMs / 60000)) + '/m';
+function pauseRecording() {
+  const pb=document.getElementById('pauseBtn');
+  const ri=document.getElementById('recIndicator'), rd=document.getElementById('recDot'), rl=document.getElementById('recLabel');
+  const sd=document.getElementById('statusDot'), st=document.getElementById('statusText');
+  if (!isPaused) {
+    isPaused=true; pauseStart=Date.now();
+    pb.classList.add('is-paused'); pb.textContent='▶ Resume';
+    ri.classList.add('paused'); rd.className='dot pau'; rl.textContent='PAUSED';
+    sd.className='dot pau'; st.textContent='PAUSED';
+  } else {
+    totalPausedMs += Date.now()-pauseStart; isPaused=false;
+    pb.classList.remove('is-paused'); pb.textContent='⏸ Pause';
+    ri.classList.remove('paused'); rd.className='dot rec'; rl.textContent='RECORDING';
+    sd.className='dot rec'; st.textContent='RECORDING';
   }
-  document.getElementById('sessCadence').textContent = sessCadence;
-
-  const sessGCTs = gait.gcts.filter((_, i) => i >= gait.gcts.length - sessSteps);
-  document.getElementById('sessGCT').textContent = sessGCTs.length
-    ? Math.round(sessGCTs.reduce((a,v)=>a+v,0)/sessGCTs.length) + 'ms'
-    : '—';
-
-  const sessStrides = gait.strideTimes.filter((_, i) => i >= gait.strideTimes.length - sessSteps);
-  document.getElementById('sessStride').textContent = sessStrides.length
-    ? (sessStrides.reduce((a,v)=>a+v,0)/sessStrides.length/1000).toFixed(2) + 's'
-    : '—';
-
-  // Zone breakdown
-  const foreSum   = ZONE_FORE.reduce((a, i) => a + avgVals[i], 0);
-  const midSum    = ZONE_MID.reduce((a, i)  => a + avgVals[i], 0);
-  const heelSum   = ZONE_HEEL.reduce((a, i) => a + avgVals[i], 0);
-  const zoneTotal = foreSum + midSum + heelSum || 1;
-  const forePct   = Math.round(foreSum  / zoneTotal * 100);
-  const midPct    = Math.round(midSum   / zoneTotal * 100);
-  const heelPct   = Math.round(heelSum  / zoneTotal * 100);
-
-  document.getElementById('zoneForePct').textContent = forePct + '%';
-  document.getElementById('zoneMidPct').textContent  = midPct  + '%';
-  document.getElementById('zoneHeelPct').textContent = heelPct + '%';
-  requestAnimationFrame(() => {
-    document.getElementById('zoneForeFill').style.width = forePct + '%';
-    document.getElementById('zoneMidFill').style.width  = midPct  + '%';
-    document.getElementById('zoneHeelFill').style.width = heelPct + '%';
-  });
-
-  drawHeatmap(document.getElementById('sessCanvas'), avgVals);
-  renderChart(recordingData);
-  document.getElementById('sessionSection').classList.add('visible');
-  setTimeout(() => document.getElementById('sessionSection').scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
 }
 
-function renderChart(data) {
-  let pts = data;
-  if (pts.length > 400) { const step = Math.ceil(pts.length / 400); pts = pts.filter((_, i) => i % step === 0); }
+function stopRecording() {
+  if(isPaused) { totalPausedMs += Date.now()-pauseStart; isPaused=false; }
+  isRecording=false; clearInterval(timerHandle);
+  const sb=document.getElementById('startBtn'), pb=document.getElementById('pauseBtn'), eb=document.getElementById('stopBtn');
+  const ri=document.getElementById('recIndicator'), sd=document.getElementById('statusDot'), st=document.getElementById('statusText');
+  sb.classList.remove('is-active'); sb.textContent='▶ Start';
+  pb.disabled=true; pb.classList.remove('is-paused'); pb.textContent='⏸ Pause';
+  eb.disabled=true; ri.classList.remove('active','paused');
+  sd.className='dot on'; st.textContent='CONNECTED';
+  if(!recordingData.length) { alert('No data recorded.'); return; }
+  const sessData = {
+    idx: sessionsStore.length, date: new Date(),
+    recordingData: [...recordingData], recordingStart, totalPausedMs,
+    stepTimestamps: [...gait.stepTimestamps], gcts: [...gait.gcts],
+    strideTimes: [...gait.strideTimes], loadRates: [...gait.loadRates],
+    events: [...gait.events],
+  };
+  sessionsStore.push(sessData);
+  renderSessionResults(sessData);
+}
 
-  const zoneGroups = [ZONE_FORE, ZONE_MID, ZONE_HEEL];
-  const zoneColors = ['#E84A00', '#00d98b', '#1C6EBF'];
-  const zoneNames  = ['Forefoot', 'Mid-Foot', 'Heel'];
+// ═══════════════════════════════════════════════════════════
+// SESSION RESULTS  (dynamic, one element per session)
+// ═══════════════════════════════════════════════════════════
+function renderSessionResults(sd) {
+  const { idx, date, recordingData: data, stepTimestamps: strikes, gcts, strideTimes } = sd;
+  const n=data.length, duration=data[n-1]?.t??0;
+  const avgVals=new Array(NUM_SENSORS).fill(0); let globalSum=0;
+  data.forEach(d => d.vals.forEach((v,i) => { avgVals[i]+=v; globalSum+=v; }));
+  avgVals.forEach((_,i) => avgVals[i]/=n);
+  const globalAvg=globalSum/(n*NUM_SENSORS);
 
-  const datasets = zoneGroups.map((grp, gi) => ({
-    label: zoneNames[gi],
-    data: pts.map(d => Math.round(grp.reduce((a, i) => a + d.vals[i], 0) / grp.length)),
-    borderColor: zoneColors[gi], backgroundColor: zoneColors[gi] + '14',
-    borderWidth: 2, tension: 0.4, fill: true, pointRadius: 0, pointHoverRadius: 4,
-  }));
+  const foreSum=ZONE_FORE.reduce((a,i)=>a+avgVals[i],0);
+  const midSum =ZONE_MID.reduce((a,i) =>a+avgVals[i],0);
+  const heelSum=ZONE_HEEL.reduce((a,i)=>a+avgVals[i],0);
+  const zoneTotal=foreSum+midSum+heelSum||1;
+  const forePct=Math.round(foreSum/zoneTotal*100), midPct=Math.round(midSum/zoneTotal*100), heelPct=Math.round(heelSum/zoneTotal*100);
 
-  if (chart) { chart.destroy(); chart = null; }
-  const chartCanvas = document.getElementById('sessionChart');
-  chartCanvas.removeAttribute('style');
-  chartCanvas.removeAttribute('width');
-  chartCanvas.removeAttribute('height');
-  chart = new Chart(chartCanvas.getContext('2d'), {
+  const sessSteps=strikes.length;
+  let sessCadence='—';
+  if(strikes.length>=2){ const span=strikes[strikes.length-1]-strikes[0]; sessCadence=Math.round((strikes.length-1)/(span/60000))+'/m'; }
+  const avgGCT=gcts.length?Math.round(gcts.reduce((a,v)=>a+v,0)/gcts.length)+'ms':'—';
+  const avgStride=strideTimes.length?(strideTimes.reduce((a,v)=>a+v,0)/strideTimes.length/1000).toFixed(2)+'s':'—';
+
+  const el=document.createElement('div');
+  el.className='session-section visible'; el.id=`sess-${idx}`;
+  el.innerHTML=`
+    <div class="session-header">
+      <div class="session-title">SESSION ${idx+1}</div>
+      <div class="session-date">${date.toLocaleString()}</div>
+      <button class="download-pdf-btn" onclick="downloadSessionPDF(${idx})">↓ PDF</button>
+    </div>
+    <div class="session-stat-grid">
+      <div class="stat-card"><div class="stat-card-label">DURATION</div><div class="stat-card-val">${Math.round(duration)}s</div></div>
+      <div class="stat-card"><div class="stat-card-label">SAMPLES</div><div class="stat-card-val">${n}</div></div>
+      <div class="stat-card"><div class="stat-card-label">AVG LOAD</div><div class="stat-card-val">${Math.round(globalAvg)}</div></div>
+    </div>
+    <div class="session-gait-label">Gait Summary</div>
+    <div class="session-gait-grid">
+      <div class="stat-card gait-stat-card-orange"><div class="stat-card-label">STEPS</div><div class="stat-card-val">${sessSteps}</div></div>
+      <div class="stat-card gait-stat-card-orange"><div class="stat-card-label">AVG CADENCE</div><div class="stat-card-val">${sessCadence}</div></div>
+      <div class="stat-card gait-stat-card-green"><div class="stat-card-label">AVG GCT</div><div class="stat-card-val">${avgGCT}</div></div>
+      <div class="stat-card gait-stat-card-green"><div class="stat-card-label">AVG STRIDE</div><div class="stat-card-val">${avgStride}</div></div>
+    </div>
+    <div class="session-heatmap-row">
+      <div>
+        <div class="session-heatmap-label">AVG PRESSURE MAP</div>
+        <div class="session-canvas-wrap">
+          <canvas id="sessMap-${idx}" width="130" height="260"></canvas>
+          <svg class="insole-overlay" viewBox="0 0 160 320" xmlns="http://www.w3.org/2000/svg">
+            <path d="${INSOLE_PATH_D}" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div>
+        <div class="session-heatmap-label">ZONE BREAKDOWN</div>
+        <div class="zone-bars">
+          <div class="zone-bar-item"><div class="zone-name"><span>FOREFOOT</span><span>${forePct}%</span></div><div class="zone-bar-track"><div class="zone-bar-fill-orange" id="zF-${idx}" style="width:0%"></div></div></div>
+          <div class="zone-bar-item"><div class="zone-name"><span>MID-FOOT</span><span>${midPct}%</span></div><div class="zone-bar-track"><div class="zone-bar-fill-green"  id="zM-${idx}" style="width:0%"></div></div></div>
+          <div class="zone-bar-item"><div class="zone-name"><span>HEEL</span><span>${heelPct}%</span></div><div class="zone-bar-track"><div class="zone-bar-fill-blue"   id="zH-${idx}" style="width:0%"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-label">FORCE OVER TIME (N) · HEEL STRIKES MARKED ▏</div>
+      <div class="chart-canvas-container"><canvas id="sessChart-${idx}"></canvas></div>
+    </div>
+  `;
+
+  document.getElementById('sessionsContainer').prepend(el);
+
+  requestAnimationFrame(() => {
+    drawHeatmap(document.getElementById(`sessMap-${idx}`), avgVals);
+    document.getElementById(`zF-${idx}`).style.width=forePct+'%';
+    document.getElementById(`zM-${idx}`).style.width=midPct+'%';
+    document.getElementById(`zH-${idx}`).style.width=heelPct+'%';
+    renderSessionChart(sd);
+  });
+  setTimeout(() => el.scrollIntoView({behavior:'smooth',block:'start'}), 200);
+}
+
+function renderSessionChart(sd) {
+  const { idx, recordingData: rawData, recordingStart: rStart, stepTimestamps } = sd;
+  let pts = rawData;
+  if (pts.length > 500) { const step=Math.ceil(pts.length/500); pts=pts.filter((_,i)=>i%step===0); }
+
+  const toF = (vals, zone) => zone.reduce((a,i) => a+(adcToForceN(vals[i])??0), 0);
+  const labels    = pts.map(d => d.t.toFixed(2));
+  const totalFD   = pts.map(d => +d.vals.reduce((a,v)=>a+(adcToForceN(v)??0),0).toFixed(2));
+  const foreFD    = pts.map(d => +toF(d.vals, ZONE_FORE).toFixed(2));
+  const midFD     = pts.map(d => +toF(d.vals, ZONE_MID).toFixed(2));
+  const heelFD    = pts.map(d => +toF(d.vals, ZONE_HEEL).toFixed(2));
+
+  // Convert step timestamps to chart x values (relative to session start)
+  const stepXVals = stepTimestamps.map(ts => +((ts - rStart) / 1000).toFixed(2));
+
+  const canvas = document.getElementById(`sessChart-${idx}`);
+  canvas.removeAttribute('style'); canvas.removeAttribute('width'); canvas.removeAttribute('height');
+
+  if (sd._chart) { sd._chart.destroy(); }
+  sd._chart = new Chart(canvas.getContext('2d'), {
     type: 'line',
-    data: { labels: pts.map(d => d.t.toFixed(1)), datasets },
+    data: {
+      labels,
+      datasets: [
+        { label:'Total', data:totalFD, borderColor:'#e8ecf4', backgroundColor:'rgba(232,236,244,0.06)', borderWidth:2, tension:0.3, fill:true, pointRadius:0, pointHoverRadius:3 },
+        { label:'Heel',  data:heelFD,  borderColor:'#1C6EBF', backgroundColor:'rgba(28,110,191,0.08)',  borderWidth:1.5, tension:0.3, fill:false, pointRadius:0 },
+        { label:'Mid',   data:midFD,   borderColor:'#00d98b', backgroundColor:'rgba(0,217,139,0.08)',   borderWidth:1.5, tension:0.3, fill:false, pointRadius:0 },
+        { label:'Fore',  data:foreFD,  borderColor:'#E84A00', backgroundColor:'rgba(232,74,0,0.08)',    borderWidth:1.5, tension:0.3, fill:false, pointRadius:0 },
+      ]
+    },
     options: {
-      responsive: true, maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
+      responsive:true, maintainAspectRatio:false,
+      interaction:{ mode:'index', intersect:false },
       plugins: {
-        legend: { display: true, labels: { color: '#5a6278', font: { size: 10, family: "'DM Mono',monospace" }, boxWidth: 12 } },
-        tooltip: { backgroundColor: '#0e1118', titleColor: '#e8ecf4', bodyColor: '#5a6278', borderColor: '#1C6EBF', borderWidth: 1, padding: 10 }
+        legend:{ display:true, labels:{ color:'#5a6278', font:{size:10,family:"'DM Mono',monospace"}, boxWidth:12 } },
+        tooltip:{ backgroundColor:'#0e1118', titleColor:'#e8ecf4', bodyColor:'#5a6278', borderColor:'#1C6EBF', borderWidth:1, padding:10 },
+        verticalLines:{ xValues: stepXVals, color:'rgba(232,74,0,0.55)' },
       },
-      scales: {
-        x: { title: { display:true, text:'Time (s)', color:'#5a6278', font:{size:10} }, ticks:{color:'#5a6278',maxTicksLimit:8,font:{family:"'DM Mono',monospace",size:9}}, grid:{color:'rgba(255,255,255,0.04)'} },
-        y: { title: { display:true, text:'ADC (12-bit)', color:'#5a6278', font:{size:10} }, min:0, max:MAX_RAW, ticks:{color:'#5a6278',font:{family:"'DM Mono',monospace",size:9}}, grid:{color:'rgba(255,255,255,0.04)'} }
+      scales:{
+        x:{ title:{display:true,text:'Time (s)',color:'#5a6278',font:{size:10}}, ticks:{color:'#5a6278',maxTicksLimit:8,font:{family:"'DM Mono',monospace",size:9}}, grid:{color:'rgba(255,255,255,0.04)'} },
+        y:{ title:{display:true,text:'Force (N)',color:'#5a6278',font:{size:10}}, min:0, ticks:{color:'#5a6278',font:{family:"'DM Mono',monospace",size:9}}, grid:{color:'rgba(255,255,255,0.04)'} }
       }
     }
   });
 }
 
 // ═══════════════════════════════════════════════════════════
-// DEMO MODE
-// Simulates a realistic gait cycle so gait detection fires
-// through all 6 phases: swing → heel strike → loading →
-// mid-stance → terminal stance → toe-off → swing
+// PDF DOWNLOAD
 // ═══════════════════════════════════════════════════════════
-let demoMode = false, demoHandle = null;
-document.addEventListener('keydown', e => { if (e.key === 'd' || e.key === 'D') toggleDemo(); });
+function downloadSessionPDF(idx) {
+  document.querySelectorAll('.session-section').forEach(el => el.classList.remove('print-target'));
+  document.getElementById(`sess-${idx}`).classList.add('print-target');
+  window.print();
+}
 
-// Each entry: [heel, mid, fore] normalised (0–1), duration ms
+// ═══════════════════════════════════════════════════════════
+// DEMO MODE
+// ═══════════════════════════════════════════════════════════
+let demoMode=false, demoHandle=null;
+document.addEventListener('keydown', e => { if(e.key==='d'||e.key==='D') toggleDemo(); });
+
 const DEMO_CYCLE = [
-  { h: 0.00, m: 0.00, f: 0.00, ms: 420 },  // 0: SWING
-  { h: 0.72, m: 0.05, f: 0.02, ms:  90 },  // 1: HEEL STRIKE
-  { h: 0.78, m: 0.38, f: 0.12, ms: 130 },  // 2: LOADING
-  { h: 0.55, m: 0.58, f: 0.48, ms: 280 },  // 3: MID-STANCE
-  { h: 0.14, m: 0.32, f: 0.78, ms: 120 },  // 4: TERMINAL STANCE
-  { h: 0.04, m: 0.10, f: 0.58, ms:  80 },  // 5: TOE-OFF
+  {h:0.00,m:0.00,f:0.00,ms:420}, // SWING
+  {h:0.72,m:0.05,f:0.02,ms: 90}, // HEEL STRIKE
+  {h:0.78,m:0.38,f:0.12,ms:130}, // LOADING
+  {h:0.55,m:0.58,f:0.48,ms:280}, // MID-STANCE
+  {h:0.14,m:0.32,f:0.78,ms:120}, // TERMINAL
+  {h:0.04,m:0.10,f:0.58,ms: 80}, // TOE-OFF
 ];
-
-let demoPhase = 0, demoPhaseMs = DEMO_CYCLE[0].ms;
-const DEMO_TICK = 20;
+let demoPhase=0, demoPhaseMs=DEMO_CYCLE[0].ms;
+const DEMO_TICK=20;
 
 function toggleDemo() {
-  const btn = document.getElementById('demoBtn');
-  if (demoMode) {
-    demoMode = false; clearInterval(demoHandle); setConnectedState(false);
-    btn.textContent = '◈ Demo Mode'; btn.classList.remove('is-active'); return;
-  }
-  demoMode = true; setConnectedState(true);
-  btn.textContent = '◈ Exit Demo'; btn.classList.add('is-active');
-  demoPhase = 0; demoPhaseMs = DEMO_CYCLE[0].ms;
-
-  demoHandle = setInterval(() => {
-    demoPhaseMs -= DEMO_TICK;
-    if (demoPhaseMs <= 0) {
-      demoPhase = (demoPhase + 1) % DEMO_CYCLE.length;
-      demoPhaseMs = DEMO_CYCLE[demoPhase].ms;
-    }
-
-    const c = DEMO_CYCLE[demoPhase];
-    const noise = () => (Math.random() - 0.5) * 0.06;
-
-    const h = Math.max(0, c.h + noise());
-    const m = Math.max(0, c.m + noise());
-    const f = Math.max(0, c.f + noise());
-
-    sensorValues[0]  = Math.round(Math.min(MAX_RAW, f * MAX_RAW * (0.80 + Math.random()*0.20)));
-    sensorValues[1]  = Math.round(Math.min(MAX_RAW, f * MAX_RAW * (0.90 + Math.random()*0.10)));
-    sensorValues[2]  = Math.round(Math.min(MAX_RAW, f * MAX_RAW * (0.85 + Math.random()*0.15)));
-    sensorValues[3]  = Math.round(Math.min(MAX_RAW, f * MAX_RAW * (0.75 + Math.random()*0.25)));
-    sensorValues[4]  = Math.round(Math.min(MAX_RAW, m * MAX_RAW * (0.85 + Math.random()*0.15)));
-    sensorValues[5]  = Math.round(Math.min(MAX_RAW, m * MAX_RAW * (0.80 + Math.random()*0.20)));
-    sensorValues[6]  = Math.round(Math.min(MAX_RAW, m * MAX_RAW * (0.75 + Math.random()*0.25)));
-    sensorValues[7]  = Math.round(Math.min(MAX_RAW, m * MAX_RAW * (0.78 + Math.random()*0.22)));
-    sensorValues[8]  = Math.round(Math.min(MAX_RAW, h * MAX_RAW * (0.90 + Math.random()*0.10)));
-    sensorValues[9]  = Math.round(Math.min(MAX_RAW, h * MAX_RAW * (0.95 + Math.random()*0.05)));
-    sensorValues[10] = Math.round(Math.min(MAX_RAW, h * MAX_RAW * (0.92 + Math.random()*0.08)));
-    sensorValues[11] = Math.round(Math.min(MAX_RAW, h * MAX_RAW * (0.88 + Math.random()*0.12)));
-
+  const btn=document.getElementById('demoBtn');
+  if (demoMode) { demoMode=false; clearInterval(demoHandle); setConnectedState(false); btn.textContent='◈ Demo Mode'; btn.classList.remove('is-active'); return; }
+  demoMode=true; setConnectedState(true); btn.textContent='◈ Exit Demo'; btn.classList.add('is-active');
+  demoPhase=0; demoPhaseMs=DEMO_CYCLE[0].ms;
+  demoHandle=setInterval(() => {
+    demoPhaseMs-=DEMO_TICK;
+    if(demoPhaseMs<=0){ demoPhase=(demoPhase+1)%DEMO_CYCLE.length; demoPhaseMs=DEMO_CYCLE[demoPhase].ms; }
+    const c=DEMO_CYCLE[demoPhase], noise=()=>(Math.random()-0.5)*0.06;
+    const h=Math.max(0,c.h+noise()), m=Math.max(0,c.m+noise()), f=Math.max(0,c.f+noise());
+    sensorValues[0] =Math.round(Math.min(MAX_RAW,f*MAX_RAW*(0.80+Math.random()*0.20)));
+    sensorValues[1] =Math.round(Math.min(MAX_RAW,f*MAX_RAW*(0.90+Math.random()*0.10)));
+    sensorValues[2] =Math.round(Math.min(MAX_RAW,f*MAX_RAW*(0.85+Math.random()*0.15)));
+    sensorValues[3] =Math.round(Math.min(MAX_RAW,f*MAX_RAW*(0.75+Math.random()*0.25)));
+    sensorValues[4] =Math.round(Math.min(MAX_RAW,m*MAX_RAW*(0.85+Math.random()*0.15)));
+    sensorValues[5] =Math.round(Math.min(MAX_RAW,m*MAX_RAW*(0.80+Math.random()*0.20)));
+    sensorValues[6] =Math.round(Math.min(MAX_RAW,m*MAX_RAW*(0.75+Math.random()*0.25)));
+    sensorValues[7] =Math.round(Math.min(MAX_RAW,m*MAX_RAW*(0.78+Math.random()*0.22)));
+    sensorValues[8] =Math.round(Math.min(MAX_RAW,h*MAX_RAW*(0.90+Math.random()*0.10)));
+    sensorValues[9] =Math.round(Math.min(MAX_RAW,h*MAX_RAW*(0.95+Math.random()*0.05)));
+    sensorValues[10]=Math.round(Math.min(MAX_RAW,h*MAX_RAW*(0.92+Math.random()*0.08)));
+    sensorValues[11]=Math.round(Math.min(MAX_RAW,h*MAX_RAW*(0.88+Math.random()*0.12)));
     updateUI();
-    if (isRecording) recordingData.push({ t: (Date.now() - recordingStart) / 1000, vals: [...sensorValues] });
+    if(isRecording&&!isPaused) recordingData.push({t:(Date.now()-recordingStart-totalPausedMs)/1000,vals:[...sensorValues]});
   }, DEMO_TICK);
 }
 
 // ═══════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════
-if (!navigator.bluetooth) {
-  const cb = document.getElementById('connectBtn');
-  cb.disabled = true;
-  cb.textContent = '⚠ BLE Not Supported (use Chrome)';
-}
-
+if(!navigator.bluetooth){ const cb=document.getElementById('connectBtn'); cb.disabled=true; cb.textContent='⚠ BLE Not Supported (use Chrome)'; }
 toggleDemo();
 </script>
 </body>
