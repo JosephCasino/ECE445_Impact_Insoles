@@ -456,19 +456,22 @@ function fmtN(n) {
 // ═══════════════════════════════════════════════════════════
 const INSOLE_PATH_D = `M 80 14 C 100 14, 128 22, 142 46 C 152 64, 150 90, 142 110 C 136 124, 130 134, 126 150 C 122 164, 122 178, 122 194 C 122 208, 124 222, 126 238 C 128 254, 126 270, 120 284 C 112 298, 96 310, 80 314 C 64 318, 48 310, 38 296 C 28 282, 24 266, 24 250 C 24 234, 26 218, 28 202 C 28 186, 28 170, 28 154 C 28 140, 26 126, 22 112 C 18 98, 14 86, 14 72 C 12 58, 14 42, 24 30 C 36 18, 60 12, 80 14 Z`;
 
+// scale: compensates for sensor active area difference.
+// FSR 402 (Fore/U-Mid): area ≈ 126.7 mm²  → scale 1.00
+// FSR 400 (L-Mid/Heel):  area ≈  20.3 mm²  → scale 6.25  (126.7/20.3)
 const SENSORS = [
-  { id:0,  label:'1', zone:'Fore',  cx: 52,  cy: 52  },
-  { id:1,  label:'2', zone:'Fore',  cx: 72,  cy: 40  },
-  { id:2,  label:'3', zone:'Fore',  cx: 96,  cy: 40  },
-  { id:3,  label:'4', zone:'Fore',  cx: 116, cy: 54  },
-  { id:4,  label:'5', zone:'U-Mid', cx: 60,  cy: 108 },
-  { id:5,  label:'6', zone:'U-Mid', cx: 96,  cy: 106 },
-  { id:6,  label:'7', zone:'L-Mid', cx: 60,  cy: 228 },
-  { id:7,  label:'8', zone:'L-Mid', cx: 96,  cy: 228 },
-  { id:8,  label:'9', zone:'Heel',  cx: 55,  cy: 252 },
-  { id:9,  label:'10', zone:'Heel',  cx: 72,  cy: 260 },
-  { id:10, label:'11', zone:'Heel',  cx: 96,  cy: 260 },
-  { id:11, label:'12', zone:'Heel',  cx: 112, cy: 252 },
+  { id:0,  label:'1',  zone:'Fore',  cx: 52,  cy: 52,  scale: 1.00 },
+  { id:1,  label:'2',  zone:'Fore',  cx: 72,  cy: 40,  scale: 1.00 },
+  { id:2,  label:'3',  zone:'Fore',  cx: 96,  cy: 40,  scale: 1.00 },
+  { id:3,  label:'4',  zone:'Fore',  cx: 116, cy: 54,  scale: 1.00 },
+  { id:4,  label:'5',  zone:'U-Mid', cx: 60,  cy: 108, scale: 1.00 },
+  { id:5,  label:'6',  zone:'U-Mid', cx: 96,  cy: 106, scale: 1.00 },
+  { id:6,  label:'7',  zone:'L-Mid', cx: 60,  cy: 228, scale: 6.25 },
+  { id:7,  label:'8',  zone:'L-Mid', cx: 96,  cy: 228, scale: 6.25 },
+  { id:8,  label:'9',  zone:'Heel',  cx: 55,  cy: 252, scale: 6.25 },
+  { id:9,  label:'10', zone:'Heel',  cx: 72,  cy: 260, scale: 6.25 },
+  { id:10, label:'11', zone:'Heel',  cx: 96,  cy: 260, scale: 6.25 },
+  { id:11, label:'12', zone:'Heel',  cx: 112, cy: 252, scale: 6.25 },
 ];
 const ZONE_FORE = [0,1,2,3];
 const ZONE_MID  = [4,5,6,7];
@@ -810,7 +813,10 @@ function setConnectedState(connected) {
 
 function handleBleData(event) {
   const data=new Uint8Array(event.target.value.buffer);
-  for(let i=0;i<NUM_SENSORS;i++) sensorValues[i]=(data[i*2]<<8)|data[i*2+1];
+  for(let i=0;i<NUM_SENSORS;i++){
+    const raw=(data[i*2]<<8)|data[i*2+1];
+    sensorValues[i]=Math.min(MAX_RAW,Math.round(raw*SENSORS[i].scale));
+  }
   const pktId=(data[24]<<24)|(data[25]<<16)|(data[26]<<8)|data[27];
   rxCount++; if(lastPacketId>=0&&pktId!==lastPacketId+1) lostCount+=Math.abs(pktId-lastPacketId-1); lastPacketId=pktId;
   const pct=(pktId+1)>0?(lostCount/(pktId+1)*100):0;
