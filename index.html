@@ -460,7 +460,7 @@ const INSOLE_PATH_D = `M 80 14 C 100 14, 128 22, 142 46 C 152 64, 150 90, 142 11
 // FSR 402 active area ≈ 126.7 mm², FSR 400 ≈ 20.3 mm². Theoretical ratio is 6.25
 // but practical circuit response is softer — tune FSR400_SCALE if readings saturate
 // too early (lower) or stay too dim compared to Fore/U-Mid (raise).
-const FSR400_SCALE = 2.0;
+const FSR400_SCALE = 1.6;
 const SENSORS = [
   { id:0,  label:'1',  zone:'Fore',  cx: 52,  cy: 52,  scale: 1.00 },
   { id:1,  label:'2',  zone:'Fore',  cx: 72,  cy: 40,  scale: 1.00 },
