@@ -425,22 +425,7 @@
 // ║  SENSOR CALIBRATION  ←  EDIT THESE VALUES DURING HARDWARE TEST  ║
 // ╚══════════════════════════════════════════════════════════════════╝
 const CAL = {
-  // Sum of all 12 raw ADC readings that triggers "foot in contact".
-  // Raise if phantom steps; lower if real contacts are missed.
-  totalContactLoad:  800,
-  // Hysteresis floor: below this → return to SWING.
-  totalSwingLoad:    500,
-  // Heel zone / total ratio to trigger HEEL STRIKE on initial contact.
-  heelDominanceRatio: 0.45,
-  // Fore zone / total ratio to trigger TERMINAL STANCE.
-  foreDominanceRatio: 0.40,
-  // Stance phases shorter than this (ms) are noise-rejected.
-  minStanceMs: 150,
-  // Minimum ms between consecutive HEEL STRIKE detections.
-  minStepIntervalMs: 300,
-  // Rolling window for cadence calculation (ms).
-  cadenceWindowMs: 8000,
-  // Circuit: V+ → FSR402 → node → R_M → GND
+  // Circuit: V+ → FSR → node → R_M → GND
   V_SUPPLY: 3.3,    // ESP32 ADC reference (V)
   R_M:      10000,  // Measuring resistor (Ω)
 };
@@ -500,33 +485,43 @@ const ZONE_MID  = [4,5,6,7];
 const ZONE_HEEL = [8,9,10,11];
 
 // ═══════════════════════════════════════════════════════════
-// GAIT PHASES
+// GAIT CONFIG
 // ═══════════════════════════════════════════════════════════
-const GAIT_PHASES = {
-  SWING:       { label: 'SWING',           css: 'swing',       order: 0 },
-  HEEL_STRIKE: { label: 'HEEL STRIKE',     css: 'heel-strike', order: 1 },
-  LOADING:     { label: 'LOADING',         css: 'loading',     order: 2 },
-  MID_STANCE:  { label: 'MID-STANCE',      css: 'mid-stance',  order: 3 },
-  TERMINAL:    { label: 'TERMINAL STANCE', css: 'terminal',    order: 4 },
-  TOE_OFF:     { label: 'TOE-OFF',         css: 'toe-off',     order: 5 },
-};
+const STEP_LOW_TH          = 100;  // ADC ≤ this → sensor unloaded
+const STEP_HIGH_TH         = 300;  // ADC ≥ this → sensor loaded (hysteresis gap prevents flicker)
+const MIN_STANCE_MS        = 100;  // stances shorter than this are noise-rejected
+const MIN_STEP_INTERVAL_MS = 350;  // debounce: minimum ms between registered steps
 
 // ═══════════════════════════════════════════════════════════
 // GAIT STATE
 // ═══════════════════════════════════════════════════════════
+// Per-sensor hysteresis state
+const sensorIsHigh = new Array(NUM_SENSORS).fill(false);
+const sensorPeaked = new Array(NUM_SENSORS).fill(false); // went high at least once this stance
+
+// Stance tracking
+let footInStance    = false;
+let stanceStartTime = 0;
+let stancePeakF     = 0;
+let stancePeakLR    = 0;  // peak load rate this stance (N/s)
+let gaitPrevForce   = 0;
+let gaitPrevTime    = 0;
+
 const gait = {
-  phase: 'SWING', phaseStart: 0,
+  phase: 'SWING',
   stepCount: 0, stepTimestamps: [],
-  stanceStart: 0, gcts: [], strideTimes: [],
-  peakForce: 0, prevForce: 0, prevTime: 0,
-  loadRates: [], curLoadRate: 0, events: [],
+  gcts: [], strideTimes: [],
+  peakForce: 0, loadRates: [], events: [],
 };
 
 function resetGaitCounters() {
   gait.stepCount = 0; gait.stepTimestamps = [];
-  gait.stanceStart = 0; gait.gcts = []; gait.strideTimes = [];
-  gait.peakForce = 0; gait.loadRates = []; gait.curLoadRate = 0;
-  gait.events = [];
+  gait.gcts = []; gait.strideTimes = [];
+  gait.peakForce = 0; gait.loadRates = []; gait.events = [];
+  gait.phase = 'SWING';
+  sensorIsHigh.fill(false); sensorPeaked.fill(false);
+  footInStance = false; stanceStartTime = 0;
+  stancePeakF = 0; stancePeakLR = 0; gaitPrevForce = 0; gaitPrevTime = 0;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -654,95 +649,118 @@ function switchTab(tabName) {
 // ═══════════════════════════════════════════════════════════
 // GAIT DETECTION
 // ═══════════════════════════════════════════════════════════
-function setGaitPhase(newPhase, now, totalForce) {
-  const phaseDur = now - gait.phaseStart;
-  if (newPhase === 'HEEL_STRIKE') {
-    const last = gait.stepTimestamps[gait.stepTimestamps.length-1] || 0;
-    if (now - last < CAL.minStepIntervalMs) return;
-    gait.stepCount++;
-    gait.peakForce = totalForce; gait.curLoadRate = 0;
-    if (last > 0) { gait.strideTimes.push(now-last); if (gait.strideTimes.length>20) gait.strideTimes.shift(); }
-    gait.stepTimestamps.push(now); if (gait.stepTimestamps.length>50) gait.stepTimestamps.shift();
-    gait.stanceStart = now;
-  }
-  if (newPhase === 'TOE_OFF' && gait.stanceStart > 0) {
-    const gct = now - gait.stanceStart;
-    if (gct >= CAL.minStanceMs) { gait.gcts.push(gct); if (gait.gcts.length>20) gait.gcts.shift(); }
-    if (gait.peakForce > 0) { gait.loadRates.push(gait.curLoadRate); if (gait.loadRates.length>20) gait.loadRates.shift(); }
-    gait.stanceStart = 0;
-  }
-  if (newPhase === 'SWING') gait.peakForce = 0;
-  gait.events.unshift({ phase: newPhase, css: GAIT_PHASES[newPhase].css, label: GAIT_PHASES[newPhase].label, time: now, force: totalForce, dur: phaseDur });
-  if (gait.events.length > 30) gait.events.pop();
-  gait.phase = newPhase; gait.phaseStart = now;
-}
-
 function detectGait() {
-  const now      = Date.now();
-  const totalRaw = sensorValues.reduce((a,v) => a+v, 0);
-  const heelRaw  = ZONE_HEEL.reduce((a,i) => a+sensorValues[i], 0);
-  const midRaw   = ZONE_MID.reduce((a,i)  => a+sensorValues[i], 0);
-  const foreRaw  = ZONE_FORE.reduce((a,i) => a+sensorValues[i], 0);
-  const totalF   = sensorValues.reduce((a,v) => a+(adcToForceN(v)??0), 0);
-  const heelRatio = totalRaw > 0 ? heelRaw/totalRaw : 0;
-  const foreRatio = totalRaw > 0 ? foreRaw/totalRaw : 0;
-  const midRatio  = totalRaw > 0 ? midRaw/totalRaw  : 0;
-  const inContact = totalRaw >= CAL.totalContactLoad;
-  const phaseDur  = now - gait.phaseStart;
-
-  // Freeze state machine when paused — metrics stay at last values
   if (isPaused) { updateGaitUI(); return; }
 
-  const dt = now - gait.prevTime;
-  if (dt > 5 && gait.prevTime > 0) { const lr=(totalF-gait.prevForce)/(dt/1000); if(lr>gait.curLoadRate) gait.curLoadRate=lr; }
-  gait.prevForce = totalF; gait.prevTime = now;
-  if (inContact && totalF > gait.peakForce) gait.peakForce = totalF;
+  const now      = Date.now();
+  const totalF   = sensorValues.reduce((a,v) => a + (adcToForceN(v) ?? 0), 0);
+  const totalRaw = sensorValues.reduce((a,v) => a + v, 0);
+  const heelRaw  = ZONE_HEEL.reduce((a,i) => a + sensorValues[i], 0);
+  const foreRaw  = ZONE_FORE.reduce((a,i) => a + sensorValues[i], 0);
+  const midRaw   = ZONE_MID.reduce((a,i)  => a + sensorValues[i], 0);
 
-  switch (gait.phase) {
-    case 'SWING':
-      if (inContact) setGaitPhase(heelRatio >= CAL.heelDominanceRatio ? 'HEEL_STRIKE' : 'LOADING', now, totalF);
-      break;
-    case 'HEEL_STRIKE':
-      if (!inContact) setGaitPhase(phaseDur >= CAL.minStanceMs ? 'TOE_OFF' : 'SWING', now, totalF);
-      else if (phaseDur > 80 && (midRatio > 0.15 || foreRatio > 0.1)) setGaitPhase('LOADING', now, totalF);
-      break;
-    case 'LOADING':
-      if (!inContact) setGaitPhase(phaseDur >= CAL.minStanceMs ? 'TOE_OFF' : 'SWING', now, totalF);
-      else if (phaseDur > 120 && heelRatio > 0.15 && midRatio > 0.1) setGaitPhase('MID_STANCE', now, totalF);
-      break;
-    case 'MID_STANCE':
-      if (!inContact) setGaitPhase('TOE_OFF', now, totalF);
-      else if (phaseDur > 100 && heelRatio < 0.28 && foreRatio >= CAL.foreDominanceRatio) setGaitPhase('TERMINAL', now, totalF);
-      break;
-    case 'TERMINAL':
-      if (!inContact) setGaitPhase('TOE_OFF', now, totalF);
-      break;
-    case 'TOE_OFF':
-      if (inContact) setGaitPhase('HEEL_STRIKE', now, totalF);
-      else if (phaseDur > 40) setGaitPhase('SWING', now, totalF);
-      break;
+  // ── Load rate tracking ──────────────────────────────────
+  const dt = now - gaitPrevTime;
+  if (dt > 5 && gaitPrevTime > 0) {
+    const lr = (totalF - gaitPrevForce) / (dt / 1000);
+    if (lr > stancePeakLR) stancePeakLR = lr;
   }
+  gaitPrevForce = totalF; gaitPrevTime = now;
+
+  // ── Per-sensor hysteresis update ────────────────────────
+  // Rising edge (low→high): mark sensor as having peaked this stance
+  // Falling edge (high→low): sensor has completed a full cycle
+  for (let i = 0; i < NUM_SENSORS; i++) {
+    if (!sensorIsHigh[i] && sensorValues[i] >= STEP_HIGH_TH) {
+      sensorIsHigh[i] = true;
+      sensorPeaked[i] = true;
+    } else if (sensorIsHigh[i] && sensorValues[i] <= STEP_LOW_TH) {
+      sensorIsHigh[i] = false;
+    }
+  }
+
+  const loadedCount = sensorIsHigh.filter(Boolean).length;
+  const allUnloaded = sensorValues.every(v => v <= STEP_LOW_TH);
+  const peakedCount = sensorPeaked.filter(Boolean).length;
+
+  // Track peak force during stance
+  if (footInStance && totalF > stancePeakF) stancePeakF = totalF;
+
+  // ── Gait phase display ──────────────────────────────────
+  const heelR = totalRaw > 0 ? heelRaw / totalRaw : 0;
+  const foreR  = totalRaw > 0 ? foreRaw / totalRaw : 0;
+  const midR   = totalRaw > 0 ? midRaw  / totalRaw : 0;
+  const stanceDurSoFar = footInStance ? now - stanceStartTime : 0;
+
+  if (!footInStance) {
+    gait.phase = 'SWING';
+  } else if (stanceDurSoFar < 130 && heelR >= 0.45) {
+    gait.phase = 'HEEL_STRIKE';
+  } else if (stanceDurSoFar < 280 && heelR >= 0.20 && (midR >= 0.10 || foreR < 0.25)) {
+    gait.phase = 'LOADING';
+  } else if (heelR >= 0.18 && foreR < 0.35) {
+    gait.phase = 'MID_STANCE';
+  } else if (foreR >= 0.35 && heelR < 0.20) {
+    gait.phase = 'TERMINAL';
+  } else if (loadedCount <= 2 && peakedCount >= 2) {
+    gait.phase = 'TOE_OFF';
+  }
+
+  // ── SWING → STANCE: foot lands ──────────────────────────
+  if (!footInStance && loadedCount >= 1) {
+    footInStance    = true;
+    stanceStartTime = now;
+    stancePeakF     = totalF;
+    stancePeakLR    = 0;
+    sensorPeaked.fill(false);
+  }
+
+  // ── STANCE → SWING: foot lifts off ──────────────────────
+  // A valid step requires: stance ≥ MIN_STANCE_MS AND ≥2 sensors completed a full
+  // low→high→low cycle (i.e. they actually loaded and then unloaded).
+  if (footInStance && allUnloaded) {
+    const stanceDur = now - stanceStartTime;
+
+    if (stanceDur >= MIN_STANCE_MS && peakedCount >= 2) {
+      const lastStep = gait.stepTimestamps[gait.stepTimestamps.length - 1] || 0;
+      if (now - lastStep >= MIN_STEP_INTERVAL_MS) {
+        gait.stepCount++;
+        gait.gcts.push(stanceDur);
+        if (gait.gcts.length > 30) gait.gcts.shift();
+        if (lastStep > 0) {
+          gait.strideTimes.push(now - lastStep);
+          if (gait.strideTimes.length > 30) gait.strideTimes.shift();
+        }
+        gait.stepTimestamps.push(now);
+        if (gait.stepTimestamps.length > 60) gait.stepTimestamps.shift();
+        gait.peakForce = stancePeakF;
+        gait.loadRates.push(stancePeakLR);
+        if (gait.loadRates.length > 30) gait.loadRates.shift();
+        gait.events.unshift({ label: `STEP ${gait.stepCount}`, time: now, dur: stanceDur, peakF: stancePeakF, sensors: peakedCount });
+        if (gait.events.length > 30) gait.events.pop();
+      }
+    }
+
+    footInStance = false;
+    sensorPeaked.fill(false);
+    gait.phase = 'SWING';
+  }
+
   updateGaitUI();
 }
 
 function updateGaitUI() {
-  // Steps & cadence: only meaningful when recording
   if (isRecording) {
     document.getElementById('gaitSteps').textContent = gait.stepCount;
-    const now = Date.now();
-    const recent = gait.stepTimestamps.filter(t => now-t < CAL.cadenceWindowMs);
-    let cad = '—';
-    if (recent.length >= 2) {
-      const span = recent[recent.length-1] - recent[0];
-      cad = Math.round((recent.length-1) / (span/60000));
-    }
-    document.getElementById('gaitCadence').textContent = cad;
+    // Average cadence = total steps / elapsed recording time
+    const elapsedMin = (Date.now() - recordingStart - totalPausedMs) / 60000;
+    document.getElementById('gaitCadence').textContent =
+      (gait.stepCount >= 2 && elapsedMin > 0) ? Math.round(gait.stepCount / elapsedMin) : '—';
   } else {
     document.getElementById('gaitSteps').textContent = '—';
     document.getElementById('gaitCadence').textContent = '—';
   }
 
-  // Contact time & stride time: only update when recording (freeze when not)
   if (isRecording) {
     document.getElementById('gaitContactTime').textContent = gait.gcts.length
       ? Math.round(gait.gcts.reduce((a,v)=>a+v,0)/gait.gcts.length) : '—';
@@ -752,10 +770,10 @@ function updateGaitUI() {
     document.getElementById('gaitStrideUnit').textContent = gait.strideTimes.length ? ' s' : '';
   }
 
-  // Peak force & load rate: always live
-  document.getElementById('gaitPeakForce').textContent = gait.peakForce > 0 ? gait.peakForce.toFixed(1)+'N' : '—';
+  document.getElementById('gaitPeakForce').textContent = gait.peakForce > 0
+    ? gait.peakForce.toFixed(1) + 'N' : '—';
   document.getElementById('gaitLoadRate').textContent = gait.loadRates.length
-    ? Math.round(gait.loadRates[gait.loadRates.length-1])+' N/s' : '—';
+    ? Math.round(gait.loadRates[gait.loadRates.length - 1]) + ' N/s' : '—';
 }
 
 // ═══════════════════════════════════════════════════════════
