@@ -487,23 +487,29 @@ const ZONE_HEEL = [8,9,10,11];
 // ═══════════════════════════════════════════════════════════
 // GAIT CONFIG
 // ═══════════════════════════════════════════════════════════
-const STEP_LOW_TH          = 100;  // ADC ≤ this → sensor unloaded
-const STEP_HIGH_TH         = 300;  // ADC ≥ this → sensor loaded (hysteresis gap prevents flicker)
+// Uses per-sensor DELTA from resting baseline — works regardless of DC offset.
+const STEP_ACTIVATE_DELTA  = 300;  // rise above sensor baseline → sensor "loaded"
+const STEP_RELEASE_DELTA   = 80;   // back within this of baseline → sensor "unloaded"
+const BASELINE_ALPHA       = 0.03; // EMA speed for tracking resting value (lower = slower)
 const MIN_STANCE_MS        = 100;  // stances shorter than this are noise-rejected
 const MIN_STEP_INTERVAL_MS = 350;  // debounce: minimum ms between registered steps
 
 // ═══════════════════════════════════════════════════════════
 // GAIT STATE
 // ═══════════════════════════════════════════════════════════
-// Per-sensor hysteresis state
+// Per-sensor baseline (tracks each sensor's resting ADC value via EMA)
+const sensorBaseline = new Array(NUM_SENSORS).fill(0);
+let   baselineReady  = false;
+
+// Per-sensor state (relative to baseline)
 const sensorIsHigh = new Array(NUM_SENSORS).fill(false);
-const sensorPeaked = new Array(NUM_SENSORS).fill(false); // went high at least once this stance
+const sensorPeaked = new Array(NUM_SENSORS).fill(false); // completed low→high this stance
 
 // Stance tracking
 let footInStance    = false;
 let stanceStartTime = 0;
 let stancePeakF     = 0;
-let stancePeakLR    = 0;  // peak load rate this stance (N/s)
+let stancePeakLR    = 0;
 let gaitPrevForce   = 0;
 let gaitPrevTime    = 0;
 
@@ -520,6 +526,9 @@ function resetGaitCounters() {
   gait.peakForce = 0; gait.loadRates = []; gait.events = [];
   gait.phase = 'SWING';
   sensorIsHigh.fill(false); sensorPeaked.fill(false);
+  // Re-snapshot baseline from current readings so the new session starts clean
+  for (let i = 0; i < NUM_SENSORS; i++) sensorBaseline[i] = sensorValues[i];
+  baselineReady = true;
   footInStance = false; stanceStartTime = 0;
   stancePeakF = 0; stancePeakLR = 0; gaitPrevForce = 0; gaitPrevTime = 0;
 }
@@ -667,29 +676,42 @@ function detectGait() {
   }
   gaitPrevForce = totalF; gaitPrevTime = now;
 
-  // ── Per-sensor hysteresis update ────────────────────────
-  // Rising edge (low→high): mark sensor as having peaked this stance
-  // Falling edge (high→low): sensor has completed a full cycle
+  // ── Per-sensor baseline + delta-based hysteresis ────────
+  // Baseline tracks each sensor's natural resting value via EMA so that
+  // DC-offset channels (~2048 at rest) are handled automatically.
+  if (!baselineReady) {
+    for (let i = 0; i < NUM_SENSORS; i++) sensorBaseline[i] = sensorValues[i];
+    baselineReady = true;
+  }
   for (let i = 0; i < NUM_SENSORS; i++) {
-    if (!sensorIsHigh[i] && sensorValues[i] >= STEP_HIGH_TH) {
-      sensorIsHigh[i] = true;
-      sensorPeaked[i] = true;
-    } else if (sensorIsHigh[i] && sensorValues[i] <= STEP_LOW_TH) {
-      sensorIsHigh[i] = false;
+    const delta = sensorValues[i] - sensorBaseline[i];
+    if (!sensorIsHigh[i]) {
+      // Update baseline only while sensor is in resting state
+      sensorBaseline[i] += (sensorValues[i] - sensorBaseline[i]) * BASELINE_ALPHA;
+      if (delta >= STEP_ACTIVATE_DELTA) {
+        sensorIsHigh[i] = true;
+        sensorPeaked[i] = true;  // this sensor completed low→high
+      }
+    } else {
+      if (delta <= STEP_RELEASE_DELTA) {
+        sensorIsHigh[i] = false; // sensor returned to baseline → cycle complete
+      }
     }
   }
 
   const loadedCount = sensorIsHigh.filter(Boolean).length;
-  const allUnloaded = sensorValues.every(v => v <= STEP_LOW_TH);
   const peakedCount = sensorPeaked.filter(Boolean).length;
 
   // Track peak force during stance
   if (footInStance && totalF > stancePeakF) stancePeakF = totalF;
 
   // ── Gait phase display ──────────────────────────────────
-  const heelR = totalRaw > 0 ? heelRaw / totalRaw : 0;
-  const foreR  = totalRaw > 0 ? foreRaw / totalRaw : 0;
-  const midR   = totalRaw > 0 ? midRaw  / totalRaw : 0;
+  // Use delta-from-baseline for ratios so DC-offset channels don't skew them
+  const deltas   = sensorValues.map((v,i) => Math.max(0, v - sensorBaseline[i]));
+  const deltaTot = deltas.reduce((a,v) => a+v, 0) || 1;
+  const heelR    = ZONE_HEEL.reduce((a,i) => a + deltas[i], 0) / deltaTot;
+  const foreR    = ZONE_FORE.reduce((a,i) => a + deltas[i], 0) / deltaTot;
+  const midR     = ZONE_MID.reduce((a,i)  => a + deltas[i], 0) / deltaTot;
   const stanceDurSoFar = footInStance ? now - stanceStartTime : 0;
 
   if (!footInStance) {
@@ -717,8 +739,8 @@ function detectGait() {
 
   // ── STANCE → SWING: foot lifts off ──────────────────────
   // A valid step requires: stance ≥ MIN_STANCE_MS AND ≥2 sensors completed a full
-  // low→high→low cycle (i.e. they actually loaded and then unloaded).
-  if (footInStance && allUnloaded) {
+  // low→high→low delta cycle. loadedCount===0 means all sensors returned to baseline.
+  if (footInStance && loadedCount === 0) {
     const stanceDur = now - stanceStartTime;
 
     if (stanceDur >= MIN_STANCE_MS && peakedCount >= 2) {
