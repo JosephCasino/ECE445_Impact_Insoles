@@ -405,19 +405,23 @@
 // ║  SENSOR CALIBRATION  ←  EDIT THESE VALUES DURING HARDWARE TEST  ║
 // ╚══════════════════════════════════════════════════════════════════╝
 const CAL = {
-  // Sum of all 12 raw ADC readings that triggers "foot in contact".
+  // Sum of all scaled sensor values that triggers "foot in contact".
+  // Measured rest sum ≈ 13000–14000; step peaks ≈ 17000–27000.
   // Raise if phantom steps; lower if real contacts are missed.
-  totalContactLoad:  800,
+  totalContactLoad:  15000,
   // Hysteresis floor: below this → return to SWING.
-  totalSwingLoad:    500,
+  totalSwingLoad:    13500,
   // Heel zone / total ratio to trigger HEEL STRIKE on initial contact.
-  heelDominanceRatio: 0.45,
+  // Rest heel ratio ≈ 0.27; step heel-strike ratio ≈ 0.49–0.57.
+  heelDominanceRatio: 0.42,
   // Fore zone / total ratio to trigger TERMINAL STANCE.
-  foreDominanceRatio: 0.40,
+  // Measured terminal-stance fore ratio ≈ 0.28–0.32.
+  foreDominanceRatio: 0.28,
   // Stance phases shorter than this (ms) are noise-rejected.
   minStanceMs: 150,
   // Minimum ms between consecutive HEEL STRIKE detections.
-  minStepIntervalMs: 300,
+  // Measured step interval ≈ 1100–1300 ms.
+  minStepIntervalMs: 500,
   // Rolling window for cadence calculation (ms).
   cadenceWindowMs: 8000,
   // Circuit: V+ → FSR402 → node → R_M → GND
@@ -462,12 +466,12 @@ const INSOLE_PATH_D = `M 80 14 C 100 14, 128 22, 142 46 C 152 64, 150 90, 142 11
 // too early (lower) or stay too dim compared to Fore/U-Mid (raise).
 const FSR400_SCALE = 1.6;
 const SENSORS = [
-  { id:0,  label:'1',  zone:'Fore',  cx: 52,  cy: 52,  scale: 1.00 },
-  { id:1,  label:'2',  zone:'Fore',  cx: 72,  cy: 40,  scale: 1.00 },
-  { id:2,  label:'3',  zone:'Fore',  cx: 96,  cy: 40,  scale: 1.00 },
-  { id:3,  label:'4',  zone:'Fore',  cx: 116, cy: 54,  scale: 1.00 },
-  { id:4,  label:'5',  zone:'U-Mid', cx: 60,  cy: 108, scale: 1.00 },
-  { id:5,  label:'6',  zone:'U-Mid', cx: 96,  cy: 106, scale: 1.00 },
+  { id:0,  label:'1',  zone:'Fore',  cx: 52,  cy: 76,  scale: 1.00 },
+  { id:1,  label:'2',  zone:'Fore',  cx: 72,  cy: 64,  scale: 1.00 },
+  { id:2,  label:'3',  zone:'Fore',  cx: 96,  cy: 64,  scale: 1.00 },
+  { id:3,  label:'4',  zone:'Fore',  cx: 116, cy: 78,  scale: 1.00 },
+  { id:4,  label:'5',  zone:'U-Mid', cx: 60,  cy: 128, scale: 1.00 },
+  { id:5,  label:'6',  zone:'U-Mid', cx: 96,  cy: 126, scale: 1.00 },
   { id:6,  label:'7',  zone:'L-Mid', cx: 60,  cy: 228, scale: FSR400_SCALE },
   { id:7,  label:'8',  zone:'L-Mid', cx: 96,  cy: 228, scale: FSR400_SCALE },
   { id:8,  label:'9',  zone:'Heel',  cx: 55,  cy: 252, scale: FSR400_SCALE },
