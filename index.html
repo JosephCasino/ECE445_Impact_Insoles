@@ -199,15 +199,9 @@
     .zone-bar-item .zone-name { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--muted); display: flex; justify-content: space-between; }
     .zone-bar-track { height: 6px; background: rgba(255,255,255,.06); border-radius: 3px; overflow: hidden; }
     .zone-bar-fill-orange { height: 100%; border-radius: 3px; background: var(--orange); transition: width 1s cubic-bezier(.16,1,.3,1); }
-    .zone-bar-fill-blue   { height: 100%; border-radius: 3px; background: var(--blue);   transition: width 1s cubic-bezier(.16,1,.3,1); }
+    .zone-bar-fill-yellow { height: 100%; border-radius: 3px; background: var(--yellow); transition: width 1s cubic-bezier(.16,1,.3,1); }
     .zone-bar-fill-green  { height: 100%; border-radius: 3px; background: #00d98b;        transition: width 1s cubic-bezier(.16,1,.3,1); }
-
-    /* AI Summary placeholder */
-    .ai-summary-section { margin-top: 14px; }
-    .ai-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 22px 16px; background: var(--bg-panel); border: 1px dashed rgba(28,110,191,0.35); border-radius: 8px; text-align: center; }
-    .ai-placeholder-icon { font-size: 22px; color: var(--blue); opacity: 0.6; }
-    .ai-placeholder-text { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
-    .ai-placeholder-sub { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--dim); line-height: 1.5; max-width: 240px; }
+    .zone-bar-fill-blue   { height: 100%; border-radius: 3px; background: var(--blue);   transition: width 1s cubic-bezier(.16,1,.3,1); }
 
     .chart-wrap { border-radius: 8px; overflow: hidden; background: var(--bg-panel); padding: 14px; margin-top: 18px; }
     .chart-wrap .chart-canvas-container { position: relative; height: 240px; }
@@ -248,7 +242,7 @@
       .gait-stat-card-green  .stat-card-val { color: #007a4f !important; }
       .stat-card-label, .session-gait-label, .session-heatmap-label, .chart-label,
       .zone-name, .session-date, .session-title, .pkt-label, .pkt-stats { color: #333 !important; }
-      .chart-wrap, .zone-bar-track, .ai-placeholder { background: #f0f0f0 !important; }
+      .chart-wrap, .zone-bar-track { background: #f0f0f0 !important; }
     }
   </style>
 </head>
@@ -275,7 +269,7 @@
 
   <!-- Tab Navigation -->
   <div class="tab-nav">
-    <button class="tab-btn active" id="tabDashboard"  onclick="switchTab('dashboard')">Dashboard</button>
+    <button class="tab-btn active" id="tabDashboard"  onclick="switchTab('dashboard')">Main Dashboard</button>
     <button class="tab-btn"        id="tabSensorTest" onclick="switchTab('sensorTest')">Sensor Test</button>
   </div>
 
@@ -481,7 +475,9 @@ const SENSORS = [
   { id:11, label:'12', zone:'Heel',  cx: 112, cy: 252, scale: FSR400_SCALE },
 ];
 const ZONE_FORE = [0,1,2,3];
-const ZONE_MID  = [4,5,6,7];
+const ZONE_UMID = [4,5];
+const ZONE_LMID = [6,7];
+const ZONE_MID  = [4,5,6,7];  // combined mid (used for gait detection & force summary)
 const ZONE_HEEL = [8,9,10,11];
 
 // ═══════════════════════════════════════════════════════════
@@ -982,11 +978,15 @@ function renderSessionResults(sd) {
   avgVals.forEach((_,i) => avgVals[i]/=n);
   const globalAvg=globalSum/(n*NUM_SENSORS);
 
-  const foreSum=ZONE_FORE.reduce((a,i)=>a+avgVals[i],0);
-  const midSum =ZONE_MID.reduce((a,i) =>a+avgVals[i],0);
-  const heelSum=ZONE_HEEL.reduce((a,i)=>a+avgVals[i],0);
-  const zoneTotal=foreSum+midSum+heelSum||1;
-  const forePct=Math.round(foreSum/zoneTotal*100), midPct=Math.round(midSum/zoneTotal*100), heelPct=Math.round(heelSum/zoneTotal*100);
+  const foreSum =ZONE_FORE.reduce((a,i)=>a+avgVals[i],0);
+  const umidSum =ZONE_UMID.reduce((a,i)=>a+avgVals[i],0);
+  const lmidSum =ZONE_LMID.reduce((a,i)=>a+avgVals[i],0);
+  const heelSum =ZONE_HEEL.reduce((a,i)=>a+avgVals[i],0);
+  const zoneTotal=foreSum+umidSum+lmidSum+heelSum||1;
+  const forePct =Math.round(foreSum /zoneTotal*100);
+  const umidPct =Math.round(umidSum /zoneTotal*100);
+  const lmidPct =Math.round(lmidSum /zoneTotal*100);
+  const heelPct =Math.round(heelSum /zoneTotal*100);
 
   const sessSteps=strikes.length;
   let sessCadence='—';
@@ -1033,17 +1033,10 @@ function renderSessionResults(sd) {
           <div>
             <div class="session-heatmap-label">ZONE BREAKDOWN</div>
             <div class="zone-bars">
-              <div class="zone-bar-item"><div class="zone-name"><span>FOREFOOT</span><span>${forePct}%</span></div><div class="zone-bar-track"><div class="zone-bar-fill-orange" id="zF-${idx}" style="width:0%"></div></div></div>
-              <div class="zone-bar-item"><div class="zone-name"><span>MID-FOOT</span><span>${midPct}%</span></div><div class="zone-bar-track"><div class="zone-bar-fill-green"  id="zM-${idx}" style="width:0%"></div></div></div>
-              <div class="zone-bar-item"><div class="zone-name"><span>HEEL</span><span>${heelPct}%</span></div><div class="zone-bar-track"><div class="zone-bar-fill-blue"   id="zH-${idx}" style="width:0%"></div></div></div>
-            </div>
-            <div class="ai-summary-section">
-              <div class="session-heatmap-label" style="margin-top:14px;">AI ANALYSIS</div>
-              <div class="ai-placeholder">
-                <div class="ai-placeholder-icon">✦</div>
-                <div class="ai-placeholder-text">Coming Soon</div>
-                <div class="ai-placeholder-sub">AI-powered gait analysis will provide injury risk assessment, efficiency metrics, and personalized recommendations.</div>
-              </div>
+              <div class="zone-bar-item"><div class="zone-name"><span>FOREFOOT</span><span>${forePct}%</span></div><div class="zone-bar-track"><div class="zone-bar-fill-orange" id="zF-${idx}"  style="width:0%"></div></div></div>
+              <div class="zone-bar-item"><div class="zone-name"><span>U-MID</span><span>${umidPct}%</span></div><div class="zone-bar-track"><div class="zone-bar-fill-yellow" id="zUM-${idx}" style="width:0%"></div></div></div>
+              <div class="zone-bar-item"><div class="zone-name"><span>L-MID</span><span>${lmidPct}%</span></div><div class="zone-bar-track"><div class="zone-bar-fill-green"  id="zLM-${idx}" style="width:0%"></div></div></div>
+              <div class="zone-bar-item"><div class="zone-name"><span>HEEL</span><span>${heelPct}%</span></div><div class="zone-bar-track"><div class="zone-bar-fill-blue"   id="zH-${idx}"  style="width:0%"></div></div></div>
             </div>
           </div>
         </div>
@@ -1060,7 +1053,8 @@ function renderSessionResults(sd) {
   requestAnimationFrame(() => {
     drawHeatmap(document.getElementById(`sessMap-${idx}`), avgVals);
     document.getElementById(`zF-${idx}`).style.width=forePct+'%';
-    document.getElementById(`zM-${idx}`).style.width=midPct+'%';
+    document.getElementById(`zUM-${idx}`).style.width=umidPct+'%';
+    document.getElementById(`zLM-${idx}`).style.width=lmidPct+'%';
     document.getElementById(`zH-${idx}`).style.width=heelPct+'%';
     renderSessionChart(sd);
   });
