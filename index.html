@@ -1180,8 +1180,14 @@ function toggleStRecording() {
 
 function exportStCsv() {
   if (!stData.length) return;
-  const header = 't_ms,s0,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11';
-  const rows = stData.map(r => r.t + ',' + r.vals.join(','));
+  const header = 't_ms,s0,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,f0_N,f1_N,f2_N,f3_N,f4_N,f5_N,f6_N,f7_N,f8_N,f9_N,f10_N,f11_N';
+  const rows = stData.map(r => {
+    const forces = r.vals.map(v => {
+      const f = adcToForceN(v);
+      return f === null ? 'SAT' : f === 0 ? '0' : f.toFixed(4);
+    });
+    return r.t + ',' + r.vals.join(',') + ',' + forces.join(',');
+  });
   const csv = [header, ...rows].join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
