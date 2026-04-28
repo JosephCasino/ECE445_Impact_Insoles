@@ -216,6 +216,19 @@
     /* Sensor Test tab */
     .sensor-test-content { display: flex; flex-direction: column; gap: 16px; }
 
+    /* ─── ST Recording Controls ─── */
+    .st-rec-row { display: flex; gap: 10px; align-items: center; }
+    .st-rec-btn { padding: 11px 18px; border-radius: 8px; border: none; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .2s ease; }
+    .st-rec-btn.start { background: var(--orange); color: #fff; box-shadow: 0 4px 20px var(--orange-dim); }
+    .st-rec-btn.start:hover { background: #ff5a10; box-shadow: 0 4px 24px var(--orange-glow); transform: translateY(-1px); }
+    .st-rec-btn.stop { background: transparent; border: 2px solid var(--orange); color: var(--orange); }
+    .st-rec-btn.stop:hover { background: var(--orange-dim); box-shadow: 0 4px 20px var(--orange-glow); transform: translateY(-1px); }
+    .st-export-btn { padding: 11px 18px; border-radius: 8px; border: 2px solid var(--blue); background: transparent; color: var(--blue); font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .2s ease; }
+    .st-export-btn:hover:not(:disabled) { background: var(--blue-dim); box-shadow: 0 4px 20px var(--blue-glow); transform: translateY(-1px); }
+    .st-export-btn:disabled { opacity: .35; cursor: not-allowed; }
+    .st-rec-status { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .st-rec-status.active { color: var(--orange); }
+
     .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); }
     .footer-text { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--dim); letter-spacing: 2px; }
 
@@ -380,6 +393,13 @@
           FORE: <span id="foreForce">0.00 N</span><br>
           MID: <span id="midForce">0.00 N</span> &nbsp; HEEL: <span id="heelForce">0.00 N</span>
         </div>
+      </div>
+
+      <!-- ST Recording Controls -->
+      <div class="st-rec-row">
+        <button class="st-rec-btn start" id="stRecBtn" onclick="toggleStRecording()">▶ Record</button>
+        <button class="st-export-btn" id="stExportBtn" onclick="exportStCsv()" disabled>⬇ Export CSV</button>
+        <span class="st-rec-status" id="stRecStatus">—</span>
       </div>
 
       <!-- Sensor table -->
@@ -815,8 +835,10 @@ function setConnectedState(connected) {
 
 function handleBleData(event) {
   const data=new Uint8Array(event.target.value.buffer);
+  const rawAdc = [];
   for(let i=0;i<NUM_SENSORS;i++){
     const raw=(data[i*2]<<8)|data[i*2+1];
+    rawAdc.push(raw);
     sensorValues[i]=Math.min(MAX_RAW,Math.round(raw*SENSORS[i].scale));
   }
   const pktId=(data[24]<<24)|(data[25]<<16)|(data[26]<<8)|data[27];
@@ -826,6 +848,11 @@ function handleBleData(event) {
   document.getElementById('pktRx').textContent=rxCount; document.getElementById('pktLost').textContent=lostCount;
   updateUI();
   if(isRecording && !isPaused) recordingData.push({t:(Date.now()-recordingStart-totalPausedMs)/1000, vals:[...sensorValues]});
+  if(stRecording) {
+    stData.push({ t: Date.now()-stStartTime, vals: rawAdc });
+    const statusEl=document.getElementById('stRecStatus');
+    if(statusEl) statusEl.textContent='● REC  '+stData.length+' rows';
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1127,6 +1154,42 @@ function toggleDemo() {
     updateUI();
     if(isRecording&&!isPaused) recordingData.push({t:(Date.now()-recordingStart-totalPausedMs)/1000,vals:[...sensorValues]});
   }, DEMO_TICK);
+}
+
+// ═══════════════════════════════════════════════════════════
+// SENSOR TEST — RECORDING + CSV EXPORT
+// ═══════════════════════════════════════════════════════════
+let stRecording = false, stData = [], stStartTime = 0;
+
+function toggleStRecording() {
+  const btn = document.getElementById('stRecBtn');
+  const statusEl = document.getElementById('stRecStatus');
+  const exportBtn = document.getElementById('stExportBtn');
+  if (!stRecording) {
+    stRecording = true; stData = []; stStartTime = Date.now();
+    btn.textContent = '■ Stop'; btn.className = 'st-rec-btn stop';
+    statusEl.textContent = '● REC  0 rows'; statusEl.className = 'st-rec-status active';
+    exportBtn.disabled = true;
+  } else {
+    stRecording = false;
+    btn.textContent = '▶ Record'; btn.className = 'st-rec-btn start';
+    statusEl.textContent = stData.length + ' rows captured'; statusEl.className = 'st-rec-status';
+    exportBtn.disabled = stData.length === 0;
+  }
+}
+
+function exportStCsv() {
+  if (!stData.length) return;
+  const header = 't_ms,s0,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11';
+  const rows = stData.map(r => r.t + ',' + r.vals.join(','));
+  const csv = [header, ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'impact_insoles_' + new Date().toISOString().replace(/[:.]/g, '-') + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // ═══════════════════════════════════════════════════════════
