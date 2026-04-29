@@ -350,6 +350,10 @@
         <div class="pkt-label">PACKET LOSS</div>
         <div class="pkt-val good" id="pktLoss">0.00%</div>
       </div>
+      <div style="text-align:center;">
+        <div class="pkt-label">SAMPLE RATE</div>
+        <div class="pkt-val good" id="pktHz">— Hz</div>
+      </div>
       <div class="pkt-stats">
         RX: <span id="pktRx">0</span> &nbsp; LOST: <span id="pktLost">0</span>
       </div>
@@ -539,6 +543,7 @@ let recordingData = [], recordingStart = 0;
 let pauseStart = 0, totalPausedMs = 0;
 let timerHandle = null;
 let lastPacketId = -1, rxCount = 0, lostCount = 0;
+const pktTimes = [];
 const sessionsStore = [];
 
 // ═══════════════════════════════════════════════════════════
@@ -842,7 +847,7 @@ async function connect() {
     await bleChar.startNotifications();
     bleChar.addEventListener('characteristicvaluechanged', handleBleData);
     bleDevice.addEventListener('gattserverdisconnected', onDisconnect);
-    setConnectedState(true); rxCount=0; lostCount=0; lastPacketId=-1;
+    setConnectedState(true); rxCount=0; lostCount=0; lastPacketId=-1; pktTimes.length=0;
   } catch(err) { alert('Connection failed: '+err.message); setConnectedState(false); }
   finally { document.getElementById('connectBtn').disabled=false; }
 }
@@ -881,6 +886,14 @@ function handleBleData(event) {
   const pct=(pktId+1)>0?(lostCount/(pktId+1)*100):0;
   const pl=document.getElementById('pktLoss'); pl.textContent=pct.toFixed(2)+'%'; pl.className='pkt-val '+(pct===0?'good':pct<5?'warn':'bad');
   document.getElementById('pktRx').textContent=rxCount; document.getElementById('pktLost').textContent=lostCount;
+  // Rolling Hz: measure over last 30 packets
+  const now30=Date.now(); pktTimes.push(now30); if(pktTimes.length>31) pktTimes.shift();
+  if(pktTimes.length>=2){
+    const hz=(pktTimes.length-1)/(pktTimes[pktTimes.length-1]-pktTimes[0])*1000;
+    const hzEl=document.getElementById('pktHz');
+    hzEl.textContent=hz.toFixed(1)+' Hz';
+    hzEl.className='pkt-val '+(hz>=90?'good':hz>=60?'warn':'bad');
+  }
   updateUI();
   if(isRecording && !isPaused) recordingData.push({t:(Date.now()-recordingStart-totalPausedMs)/1000, vals:[...sensorValues]});
   if(stRecording) {
