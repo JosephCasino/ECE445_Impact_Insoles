@@ -887,7 +887,10 @@ function handleBleData(event) {
   const pl=document.getElementById('pktLoss'); pl.textContent=pct.toFixed(2)+'%'; pl.className='pkt-val '+(pct===0?'good':pct<5?'warn':'bad');
   document.getElementById('pktRx').textContent=rxCount; document.getElementById('pktLost').textContent=lostCount;
   // Rolling Hz: measure over last 30 packets
-  const now30=Date.now(); pktTimes.push(now30); if(pktTimes.length>31) pktTimes.shift();
+  // Reset buffer if gap > 500 ms — tab was backgrounded and packets burst on return
+  const now30=Date.now();
+  if(pktTimes.length>0 && now30-pktTimes[pktTimes.length-1]>500) pktTimes.length=0;
+  pktTimes.push(now30); if(pktTimes.length>31) pktTimes.shift();
   if(pktTimes.length>=2){
     const hz=(pktTimes.length-1)/(pktTimes[pktTimes.length-1]-pktTimes[0])*1000;
     const hzEl=document.getElementById('pktHz');
