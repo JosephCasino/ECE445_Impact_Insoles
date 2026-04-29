@@ -461,18 +461,18 @@ const INSOLE_PATH_D = `M 80 14 C 100 14, 128 22, 142 46 C 152 64, 150 90, 142 11
 // too early (lower) or stay too dim compared to Fore/U-Mid (raise).
 const FSR400_SCALE = 1.6;
 const SENSORS = [
-  { id:0,  label:'1',  zone:'Fore',  cx: 52,  cy: 52,  scale: 1.00 },
-  { id:1,  label:'2',  zone:'Fore',  cx: 72,  cy: 40,  scale: 1.00 },
-  { id:2,  label:'3',  zone:'Fore',  cx: 96,  cy: 40,  scale: 1.00 },
-  { id:3,  label:'4',  zone:'Fore',  cx: 116, cy: 54,  scale: 1.00 },
-  { id:4,  label:'5',  zone:'U-Mid', cx: 60,  cy: 108, scale: 1.00 },
-  { id:5,  label:'6',  zone:'U-Mid', cx: 96,  cy: 106, scale: 1.00 },
-  { id:6,  label:'7',  zone:'L-Mid', cx: 60,  cy: 228, scale: FSR400_SCALE },
-  { id:7,  label:'8',  zone:'L-Mid', cx: 96,  cy: 228, scale: FSR400_SCALE },
-  { id:8,  label:'9',  zone:'Heel',  cx: 55,  cy: 252, scale: FSR400_SCALE },
-  { id:9,  label:'10', zone:'Heel',  cx: 72,  cy: 260, scale: FSR400_SCALE },
-  { id:10, label:'11', zone:'Heel',  cx: 96,  cy: 260, scale: FSR400_SCALE },
-  { id:11, label:'12', zone:'Heel',  cx: 112, cy: 252, scale: FSR400_SCALE },
+  { id:0,  label:'1',  zone:'Fore',  cx: 52,  cy: 70,  scale: 1.00 },
+  { id:1,  label:'2',  zone:'Fore',  cx: 72,  cy: 60,  scale: 1.00 },
+  { id:2,  label:'3',  zone:'Fore',  cx: 96,  cy: 60,  scale: 1.00 },
+  { id:3,  label:'4',  zone:'Fore',  cx: 116, cy: 72,  scale: 1.00 },
+  { id:4,  label:'5',  zone:'U-Mid', cx: 60,  cy: 156, scale: 1.00 },
+  { id:5,  label:'6',  zone:'U-Mid', cx: 96,  cy: 154, scale: 1.00 },
+  { id:6,  label:'7',  zone:'L-Mid', cx: 60,  cy: 248, scale: FSR400_SCALE },
+  { id:7,  label:'8',  zone:'L-Mid', cx: 96,  cy: 248, scale: FSR400_SCALE },
+  { id:8,  label:'9',  zone:'Heel',  cx: 52,  cy: 272, scale: FSR400_SCALE },
+  { id:9,  label:'10', zone:'Heel',  cx: 70,  cy: 284, scale: FSR400_SCALE },
+  { id:10, label:'11', zone:'Heel',  cx: 94,  cy: 284, scale: FSR400_SCALE },
+  { id:11, label:'12', zone:'Heel',  cx: 110, cy: 272, scale: FSR400_SCALE },
 ];
 const ZONE_FORE = [0,1,2,3];
 const ZONE_UMID = [4,5];
@@ -581,7 +581,9 @@ function drawHeatmap(canvasEl, vals) {
   const ctx = canvasEl.getContext('2d');
   const sx = W/160, sy = H/320;
   const norm = vals.map(v => Math.max(0, Math.min(1, v/MAX_RAW)));
-  const POWER = 2.5, RADIUS = 110 * Math.min(sx, sy);
+  // Pure Gaussian kernel — large sigma so adjacent sensors bleed into each other smoothly.
+  // Sigma is ~90px on the base 160×320 canvas; scales with canvas size.
+  const SIGMA2 = Math.pow(90 * Math.min(sx, sy), 2) * 2;
   const cacheKey = W + 'x' + H;
   if (!drawHeatmap._masks) drawHeatmap._masks = {};
   if (!drawHeatmap._masks[cacheKey]) drawHeatmap._masks[cacheKey] = buildMask(W, H);
@@ -597,9 +599,8 @@ function drawHeatmap(canvasEl, vals) {
       for (let s = 0; s < NUM_SENSORS; s++) {
         const dx = px-sensorPx[s].x, dy = py-sensorPx[s].y, dist2 = dx*dx+dy*dy;
         if (dist2 < 1) { valueSum = norm[s]; weightSum = 1; break; }
-        const dist = Math.sqrt(dist2);
-        if (dist > RADIUS) continue;
-        const w = Math.pow(1/dist2, POWER/2) * Math.exp(-dist2/(2*RADIUS*RADIUS*0.25));
+        const w = Math.exp(-dist2 / SIGMA2);
+        if (w < 0.004) continue;
         weightSum += w; valueSum += w*norm[s];
       }
       const n = weightSum > 0 ? valueSum/weightSum : 0;
