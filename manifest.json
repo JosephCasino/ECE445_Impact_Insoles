@@ -4,7 +4,7 @@
   "display": "standalone",
   "name": "Impact Insoles",
   "orientation": "any",
-  "scope": "/",
+  "scope": "/ECE445_Impact_Insoles/",
   "short_name": "Impact Insoles",
   "start_url": "/",
   "theme_color": "#ffffff",
