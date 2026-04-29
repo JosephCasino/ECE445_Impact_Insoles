@@ -226,28 +226,6 @@
     .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); }
     .footer-text { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--dim); letter-spacing: 2px; }
 
-    /* ─── Verification Tab ─── */
-    .verif-summary { display: flex; align-items: center; gap: 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; }
-    .verif-summary-counts { font-family: 'DM Mono', monospace; font-size: 12px; white-space: nowrap; }
-    .verif-summary-pass  { color: var(--green); font-weight: 700; }
-    .verif-summary-fail  { color: var(--orange); font-weight: 700; }
-    .verif-summary-total { color: var(--muted); }
-    .verif-progress-bar  { flex: 1; height: 6px; background: rgba(255,255,255,.06); border-radius: 3px; overflow: hidden; }
-    .verif-progress-fill { height: 100%; border-radius: 3px; background: var(--green); transition: width 0.4s ease; }
-
-    .verif-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 14px; }
-    .verif-card-title { font-size: 10px; font-weight: 700; letter-spacing: 3px; color: var(--muted); margin-bottom: 14px; text-transform: uppercase; }
-    .verif-item { padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.04); }
-    .verif-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .verif-item-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
-    .verif-status-btn { flex-shrink: 0; min-width: 62px; padding: 4px 8px; border-radius: 5px; border: 1px solid var(--border); background: var(--bg-panel); color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .18s; text-align: center; }
-    .verif-status-btn.pass { background: rgba(0,217,139,0.12); color: var(--green); border-color: var(--green); }
-    .verif-status-btn.fail { background: rgba(232,74,0,0.12);  color: var(--orange); border-color: var(--orange); }
-    .verif-item-text { font-size: 13px; color: var(--text); line-height: 1.45; flex: 1; }
-    .verif-notes-input { width: 100%; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text); outline: none; transition: border-color .2s; resize: none; height: 34px; }
-    .verif-notes-input:focus { border-color: var(--blue); }
-    .verif-notes-input::placeholder { color: var(--dim); }
-
     /* ─── Print / PDF ─── */
     @media print {
       body { background: #fff !important; color: #111 !important; }
@@ -291,9 +269,8 @@
 
   <!-- Tab Navigation -->
   <div class="tab-nav">
-    <button class="tab-btn active" id="tabDashboard"    onclick="switchTab('dashboard')">Main Dashboard</button>
-    <button class="tab-btn"        id="tabSensorTest"   onclick="switchTab('sensorTest')">Sensor Test</button>
-    <button class="tab-btn"        id="tabVerification" onclick="switchTab('verification')">Verification</button>
+    <button class="tab-btn active" id="tabDashboard"  onclick="switchTab('dashboard')">Main Dashboard</button>
+    <button class="tab-btn"        id="tabSensorTest" onclick="switchTab('sensorTest')">Sensor Test</button>
   </div>
 
   <!-- ═══ DASHBOARD TAB ═══ -->
@@ -430,19 +407,6 @@
 
     </div>
   </div><!-- /tab-sensor-test -->
-
-  <!-- ═══ VERIFICATION TAB ═══ -->
-  <div id="tab-verification" style="display:none;">
-    <div class="verif-summary">
-      <div class="verif-summary-counts">
-        <span class="verif-summary-pass" id="verifPassCount">0</span><span class="verif-summary-total"> / <span id="verifTotalCount">0</span> pass</span>
-        &nbsp;·&nbsp;
-        <span class="verif-summary-fail" id="verifFailCount">0</span><span class="verif-summary-total"> fail</span>
-      </div>
-      <div class="verif-progress-bar"><div class="verif-progress-fill" id="verifProgressFill" style="width:0%"></div></div>
-    </div>
-    <div id="verifContent"></div>
-  </div><!-- /tab-verification -->
 
   <div class="footer">
     <div class="footer-text">ECE445 · GROUP 68 · CASINO · SIVANESAN · WENG &nbsp;·&nbsp; UIUC 2026</div>
@@ -662,121 +626,10 @@ function drawHeatmap(canvasEl, vals) {
 // TAB SWITCHING
 // ═══════════════════════════════════════════════════════════
 function switchTab(tabName) {
-  document.getElementById('tab-dashboard').style.display    = tabName === 'dashboard'    ? '' : 'none';
-  document.getElementById('tab-sensor-test').style.display  = tabName === 'sensorTest'   ? '' : 'none';
-  document.getElementById('tab-verification').style.display = tabName === 'verification' ? '' : 'none';
-  document.getElementById('tabDashboard').classList.toggle('active',    tabName === 'dashboard');
-  document.getElementById('tabSensorTest').classList.toggle('active',   tabName === 'sensorTest');
-  document.getElementById('tabVerification').classList.toggle('active', tabName === 'verification');
-}
-
-// ═══════════════════════════════════════════════════════════
-// VERIFICATION TAB
-// ═══════════════════════════════════════════════════════════
-const VERIF_SECTIONS = [
-  {
-    id: 'ss1', title: 'SS1 — FSR Sensor Response',
-    items: [
-      { key: 'ss1-1', text: 'Place insole on rigid surface. Measure baseline voltage V₀ across the measuring resistor for each sensor channel.' },
-      { key: 'ss1-2', text: 'Apply 10 N calibration load to each sensor. Measure loaded voltage V₁₀ₙ.' },
-      { key: 'ss1-3', text: 'Compute ΔV = V₁₀ₙ − V₀ and R_FSR = V / I. Confirm a measurable voltage change is produced.' },
-      { key: 'ss1-4', text: 'Repeat measurement procedure for all 12 sensor channels. Confirm each channel responds independently.' },
-    ]
-  },
-  {
-    id: 'ss2', title: 'SS2 — Heatmap Visualization',
-    items: [
-      { key: 'ss2-1', text: 'Enable 50 Hz BLE streaming. Apply weight to the ball of foot for 5 s with the live heatmap visible. Confirm forefoot region illuminates.' },
-      { key: 'ss2-2', text: 'Shift weight toward heel over the next 5 s. Observe color gradient transition to heel region on the heatmap in real time.' },
-      { key: 'ss2-3', text: 'Capture fore-load and heel-load frames. Compute SSD between distributions and confirm a statistically clear difference between the two loading patterns.' },
-    ]
-  },
-  {
-    id: 'ss3', title: 'SS3 — BLE Data Transmission',
-    items: [
-      { key: 'ss3-1', text: 'Enable timestamp logging. Collect ≥ 30 s of continuous data. Compute per-channel sample rate from timestamps. Verify measured rate ≥ 50 Hz.' },
-      { key: 'ss3-2', text: 'Stream for 5 min. Record BLE packet sequence numbers from the dashboard. Compute delivery ratio = received / expected. Verify ≥ 95% delivery.' },
-      { key: 'ss3-3', text: 'Fully charge battery. Run device for 1 hr under normal BLE streaming load. Monitor for disconnections or firmware crashes. Verify stable operation at end of 1 hr run.' },
-    ]
-  },
-  {
-    id: 'ss4', title: 'SS4 — Power Management',
-    items: [
-      { key: 'ss4-1', text: 'Connect USB-C charger with inline multimeter. Verify charging current is 200 ± 5 mA throughout the charge cycle.' },
-      { key: 'ss4-2', text: 'Run system under normal load for 5 min. Measure 3.3 V and 5 V rail voltages with multimeter. Verify 3 × σ < 1% of nominal for each rail.' },
-      { key: 'ss4-3', text: 'Fully charge battery then run system until automatic low-battery shutoff. Record total runtime. Verify runtime ≥ 1 hour.' },
-    ]
-  },
-  {
-    id: 'ss5', title: 'SS5 — MUX Channel Isolation',
-    items: [
-      { key: 'ss5-1', text: 'Apply pressure to one sensor only while monitoring the Sensor Test tab. Confirm only the corresponding channel shows a change. All other channels remain at baseline.' },
-      { key: 'ss5-2', text: 'Repeat isolation test for all 12 sensors sequentially. Confirm each sensor maps to the correct heatmap position with no crosstalk.' },
-      { key: 'ss5-3', text: 'Tap a single sensor at 2–3 Hz. Confirm real-time response appears in the dashboard with no perceptible lag.' },
-    ]
-  },
-];
-
-const verifState = {};
-
-function buildVerifTab() {
-  let totalItems = 0;
-  VERIF_SECTIONS.forEach(sec => {
-    sec.items.forEach(item => {
-      verifState[item.key] = { status: 'pending', notes: '' };
-      totalItems++;
-    });
-  });
-  document.getElementById('verifTotalCount').textContent = totalItems;
-
-  const container = document.getElementById('verifContent');
-  container.innerHTML = '';
-
-  VERIF_SECTIONS.forEach(sec => {
-    const card = document.createElement('div');
-    card.className = 'verif-card';
-    card.innerHTML = `<div class="verif-card-title">${sec.title}</div>`;
-    sec.items.forEach(item => {
-      const div = document.createElement('div');
-      div.className = 'verif-item';
-      div.id = `vitem-${item.key}`;
-      div.innerHTML = `
-        <div class="verif-item-row">
-          <button class="verif-status-btn pending" id="vbtn-${item.key}" onclick="cycleVerif('${item.key}')">PENDING</button>
-          <span class="verif-item-text">${item.text}</span>
-        </div>
-        <textarea class="verif-notes-input" id="vnotes-${item.key}" placeholder="Notes / measured value..." oninput="verifState['${item.key}'].notes=this.value"></textarea>
-      `;
-      card.appendChild(div);
-    });
-    container.appendChild(card);
-  });
-
-  updateVerifSummary();
-}
-
-function cycleVerif(key) {
-  const states = ['pending', 'pass', 'fail'];
-  const labels = { pending: 'PENDING', pass: '✓ PASS', fail: '✗ FAIL' };
-  const cur = verifState[key].status;
-  const next = states[(states.indexOf(cur) + 1) % states.length];
-  verifState[key].status = next;
-  const btn = document.getElementById(`vbtn-${key}`);
-  btn.className = 'verif-status-btn ' + next;
-  btn.textContent = labels[next];
-  updateVerifSummary();
-}
-
-function updateVerifSummary() {
-  const all = Object.values(verifState);
-  const total = all.length;
-  const pass  = all.filter(v => v.status === 'pass').length;
-  const fail  = all.filter(v => v.status === 'fail').length;
-  document.getElementById('verifPassCount').textContent  = pass;
-  document.getElementById('verifFailCount').textContent  = fail;
-  document.getElementById('verifTotalCount').textContent = total;
-  const pct = total > 0 ? (pass / total * 100).toFixed(1) : 0;
-  document.getElementById('verifProgressFill').style.width = pct + '%';
+  document.getElementById('tab-dashboard').style.display   = tabName === 'dashboard'  ? '' : 'none';
+  document.getElementById('tab-sensor-test').style.display = tabName === 'sensorTest' ? '' : 'none';
+  document.getElementById('tabDashboard').classList.toggle('active',  tabName === 'dashboard');
+  document.getElementById('tabSensorTest').classList.toggle('active', tabName === 'sensorTest');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -877,7 +730,6 @@ function detectGait() {
     stanceStartTime = now;
     stancePeakF     = totalF;
     stancePeakLR    = 0;
-    sensorPeaked.fill(false);
   }
 
   // ── STANCE → SWING: foot lifts off ──────────────────────
@@ -1382,7 +1234,6 @@ function exportStCsv() {
 // ═══════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════
-buildVerifTab();
 if(!navigator.bluetooth){ const cb=document.getElementById('connectBtn'); cb.disabled=true; cb.textContent='⚠ BLE Not Supported (use Chrome)'; }
 </script>
 </body>
