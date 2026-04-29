@@ -6,7 +6,7 @@
   "orientation": "any",
   "scope": "/ECE445_Impact_Insoles/",
   "short_name": "Impact Insoles",
-  "start_url": "/",
+  "start_url": "/ECE445_Impact_Insoles/",
   "theme_color": "#ffffff",
   "id": "ece445group68.impactinsoles",
   "description": "Impact Insoles test app",
