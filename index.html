@@ -453,7 +453,7 @@ function fmtN(n) {
 // ═══════════════════════════════════════════════════════════
 // INSOLE SHAPE
 // ═══════════════════════════════════════════════════════════
-const INSOLE_PATH_D = `M 80 14 C 100 14, 128 22, 142 46 C 152 64, 150 90, 142 110 C 136 124, 130 134, 126 150 C 122 164, 122 178, 122 194 C 122 208, 124 222, 126 238 C 128 254, 126 270, 120 284 C 112 298, 96 310, 80 314 C 64 318, 48 310, 38 296 C 28 282, 24 266, 24 250 C 24 234, 26 218, 28 202 C 28 186, 28 170, 28 154 C 28 140, 26 126, 22 112 C 18 98, 14 86, 14 72 C 12 58, 14 42, 24 30 C 36 18, 60 12, 80 14 Z`;
+const INSOLE_PATH_D = `M 80 8 C 93 8, 120 20, 138 46 C 150 64, 150 90, 142 110 C 136 124, 130 134, 126 150 C 122 164, 122 178, 122 194 C 122 208, 124 222, 126 238 C 128 254, 126 270, 120 284 C 112 298, 96 310, 80 314 C 64 318, 48 310, 38 296 C 28 282, 24 266, 24 250 C 24 234, 26 218, 28 202 C 28 186, 28 170, 28 154 C 28 140, 26 126, 22 112 C 18 98, 14 86, 14 72 C 12 58, 14 42, 24 30 C 38 20, 64 8, 80 8 Z`;
 
 // scale: empirical gain to equalize FSR 400 (L-Mid/Heel) vs FSR 402 (Fore/U-Mid).
 // FSR 402 active area ≈ 126.7 mm², FSR 400 ≈ 20.3 mm². Theoretical ratio is 6.25
@@ -461,10 +461,10 @@ const INSOLE_PATH_D = `M 80 14 C 100 14, 128 22, 142 46 C 152 64, 150 90, 142 11
 // too early (lower) or stay too dim compared to Fore/U-Mid (raise).
 const FSR400_SCALE = 1.6;
 const SENSORS = [
-  { id:0,  label:'1',  zone:'Fore',  cx: 52,  cy: 70,  scale: 1.00 },
-  { id:1,  label:'2',  zone:'Fore',  cx: 72,  cy: 60,  scale: 1.00 },
-  { id:2,  label:'3',  zone:'Fore',  cx: 96,  cy: 60,  scale: 1.00 },
-  { id:3,  label:'4',  zone:'Fore',  cx: 116, cy: 72,  scale: 1.00 },
+  { id:0,  label:'1',  zone:'Fore',  cx: 52,  cy: 88,  scale: 1.00 },
+  { id:1,  label:'2',  zone:'Fore',  cx: 72,  cy: 78,  scale: 1.00 },
+  { id:2,  label:'3',  zone:'Fore',  cx: 96,  cy: 78,  scale: 1.00 },
+  { id:3,  label:'4',  zone:'Fore',  cx: 116, cy: 90,  scale: 1.00 },
   { id:4,  label:'5',  zone:'U-Mid', cx: 60,  cy: 156, scale: 1.00 },
   { id:5,  label:'6',  zone:'U-Mid', cx: 96,  cy: 154, scale: 1.00 },
   { id:6,  label:'7',  zone:'L-Mid', cx: 60,  cy: 248, scale: FSR400_SCALE },
@@ -581,9 +581,7 @@ function drawHeatmap(canvasEl, vals) {
   const ctx = canvasEl.getContext('2d');
   const sx = W/160, sy = H/320;
   const norm = vals.map(v => Math.max(0, Math.min(1, v/MAX_RAW)));
-  // Pure Gaussian kernel — large sigma so adjacent sensors bleed into each other smoothly.
-  // Sigma is ~90px on the base 160×320 canvas; scales with canvas size.
-  const SIGMA2 = Math.pow(90 * Math.min(sx, sy), 2) * 2;
+  const POWER = 2.5, RADIUS = 110 * Math.min(sx, sy);
   const cacheKey = W + 'x' + H;
   if (!drawHeatmap._masks) drawHeatmap._masks = {};
   if (!drawHeatmap._masks[cacheKey]) drawHeatmap._masks[cacheKey] = buildMask(W, H);
@@ -599,8 +597,9 @@ function drawHeatmap(canvasEl, vals) {
       for (let s = 0; s < NUM_SENSORS; s++) {
         const dx = px-sensorPx[s].x, dy = py-sensorPx[s].y, dist2 = dx*dx+dy*dy;
         if (dist2 < 1) { valueSum = norm[s]; weightSum = 1; break; }
-        const w = Math.exp(-dist2 / SIGMA2);
-        if (w < 0.004) continue;
+        const dist = Math.sqrt(dist2);
+        if (dist > RADIUS) continue;
+        const w = Math.pow(1/dist2, POWER/2) * Math.exp(-dist2/(2*RADIUS*RADIUS*0.25));
         weightSum += w; valueSum += w*norm[s];
       }
       const n = weightSum > 0 ? valueSum/weightSum : 0;
