@@ -55,8 +55,8 @@ to their respective sections.
 Deciding wheter to not we should order for the second round but decided not to since our parts have not arrived yet. However, looked into more research regarding
 the BMS and found there was a bug in the chip according to the datasheet. I forgot to add some passives mentioned in the datasheet.
 
-[Datasheet]([https://www.adafruit.com/product/4236](https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Fbq24075
-))
+[Datasheet](https://www.adafruit.com/product/4236](https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Fbq24075
+)
 
 Helped start to plan out the parts needed and what we wanted to showcase regarding the breadboard demo. We decided on that we wanted to show BLE since it was one of the most
 important aspects. In addition, since we did not have our flex sensors in yet, we decided to use potentiometers to show ADC functionality due to their dynamic nature.
@@ -144,26 +144,43 @@ Flywire from mux to ESP32
 
 ## 4/11/26
 
-Due to 
+Due to the issues seen from the footprint and the due date coming up, as a group we decided we needed to order our own boards from JLC. Today, I fixed the bugs seen previously by ensuring that our footprints matched the expected pin layout for our op-amp and ADC.
+
+Notice the pin layout for these updated footprints
+<img width="606" height="523" alt="image" src="https://github.com/user-attachments/assets/431a8598-0131-4914-bf1f-84884011f6da" />
+
 
 ## 4/19/26
+
+While waiting for our new PCB to come in, I worked along side Aarush to figure out how to properly size our enclosure. The picture below was the test fit for the first enclosure. Some points I wanted to improve on was the size to try and make it smaller,
+finding a way to attach to the show, and having screws/heat inserts. However, the fit of the PCB on the enclosure and the lid did fit well.
 
 <img width="387" height="330" alt="image" src="https://github.com/user-attachments/assets/17648006-84f9-4c06-b39a-aea8382b9ded" />
 
 
 ## 4/21/26
 
+Joseph and I were waiting for the DHL truck to deliver our package. I had to ultimately chase down the DHL truck to get the new updated PCBs. I soldered them and did intial functionality testing to ensure that the board worked properly. What this entailed was 
+makign sure the BMS behaved and that the ESP could be programed. In addition, we see now that the op-amp works and the ESP32 can communicate with the ADC. Therefore, we are now able to get sensor data from the connector.
+
 <img width="248" height="304" alt="image" src="https://github.com/user-attachments/assets/afe6abd3-666f-4b60-b030-fae040599a7d" />
 
 ## 4/23/26
+
+The whole group met up today to do a full system integration with the full sensor array. The main bug we faced today was seeing that we accidently flipped the pins for connecting the flex PCB to the main PCB. Another bug we saw was how we were not properly
+selecting the write mux address when selecting certain sensors. However, we were able to ultimately get the high level goal of our project to work. We plan on trying to find any more bugs before properly packaging this project for the final presentation.
 
 <img width="807" height="230" alt="image" src="https://github.com/user-attachments/assets/4cd9fe88-8125-46c6-98a0-a0bac848978b" />
 
 ## 4/25/26
 
+Aarush lamanated the sensor to properly be attached to the insole. In addition, we test fitted the heat inserts which worked pretty well. Joseph cleaned up the app with some suggestions from the rest of the group. The product is working as intended with a little issues that could not be avoided.
+
 <img width="401" height="819" alt="image" src="https://github.com/user-attachments/assets/12345b04-09cc-402a-95d7-b6abd52103c1" />
 
 ## 4/28/26
+
+We worked on the presentation and how we should present our demo. I ensured that my subsystems were properly wokring by ensuring the BMS functionality. The screenshot below was the votlage at a resistor which proved the battery was charging at ~200mA. We also did a stress test to prove the battery could run for over an hour. Excited to get the presented and finished! Could not have done it without the rest of my group!
 
 <img width="660" height="632" alt="image" src="https://github.com/user-attachments/assets/fda15de7-6299-42e1-858c-f8591728b877" />
 
