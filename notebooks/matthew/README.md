@@ -82,8 +82,88 @@ Rev2 Layout
 <img height="683" alt="image" src="https://github.com/user-attachments/assets/8ce373a2-b06a-4755-9b6e-8f92dcfbf812" />
 
 
+## 3/22/26
+
+The time gap from the last notebook log to the current notebook log is due to spring break. We met up as a group today to create a roadmap before our final PCB. Our main concern is how we could not test the second round PCB which is important since we changed our connector. However, we know it is important to focus on what we currently can do.
+
+Roadmap
+
+<img  height="683" alt="image" src="https://github.com/user-attachments/assets/f404b276-fcc0-4588-816e-f0718deb00c1" />
+
+
+## 3/23/26
+
+I went to the senior design room to use the oven, however, I realzied it might be a little bit more complicated than I thought. I used our current PCB and a plan I had in mind to create a rough CAD on our inclosure. This was generated using Claude so it is really rough, but is a good baseline on how I envision our enclosure to be. 
+
+Rough CAD
+
+<img   height="683"  alt="image" src="https://github.com/user-attachments/assets/6aa43289-be69-4f02-b282-0a092ca7e48d" />
+
+
+## 3/24/26
+
+I learned how to used the oven from Xiaodong so I was now able to solder the BMS QFN package. After putting the board in the oven and doing some basic rework, I tested the BMS operation. To test the operation of the BMS, I plugged in the USB-C and checked if the power LED was on. After ensuring the board was recieving 3V3 and the LED for power was on, I plugged in the battery. Therefore, I was able to see that the charging LED was on and probed the battery voltage intermittently. Through that, I was able to notice the battery voltage increasing. I also made sure the board was getting supplied 3V3 from the battery itself without the USB-C plugged in. 
+
+BMS soldered onto the board
+
+<img height="483"  alt="image" src="https://github.com/user-attachments/assets/79c19134-813f-4795-971c-7f5857db7d1a" />
+
+
+## 3/25/26
+
+I had a work session to make sure that our final PCB had mounting holes for our enclosure. I made sure that the holes were sized so it would not add too much to the dimensions of the PCB.
+
+Final Rd PCB Layout
+
+<img height="683" alt="image" src="https://github.com/user-attachments/assets/1d16d59d-221c-452c-a39c-1d58e999c1d7" />
 
 
 
+## 4/2/26
 
+I finsihed soldering the remaing parts of the PCB including the IMU and ESP32. I started to try and program the ESP32 with Joseph but we ran into some problems that made the ESP32 unreachable. Currently, we have some theories such as the LDO not being able to supply enough current to the ESP32 at startup. The current behavior we have is that it is consistently connecting and disconnecting to the laptop. We solved that we were missing a pull-up resistor at enable, but there are still other unknown issues. 
+
+
+This was one of the threads we looked online on how to debug our current issue. 
+[Link](https://www.reddit.com/r/esp32/comments/ivtdzf/esp32_keeps_disconnecting_and_reconnecting_from/?share_id=mEda3ENu8LNhEc6iy4DJl&utm_name=androidcss)
+
+## 4/3/26
+
+I continued debugging with Joseph on how to program the ESP32. We eventually found out that the issue was tha the ESP32 was constantly looking for firmware, but there was no firmware due to this being the first time flashing code onto it. Therefore the solution is to hold the BOOT -> EN -> Release EN -> Release BOOT to make the ESP32 enter boot mode. From there, we were able to properly program the ESP32. However, we ran into issues with correctly addressing the IMU from the ESP32. I found out in the datasheet, I incorrectly put the pull ups making the address of the IMU floating.
+
+## 4/9 - 4/10/26
+
+The next round of PCBs came in so I was able to test the new ADC and Op-Amp circuit alongside the flex PCB. I soldered the board and made sure I was able to program the ESP32 along side Joseph. After I made sure that was the case, I soldered a flex sensor to a flex PCB to test the fit. Since the fit work and Joseph wrote some basic firmware, I was able to test the PCB. However, we ran into issues regarding aquiring data from the sensor. After some probing and debugging, I realized the footprints I used did not match with the pinout that I used in the schematic. To ensure that we are able to extract data, I bypassed both the op-amp and the ADC to send the data straight from the mux to the onboard ADC. Joseph wrote firmware to confirm that the flex sensor data was being aquired by the ESP32.
+
+One of the mismatched pinouts to footprint
+
+<img width="391" height="329"  alt="image" src="https://github.com/user-attachments/assets/9364ada5-eaad-480e-b9e4-65c44bb5c92a" />
+
+Flywire from mux to ESP32
+<img width="391" height="429" alt="image" src="https://github.com/user-attachments/assets/383c01dd-fa37-48eb-9470-7c33950c81c5" />
+
+## 4/11/26
+
+Due to 
+
+## 4/19/26
+
+<img width="387" height="330" alt="image" src="https://github.com/user-attachments/assets/17648006-84f9-4c06-b39a-aea8382b9ded" />
+
+
+## 4/21/26
+
+<img width="248" height="304" alt="image" src="https://github.com/user-attachments/assets/afe6abd3-666f-4b60-b030-fae040599a7d" />
+
+## 4/23/26
+
+<img width="807" height="230" alt="image" src="https://github.com/user-attachments/assets/4cd9fe88-8125-46c6-98a0-a0bac848978b" />
+
+## 4/25/26
+
+<img width="401" height="819" alt="image" src="https://github.com/user-attachments/assets/12345b04-09cc-402a-95d7-b6abd52103c1" />
+
+## 4/28/26
+
+<img width="660" height="632" alt="image" src="https://github.com/user-attachments/assets/fda15de7-6299-42e1-858c-f8591728b877" />
 
