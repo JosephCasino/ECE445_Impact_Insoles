@@ -28,6 +28,9 @@ Individual session to research flex PCB implementation. Read Interlink Electroni
 
 The plan for now is to design a simple test board to see if a conductive epoxy method for electrical connection will work, as well as to test the FPC connector design. 
 
+I also derived a equation for the FSRs. It is a log curve, so one possible way to do it is calculating conductance and then applying a scaling factor:\
+
+$$V_{out} = 3.3 \ V \cdot (\frac{4.7k\ \ohm}{4.7k\ \ohm + R_{FSR}})$$
 # 2026-02-26 – Initial Flex PCB Design
 Marathon session to design test flex PCB for order. All aspects planned on the 22nd were implemented. The script-generated FPC connectors did not stand up to DRC (custom rules and edge clearance issues), so some manual placement and footprint editing was necessary.
 
