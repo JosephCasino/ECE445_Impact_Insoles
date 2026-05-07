@@ -31,8 +31,7 @@ The plan for now is to design a simple test board to see if a conductive epoxy m
 # 2026-02-26 – Initial Flex PCB Design
 Marathon session to design test flex PCB for order. All aspects planned on the 22nd were implemented. The script-generated FPC connectors did not stand up to DRC (custom rules and edge clearance issues), so some manual placement and footprint editing was necessary.
 
-![](./Images/InitialFlexPCBLayout.png)
-![](./Images/InitialFlexPCBSchematic.png)
+![[InitialFlexPCBLayout.png]]![[InitialFlexPCBSchematic.png]]
 # 2026-02-27 - Design Document Work Session
 Put finishing touches on design document with Matthew and Joseph.
 
@@ -57,7 +56,7 @@ Went in today to test the R1 flex PCB that recently came in. The custom footprin
 
 I also took the chance to design the flex PCB design mentioned in the entry from the 4th. This is below.
 
-![](./Images/FlexV2.png)
+![[FlexV2.png]]
 
 # 2026-03-22 - Post-Spring-Break Meeting
 
@@ -96,38 +95,38 @@ Software Side:
 
 # 2026-03-25 - Final Round Flex PCB Design
 I generated a quote for a full insole PCB. Unfortunately, if we were to buy it ourselves, it would cost $50:
-![](./Images/InsoleFlexQuote.png)
+![[InsoleFlexQuote.png]]
 
 As such, I've designed two flex PCBs. The first is a shorter version of the flex PCB design from R3. I've also angled the side pads sharper. This is after doing a crude AutoCAD sketch of the dimensions and fit within a shoe-sized rectangle:
-![](./Images/CrudeAutoCAD.png)
+![[CrudeAutoCAD.png]]
 This is how it turned out:
-![](./Images/ShortFlex.png)
+![[ShortFlex.png]]
 
 The second PCB is the bridge that connects the two to an output ribbon cable, called the FlexHub. This is how it turned out:
-![](./Images/FlexHub.png)
+![[FlexHub.png]]
 I also decided an additional extender FlexExt PCB that will allow for a sideways ribbon cable exit, as well as for some extra length within the insole if necessary:
-![](./Images/FlexExt.png)
+![[FlexExt.png]]
 
 
 I also tested the three sensor ranges we bought with R1 again (by standing on them) and decided to go with the FSR 402. We will buy shorts for the bottom, as seen in the AutoCAD drawing.
 
 # 2026-04-03 - FSR Joint Test
 Went in today to test some FSR solder joints on the designed footprints, as well as their durability. I tried to spread different amounts and see how durable they were. This is a still from the test timelapse of the most successful one (which turned out to be the one with the most solder):
-![](./Images/JointTest.png)
+![[JointTest.png]]
 
 The technique I've found is to deposit some solder on one pad, then align the FSR tabs onto the uneven pads. Then, press down on the FSR pads with tweezers, and reflow the solder onto the FSR tab. Finally, solder the other tab on, pressing down on the tab with tweezers as you do so. This results in a nearly-flush mounting without applying too much heat to the FSR, which is what we want to avoid. 
 # 2026-04-11 - Test R4 Flex PCB and FlexHub
 The final round boards came in yesterday. I went in to check dimensions of the FlexHub and the ShortFlex, as well as to do some minimal soldering to check the coupling between the boards. This is what that turned out to be:
-![](./Images/MinimalSolderHub.jpeg)
+![[MinimalSolderHub.jpeg]]
 The coupling seems to be plenty strong laterally. When we mount this onto an insole (I'm thinking of laminating it using cold-lamination sheets) it should firm up in the vertical direction too.
 
 We also met as a group earlier today and decided that we need to redesign and buy a new hard PCB board due to some unfortunately-wrong pinouts. 
 
 # 2026-04-16 - Design Enclosure for Hard PCB
 Since I have previous CAD experience, I decided to design the final enclosure that will house our hard electronics. Matthew has previously asked AI to generate a design, and while I ultimately took some inspiration from that, I made my own from scratch:
-![](./Images/PCBEnclosureV1.png)
+![[PCBEnclosureV1.png]]
 With lid:
-![](./Images/EnclosureV1Lid.png)
+![[EnclosureV1Lid.png]]
 
 Key design choices:
 - Tabs on the top short sides to easily align lid onto the base
@@ -139,15 +138,15 @@ Key design choices:
 
 # 2026-04-19 - Testing V1 Enclosure
 Matthew and I sliced, printed, and tested the V1 enclosure I designed three days ago with a blank PCB. The lateral dimensions seem fine, but it is definitely too tall. Both the PCB section and the battery compartment have lots of extra room, and as it stands it will jut out of the show too much. The clearance for the battery cable, my main concern, ended up working, though. Here is how the blank fit within the enclosure:
-![](./Images/EnclosureV1Test.png)
+![[EnclosureV1Test.png]]
 
 # 2026-04-20 - Quick Mock Demo Session
 Had a quick meeting today to get our demo straight for the Mock tomorrow. We don't have the system fully integrated yet due to the roadblocks we've faced in hard PCB and sensor shipping, so the next week will be busy.
 
 # 2026-04-22 - Full Sensor Array PCB Assembly
 I decided to go in today and get all the sensors soldered on for testing of the full sensor array, as well as all connectors in the FlexHub. This is how it turned out:
-![](./Images/SensorArray.jpg)
-![](./Images/ArrayinShoe.jpg)
+![[SensorArray.jpg]]
+![[ArrayinShoe.jpg]]
 
 A couple notes:
 - The connectors are a little big unstable on the FlexHub with all the sensors in place. Might have to figure out a solution to this later but the lamination should fix it in place.
@@ -157,27 +156,27 @@ While we have tested prototype/breadboard versions of the modules together in th
 
 # 2026-04-23 - First Final Form Integration
 We all met up today to attempt a full-system integration:
-![](./Images/FullInt1.png)
+![[FullInt1.png]]
 
 As we did that, I found a problem with the FlexHub. Because a path between two female connectors is the same as a rotating a cable 180 degrees, the pinout leaving the FlexExt is reversed from the desired pinout. This is a problem because the 3V3 supply is going to the (unconnected) ground pin in the Flex PCBs. As a temporary fix, I attached a FlexExt to the end of the FPC cable with the female connector reversed. For a more permanent fix, I ordered FPC cables on Amazon that have pins exposed on opposite sides (one end on the top, the other on the bottom). This 'flips' the pinout order within the cable, serving the same purpose in a cleaner way.
 
 # 2026-04-24 - CAD Session
 Today, I finished the V2 (and V3) designs of the enclosure. This is V2:
-![](EnclosureV2.png)
+![[EnclosureV2.png]]
 This was made significantly thinner than before. Additionally, the holes are now threaded for M2.5 screws. The lid stayed the same. Additionally, a hole is included through the battery compartment to attach a clip (which will clip onto the shoe). I also designed that clip:
-![](./Images/Clip.png)
+![[Clip.png]]
 
 When printed, however, 3D-printed M2.5 screws would not thread through the printed holes. Because of this, I quickly CAD-ed two alternate designs. The first has snap-fit joints, in case we can't get screws working:
-![](./Images/EnclosureV3Snap.png)
+![[EnclosureV3Snap.png]]
 
 The second has holes meant to slide brass M2.5 heat inserts into (which we bought on Amazon):
-![](./Images/EnclosureV3Heat.png)
+![[EnclosureV3Heat.png]]
 
 We will print these two and test (given that the inserts come in time).
 
 # 2026-04-25 - Packaging Joint Session
 Today we met up and worked on packaging details. Notably, I laminated the insole flexes onto the foam insole of Joseph's shoe:
-![](./Images/Lamination.png)
+![[Lamination.png]]
 
 All sensors seem to work with the lamination intact. 
 
@@ -185,18 +184,18 @@ All sensors seem to work with the lamination intact.
 We managed to print the new designs and test. The snap-fits worked better than expected, but would break on removal. We decided to set one aside as an extra. 
 
 Update: the heat inserts came, so I inserted them into the corresponding design and tested. This works extremely well:
-![](./Images/HeatInsert.jpg)
+![[HeatInsert.jpg]]
 
 I tested the clip and enclosure on my own shoe, and the design does not seem to need much modification. The clip holds with no movement after mounting it onto the enclosure by slipping a nut through the middle ot the clip. I will modify if Joseph's tests show that it's necessary, though.
-![](./Images/OnShoe.jpg)
-![](./Images/OnShoeSide.jpg)
+![[OnShoe.jpg]]
+![[OnShoeSide.jpg]]
 
 # 2026-04-28 - Testing Session
 We got together to practice our demo, work on our presentation, and compile our testing data into graphs for the presentation/report. To this end, I took data on the distribution of sensor differences between consecutive samples. Me and Joseph pulsed the sensors rapidly over 15 seconds to take this data. I then displayed the distribution as a Pareto graph:
-![](./Images/SensorPareto.png)
+![[SensorPareto.png]]
 
 I also took data of the mean and variance of the sensors under a standardized, equivalent load (my phone balanced onto a button cell battery on each sensor):
-![](./Images/LoadTests.png)
+![[LoadTests.png]]
 
 After this, we practiced for the demo. The project is done and seems to work!
-![](./Images/FullProject.jpg)
+![[FullProject.jpg]]
